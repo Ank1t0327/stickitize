@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --electric: #00f2fe;
+  --navy: #0f172a;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0f172a;
+  color: white;
+  min-height: 100vh;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.bg-grid {
+  background-image: url('../public/grid.svg');
+  background-size: 50px 50px;
+  background-position: center;
+  opacity: 0.1;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--electric);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--electric);
+  }
+}
+
+.animate-pulseGlow {
+  animation: pulseGlow 2s infinite;
+}
+
+::selection {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.text-electric {
+  color: var(--electric);
+}
+
+.bg-electric {
+  background-color: var(--electric);
+}
+
+.border-electric {
+  border-color: var(--electric);
+}
+
+.hover\:bg-electric:hover {
+  background-color: var(--electric);
+}
+
+.hover\:text-electric:hover {
+  color: var(--electric);
+}
+
+.hover\:border-electric:hover {
+  border-color: var(--electric);
+}
+
+.aspect-w-16 {
+  position: relative;
+  padding-bottom: 56.25%;
+}
+
+.aspect-w-16 > * {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.aspect-h-9 {
+  position: relative;
+  padding-bottom: 56.25%;
+}
+
+.aspect-h-9 > * {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.aspect-h-12 {
+  position: relative;
+  padding-bottom: 75%;
+}
+
+.aspect-h-12 > * {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+} 
