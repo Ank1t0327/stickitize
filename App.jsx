@@ -68,6 +68,7 @@ export default function App() {
   const [navOpen, setNavOpen] = useState(false); // New state for mobile nav
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 800);
   const [adminToken, setAdminToken] = useState(null); // Store admin token after login
+  const [loading, setLoading] = useState(false); // Global loading state
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 800);
@@ -118,6 +119,7 @@ export default function App() {
 
   // Place order logic (add to orders)
   const handlePlaceOrder = async () => {
+    setLoading(true);
     // Save sticker names and quantities
     const stickerList = cartDetails.map(item => `${item.name} (x${item.qty})`);
     const orderData = {
@@ -145,8 +147,10 @@ export default function App() {
         setOrderAddress('');
         setOrderPayment('Pay on delivery/pickup');
         setPickupType('SELF-PICKUP');
+        setLoading(false);
       }, 3000);
     } catch (err) {
+      setLoading(false);
       alert('Failed to place order. Please try again.');
     }
   };
@@ -154,6 +158,7 @@ export default function App() {
   // Contact form submit handler
   const handleContactSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const form = e.target;
     const name = form.name.value;
     const email = form.email.value;
@@ -167,7 +172,9 @@ export default function App() {
       setMessageSent(true);
       setTimeout(() => setMessageSent(false), 2500);
       form.reset();
+      setLoading(false);
     } catch (err) {
+      setLoading(false);
       alert('Failed to send message. Please try again.');
     }
   };
@@ -208,6 +215,7 @@ export default function App() {
 
   // Admin login handler
   const handleAdminLogin = async () => {
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/admin/login`, {
         method: 'POST',
@@ -222,7 +230,9 @@ export default function App() {
       } else {
         setAdminError('Try again');
       }
+      setLoading(false);
     } catch (err) {
+      setLoading(false);
       setAdminError('Server error');
     }
   };
@@ -236,6 +246,31 @@ export default function App() {
       minHeight: '100vh',
       background: '#101522',
     }}>
+      {/* Loading Spinner Overlay */}
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(10,20,40,0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 3000
+        }}>
+          <div className="spinner" style={{
+            width: 60,
+            height: 60,
+            border: '6px solid #6ec1ff',
+            borderTop: '6px solid #101828',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
       {/* Zoomed image modal */}
       {zoomImg && (
         <div className="zoom-modal" style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(10,20,40,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000}}>
