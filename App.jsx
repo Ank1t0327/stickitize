@@ -11,7 +11,8 @@ const categories = {
   aesthetic: { name: 'Aesthetic', folder: 'aesthetic' },
   movies: { name: 'Movies', folder: 'movies' },
   girl: { name: 'Girl', folder: 'girl' },
-  phone: { name: 'Phone', folder: 'phone' }
+  phone: { name: 'Phone', folder: 'phone' },
+  sports: { name: 'Sports', folder: 'sports' }
 };
 
 // Create stickers array based on folder structure
