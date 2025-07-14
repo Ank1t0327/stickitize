@@ -21,7 +21,7 @@ const stickers = [];
 
 // Add stickers from main stickers folder (for "All Stickers" category)
 // These are the existing stickers in the main stickers folder
-for (let i = 1; i <= 56; i++) {
+for (let i = 1; i <= 57; i++) {
   stickers.push({
     id: `main_${i}`,
     name: `Sticker ${i}`,
@@ -385,9 +385,18 @@ export default function App() {
       )}
       {/* Zoomed image modal */}
       {zoomImg && (
-        <div className="zoom-modal" style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(10,20,40,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000}}>
+        <div
+          className="zoom-modal"
+          style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(10,20,40,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 4000}}
+          onClick={() => setZoomImg(null)}
+        >
           <button className="zoom-close" onClick={() => setZoomImg(null)} style={{position: 'absolute', top: 32, right: 32, background: 'rgba(30,40,60,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, fontSize: '1.5em', cursor: 'pointer', zIndex: 1001}}>×</button>
-          <img src={zoomImg} alt="Zoomed Sticker" style={{maxWidth: '90vw', maxHeight: '80vh', borderRadius: '18px', boxShadow: '0 0 32px #0008'}} />
+          <img
+            src={zoomImg}
+            alt="Zoomed Sticker"
+            style={{maxWidth: '90vw', maxHeight: '80vh', borderRadius: '18px', boxShadow: '0 0 32px #0008'}}
+            onClick={e => e.stopPropagation()}
+          />
         </div>
       )}
       <nav className="navbar" style={{
