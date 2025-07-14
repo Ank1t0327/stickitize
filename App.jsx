@@ -662,6 +662,9 @@ export default function App() {
                         const qty = qtyMatch ? parseInt(qtyMatch[1], 10) : 1;
                         total += 7 * qty; // All stickers are 7.00
                       });
+                      // Add delivery charge if applicable
+                      const showDelivery = order.orderType === 'DELIVERY';
+                      if (showDelivery) total += 10;
                       return (
                         <div key={idx} style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#101828', borderRadius: '8px', padding: '12px 18px'}}>
                           <div style={{display: 'flex', flexDirection: 'column', gap: '4px'}}>
@@ -670,7 +673,7 @@ export default function App() {
                             <span style={{color: '#6ec1ff', fontSize: '0.98em'}}>{order.stickers.join(', ')}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
-                            <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}</span>
+                            <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery ? ' (includes ₹10 delivery)' : ''}</span>
                           </div>
                           <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearOrder(order._id)}>CLEAR</button>
                         </div>
