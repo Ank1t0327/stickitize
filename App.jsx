@@ -122,6 +122,8 @@ export default function App() {
     const sticker = stickers.find(s => s.id === item.id);
     return { ...sticker, qty: item.qty };
   });
+  // Calculate checkout total (including delivery if selected)
+  const checkoutTotal = cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0) + (pickupType === 'DELIVERY' ? 10 : 0);
 
   // Validate phone number format (must be exactly 10 digits)
   const isValidPhone = /^\d{10}$/.test(orderPhone);
@@ -567,7 +569,12 @@ export default function App() {
                 <div className="cart-list">
                   {cartDetails.map(item => (
                     <div className="cart-item" key={item.id} style={{display: 'flex', alignItems: 'center', gap: '24px', background: 'rgba(30,40,60,0.9)', borderRadius: '16px', padding: '16px', marginBottom: '16px'}}>
-                      <img src={item.img} alt={item.name} style={{width: '120px', height: '120px', objectFit: 'cover', borderRadius: '12px', flexShrink: 0}} />
+                      <img
+                        src={item.img}
+                        alt={item.name}
+                        style={{width: '120px', height: '120px', objectFit: 'cover', borderRadius: '12px', flexShrink: 0, cursor: 'pointer'}}
+                        onClick={() => setZoomImg(item.img)}
+                      />
                       <div className="cart-info" style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1, gap: '12px'}}>
                         {/* <span className="cart-title" style={{fontSize: '1.3em', fontWeight: 'bold'}}>{item.name}</span> */}
                         <span className="cart-price" style={{color: '#6ec1ff', fontSize: '1.1em', fontWeight: 'bold'}}>₹{item.price}</span>
@@ -589,73 +596,6 @@ export default function App() {
                   <h3 style={{color: '#6ec1ff'}}>Total: ₹{cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0).toFixed(2)}</h3>
                   <button className="buy-btn" style={{background: '#6ec1ff', color: '#101828', border: 'none', borderRadius: '8px', padding: '12px 0', fontWeight: 'bold', fontSize: '1.1em', cursor: 'pointer', marginTop: '18px', width: '100%'}} onClick={() => setShowCheckout(true)}>Buy</button>
                 </div>
-                {/* Checkout modal */}
-                {showCheckout && (
-                  <div className="checkout-modal" style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(10,20,40,0.97)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000}}>
-                    <div className="checkout-form-wrapper" style={{background: 'rgba(30,40,60,1)', borderRadius: '18px', padding: '32px', minWidth: '320px', maxWidth: '90vw', boxShadow: '0 0 32px #000a', position: 'relative'}}>
-                      <button onClick={() => setShowCheckout(false)} style={{position: 'absolute', top: 18, right: 18, background: 'rgba(30,40,60,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: 32, height: 32, fontSize: '1.3em', cursor: 'pointer'}}>×</button>
-                      <h3 style={{color: '#6ec1ff', marginBottom: '18px'}}>Checkout</h3>
-                      <form style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
-                        <input type="text" placeholder="Name" value={orderName} onChange={e => setOrderName(e.target.value)} required style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}} />
-                        <input type="tel" placeholder="Phone Number" value={orderPhone} onChange={e => setOrderPhone(e.target.value)} required style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}} />
-                        <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                          <label style={{color: '#6ec1ff', fontWeight: 'bold'}}>Order Type</label>
-                          <div style={{display: 'flex', gap: '12px'}}>
-                            <label style={{color: '#fff', fontWeight: 'bold'}}>
-                              <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} /> Self-pickup
-                            </label>
-                            <label style={{color: '#fff', fontWeight: 'bold'}}>
-                              <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} /> Delivery (₹10 delivery charge)
-                            </label>
-                          </div>
-                        </div>
-                        {pickupType === 'SELF-PICKUP' && (
-                          <div style={{color: '#6ec1ff', background: '#101828', borderRadius: '8px', padding: '10px', textAlign: 'center', fontWeight: 'bold'}}>You'll receive a call for when you pickup your order.</div>
-                        )}
-                        {pickupType === 'DELIVERY' && (
-                          <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}}>
-                            <option value="">Select Delivery Address</option>
-                            <option value="GH2">GH2</option>
-                            <option value="GH5">GH5</option>
-                            <option value="GH7">GH7</option>
-                            <option value="Unimall">Unimall</option>
-                            <option value="CC">CC</option>
-                            <option value="Buzz">Buzz</option>
-                            <option value="BH1">BH1</option>
-                            <option value="BH2">BH2</option>
-                            <option value="BH3">BH3</option>
-                            <option value="BH4">BH4</option>
-                            <option value="BH5">BH5</option>
-                            <option value="BH6">BH6</option>
-                            <option value="BH7">BH7</option>
-                          </select>
-                        )}
-                        <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                          <label style={{color: '#6ec1ff', fontWeight: 'bold'}}>Payment Mode</label>
-                          <div style={{display: 'flex', gap: '12px'}}>
-                            <label style={{color: '#fff', fontWeight: 'bold'}}>
-                              <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} /> Pay on delivery/pickup
-                            </label>
-                            <label style={{color: '#888', fontWeight: 'bold', opacity: 0.5, cursor: 'not-allowed'}}>
-                              <input type="radio" name="payment" value="Pay Online" disabled /> Pay Online (Available Soon)
-                            </label>
-                          </div>
-                        </div>
-                        {/* Place Order button, hide after orderPlaced */}
-                        {!orderPlaced && (
-                          <button type="button" disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment} onClick={handlePlaceOrder} style={{background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '8px', padding: '12px 0', fontWeight: 'bold', fontSize: '1.1em', cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer', marginTop: '12px', width: '100%'}}>Place Order</button>
-                        )}
-                        {orderPlaced && (
-                          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '18px'}}>
-                            <span style={{fontSize: '2.5em', color: '#2ecc40'}}>✔️</span>
-                            <span style={{color: '#2ecc40', fontWeight: 'bold', marginTop: '8px'}}>Order Placed!</span>
-                            <span style={{color: '#6ec1ff', marginTop: '10px', fontWeight: 'bold', fontSize: '1.1em'}}>You'll receive your stickers within 2-3 days.</span>
-                          </div>
-                        )}
-                      </form>
-                    </div>
-                  </div>
-                )}
               </>
             )}
           </section>
@@ -810,6 +750,84 @@ export default function App() {
           }}>{cartCount}</span>
         )}
       </button>
+      {/* Checkout modal rendered globally so it always appears when showCheckout is true */}
+      {showCheckout && (
+        <div className="checkout-modal" style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(10,20,40,0.97)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000}}>
+          <div className="checkout-form-wrapper" style={{background: 'rgba(30,40,60,1)', borderRadius: '18px', padding: '32px', minWidth: '320px', maxWidth: '90vw', boxShadow: '0 0 32px #000a', position: 'relative'}}>
+            <button onClick={() => setShowCheckout(false)} style={{position: 'absolute', top: 18, right: 18, background: 'rgba(30,40,60,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: 32, height: 32, fontSize: '1.3em', cursor: 'pointer'}}>×</button>
+            <h3 style={{color: '#6ec1ff', marginBottom: '18px'}}>Checkout</h3>
+            <form style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
+              <input type="text" placeholder="Name" value={orderName} onChange={e => setOrderName(e.target.value)} required style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}} />
+              <input type="tel" placeholder="Phone Number" value={orderPhone} onChange={e => setOrderPhone(e.target.value)} required style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}} />
+              <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                <label style={{color: '#6ec1ff', fontWeight: 'bold'}}>Order Type</label>
+                <div style={{display: 'flex', gap: '12px'}}>
+                  <label style={{color: '#fff', fontWeight: 'bold'}}>
+                    <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} /> Self-pickup
+                  </label>
+                  <label style={{color: '#fff', fontWeight: 'bold'}}>
+                    <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} /> Delivery (₹10 delivery charge)
+                  </label>
+                </div>
+              </div>
+              {pickupType === 'SELF-PICKUP' && (
+                <div style={{color: '#6ec1ff', background: '#101828', borderRadius: '8px', padding: '10px', textAlign: 'center', fontWeight: 'bold'}}>You'll receive a call for when you pickup your order.</div>
+              )}
+              {pickupType === 'DELIVERY' && (
+                <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}}>
+                  <option value="">Select Delivery Address</option>
+                  <option value="GH2">GH2</option>
+                  <option value="GH5">GH5</option>
+                  <option value="GH7">GH7</option>
+                  <option value="Unimall">Unimall</option>
+                  <option value="CC">CC</option>
+                  <option value="Buzz">Buzz</option>
+                  <option value="BH1">BH1</option>
+                  <option value="BH2">BH2</option>
+                  <option value="BH3">BH3</option>
+                  <option value="BH4">BH4</option>
+                  <option value="BH5">BH5</option>
+                  <option value="BH6">BH6</option>
+                  <option value="BH7">BH7</option>
+                </select>
+              )}
+              <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                <label style={{color: '#6ec1ff', fontWeight: 'bold'}}>Payment Mode</label>
+                <div style={{display: 'flex', gap: '12px'}}>
+                  <label style={{color: '#fff', fontWeight: 'bold'}}>
+                    <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} /> Pay on delivery/pickup
+                  </label>
+                  <label style={{color: '#888', fontWeight: 'bold', opacity: 0.5, cursor: 'not-allowed'}}>
+                    <input type="radio" name="payment" value="Pay Online" disabled /> Pay Online (Available Soon)
+                  </label>
+                </div>
+              </div>
+              {/* Place Order button, hide after orderPlaced */}
+              {!orderPlaced && (
+                <>
+                  <div style={{
+                    color: '#60a5fa',
+                    fontWeight: 'bold',
+                    fontSize: '1.2em',
+                    textAlign: 'center',
+                    marginBottom: 10
+                  }}>
+                    Total: ₹{checkoutTotal.toFixed(2)}{pickupType === 'DELIVERY' ? ' (includes ₹10 delivery)' : ''}
+                  </div>
+                  <button type="button" disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment} onClick={handlePlaceOrder} style={{background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '8px', padding: '12px 0', fontWeight: 'bold', fontSize: '1.1em', cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer', marginTop: '12px', width: '100%'}}>Place Order</button>
+                </>
+              )}
+              {orderPlaced && (
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '18px'}}>
+                  <span style={{fontSize: '2.5em', color: '#2ecc40'}}>✔️</span>
+                  <span style={{color: '#2ecc40', fontWeight: 'bold', marginTop: '8px'}}>Order Placed!</span>
+                  <span style={{color: '#6ec1ff', marginTop: '10px', fontWeight: 'bold', fontSize: '1.1em'}}>You'll receive your stickers within 2-3 days.</span>
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
       <footer>
         <p>&copy; 2025 STICKITIZE. All rights reserved.</p>
       </footer>
