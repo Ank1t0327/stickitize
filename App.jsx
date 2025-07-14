@@ -159,7 +159,9 @@ export default function App() {
     return { ...sticker, qty: item.qty };
   });
   // Calculate checkout total (including delivery if selected)
-  const checkoutTotal = cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0) + (pickupType === 'DELIVERY' ? 10 : 0);
+  const cartSubtotal = cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0);
+  const deliveryCharge = (pickupType === 'DELIVERY' && cartSubtotal <= 50) ? 10 : 0;
+  const checkoutTotal = cartSubtotal + deliveryCharge;
 
   // Validate phone number format (must be exactly 10 digits)
   const isValidPhone = /^\d{10}$/.test(orderPhone);
@@ -650,16 +652,18 @@ export default function App() {
                   <div style={{display: 'flex', flexDirection: 'column', gap: '18px'}}>
                     {orders.map((order, idx) => {
                       // Calculate total price for this order
-                      let total = 0;
+                      let adminOrderSubtotal = 0;
                       order.stickers.forEach(stickerStr => {
                         // Extract quantity from string like "Sticker 1 (x2)"
                         const qtyMatch = stickerStr.match(/\(x(\d+)\)/);
                         const qty = qtyMatch ? parseInt(qtyMatch[1], 10) : 1;
-                        total += 7 * qty; // All stickers are 7.00
+                        adminOrderSubtotal += 7 * qty; // All stickers are 7.00
                       });
                       // Add delivery charge if applicable
                       const showDelivery = order.orderType === 'DELIVERY';
-                      if (showDelivery) total += 10;
+                      const deliveryCharge = (showDelivery && adminOrderSubtotal <= 50) ? 10 : 0;
+                      let total = adminOrderSubtotal;
+                      if (showDelivery) total += deliveryCharge;
                       return (
                         <div key={idx} style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#101828', borderRadius: '8px', padding: '12px 18px'}}>
                           <div style={{display: 'flex', flexDirection: 'column', gap: '4px'}}>
@@ -668,7 +672,7 @@ export default function App() {
                             <span style={{color: '#6ec1ff', fontSize: '0.98em'}}>{order.stickers.join(', ')}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
-                            <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery ? ' (includes ₹10 delivery)' : ''}</span>
+                            <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery && deliveryCharge > 0 ? ' (includes ₹10 delivery)' : showDelivery && deliveryCharge === 0 ? ' (Free delivery!)' : ''}</span>
                           </div>
                           <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearOrder(order._id)}>CLEAR</button>
                         </div>
@@ -773,6 +777,28 @@ export default function App() {
             <span style={{fontWeight: 'bold', fontSize: '1.2em', color: '#6ec1ff'}}>Your Cart</span>
             <button onClick={closeCartDrawer} style={{background: 'none', border: 'none', color: '#fff', fontSize: '2em', cursor: 'pointer', lineHeight: 1}}>&times;</button>
           </div>
+          {/* Free Delivery Dynamic Message */}
+          {cartDetails.length > 0 && cartSubtotal < 50 && (
+            <div style={{
+              background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)', // softer blue-green
+              color: '#101828',
+              borderRadius: 10,
+              margin: '14px 24px 0 24px',
+              padding: '8px 10px',
+              fontWeight: 'bold',
+              fontSize: '1em',
+              textAlign: 'center',
+              boxShadow: '0 2px 8px #10182822',
+              animation: 'fadeInHighlight 0.7s',
+              letterSpacing: 0.1,
+              maxWidth: 320,
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            }}>
+              Add stickers worth <span style={{color: '#0a2342', fontWeight: 'bold'}}>₹{(50 - cartSubtotal).toFixed(2)}</span> for <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
+              <style>{`@keyframes fadeInHighlight { from { opacity: 0; background: #fff; } to { opacity: 1; background: linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%); } }`}</style>
+            </div>
+          )}
           <div style={{flex: 1, overflowY: 'auto', padding: '24px'}}>
             {cartDetails.length === 0 ? (
               <div style={{color: '#fff', textAlign: 'center', marginTop: 40, fontSize: '1.1em'}}>Your cart is empty.</div>
@@ -905,7 +931,7 @@ export default function App() {
                     textAlign: 'center',
                     marginBottom: 10
                   }}>
-                    Total: ₹{checkoutTotal.toFixed(2)}{pickupType === 'DELIVERY' ? ' (includes ₹10 delivery)' : ''}
+                    Total: ₹{checkoutTotal.toFixed(2)}{pickupType === 'DELIVERY' && deliveryCharge > 0 ? ' (includes ₹10 delivery)' : pickupType === 'DELIVERY' && deliveryCharge === 0 ? ' (Free delivery!)' : ''}
                   </div>
                   <button type="button" disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment} onClick={handlePlaceOrder} style={{background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '8px', padding: '12px 0', fontWeight: 'bold', fontSize: '1.1em', cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer', marginTop: '12px', width: '100%'}}>Place Order</button>
                 </>
