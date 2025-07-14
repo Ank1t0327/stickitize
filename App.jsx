@@ -853,7 +853,7 @@ export default function App() {
               <style>{`@keyframes fadeInHighlight { from { opacity: 0; background: #fff; } to { opacity: 1; background: linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%); } }`}</style>
             </div>
           )}
-          <div style={{flex: 1, overflowY: 'auto', padding: '24px'}}>
+          <div style={{flex: 1, overflowY: 'auto', padding: '24px', marginBottom: isMobile ? 90 : 90}}>
             {cartDetails.length === 0 ? (
               <div style={{color: '#fff', textAlign: 'center', marginTop: 40, fontSize: '1.1em'}}>Your cart is empty.</div>
             ) : (
@@ -884,7 +884,18 @@ export default function App() {
               ))
             )}
           </div>
-          <div style={{padding: '18px 24px', borderTop: '1px solid #233', background: '#101828'}}>
+          {/* Fixed checkout bar at the bottom */}
+          <div style={{
+            position: 'fixed',
+            bottom: 0,
+            right: 0,
+            width: isMobile ? '100vw' : 400,
+            background: '#101828',
+            borderTop: '1px solid #233',
+            zIndex: 3100,
+            padding: '18px 24px',
+            boxSizing: 'border-box',
+          }}>
             <div style={{color: '#6ec1ff', fontWeight: 'bold', fontSize: '1.15em', marginBottom: 8}}>Total: ₹{cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0).toFixed(2)}</div>
             <button
               style={{
