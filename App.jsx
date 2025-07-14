@@ -69,6 +69,12 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 800);
   const [adminToken, setAdminToken] = useState(null); // Store admin token after login
   const [loading, setLoading] = useState(false); // Global loading state
+  // Carousel state for smooth transition
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [carouselTransition, setCarouselTransition] = useState(true);
+  const [isManual, setIsManual] = useState(false);
+  const autoScrollTimeout = useRef();
+  const carouselRef = useRef();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 800);
@@ -237,14 +243,47 @@ export default function App() {
     }
   };
 
+  // Auto-scroll effect
+  useEffect(() => {
+    if (page !== 'home') return;
+    if (isManual) return; // Pause auto-scroll briefly after manual scroll
+    setCarouselTransition(true);
+    autoScrollTimeout.current = setTimeout(() => {
+      setCarouselTransition(true);
+      setFeaturedIndex(idx => (idx + 1) % stickers.length);
+    }, 4500);
+    return () => clearTimeout(autoScrollTimeout.current);
+  }, [page, stickers.length, featuredIndex, isManual]);
+
+  // Resume auto-scroll after manual navigation
+  useEffect(() => {
+    if (!isManual) return;
+    const timeout = setTimeout(() => setIsManual(false), 6000);
+    return () => clearTimeout(timeout);
+  }, [isManual]);
+
+  // Manual navigation handlers
+  const handlePrev = () => {
+    setCarouselTransition(true);
+    setFeaturedIndex(idx => (idx - 1 + stickers.length) % stickers.length);
+    setIsManual(true);
+  };
+  const handleNext = () => {
+    setCarouselTransition(true);
+    setFeaturedIndex(idx => (idx + 1) % stickers.length);
+    setIsManual(true);
+  };
+
   return (
     <div className="container" style={{
       maxWidth: 1200,
       margin: '0 auto',
-      padding: '24px 16px',
+      padding: isMobile ? '12px 2vw' : '24px 16px',
       boxSizing: 'border-box',
       minHeight: '100vh',
       background: '#101522',
+      overflowX: 'hidden',
+      zoom: 1,
     }}>
       {/* Loading Spinner Overlay */}
       {loading && (
@@ -278,8 +317,15 @@ export default function App() {
           <img src={zoomImg} alt="Zoomed Sticker" style={{maxWidth: '90vw', maxHeight: '80vh', borderRadius: '18px', boxShadow: '0 0 32px #0008'}} />
         </div>
       )}
-      <nav className="navbar" style={{padding: '0 12px', boxSizing: 'border-box', minHeight: 70}}>
-        <div className="navbar-logo" style={{marginRight: 'auto', padding: '8px 0'}}>
+      <nav className="navbar" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: isMobile ? '0 12px' : '0 12px',
+        boxSizing: 'border-box',
+        minHeight: 70
+      }}>
+        <div className="navbar-logo" style={{padding: '8px 0'}}>
           <img src="/logo.png" alt="STICKITIZE Logo" style={{borderRadius: '8px', width: '180px', height: '60px', maxWidth: '100%'}} />
         </div>
         {isMobile && (
@@ -318,7 +364,15 @@ export default function App() {
       <div style={{padding: isMobile ? '0 8px' : '0 24px', boxSizing: 'border-box', width: '100%'}}>
         {page === 'home' && (
           <>
-            <header className="hero" style={{margin: isMobile ? '18px 0 0 0' : '32px 0 0 0', padding: isMobile ? '32px 8px 24px 8px' : '60px 0 40px 0', borderRadius: 16, background: 'linear-gradient(90deg, #0a2342 0%, #1e3a8a 100%)', textAlign: 'center', color: '#f4f8fb', boxSizing: 'border-box'}}>
+            <header className="hero" style={{
+              margin: isMobile ? '18px 0 0 0' : '32px 0 0 0',
+              padding: isMobile ? '32px 4vw 24px 4vw' : '60px 0 40px 0',
+              borderRadius: 16,
+              background: 'linear-gradient(90deg, #0a2342 0%, #1e3a8a 100%)',
+              textAlign: 'center',
+              color: '#f4f8fb',
+              boxSizing: 'border-box',
+            }}>
               <h1 style={{fontSize: isMobile ? '2.2rem' : '3rem', marginBottom: 12, letterSpacing: 2, color: '#60a5fa'}}>STICKITIZE</h1>
               <p style={{fontSize: isMobile ? '1.1rem' : '1.3rem', marginBottom: 24, color: '#dbeafe'}}>Your one-stop shop for awesome stickers!</p>
               <a href="#shop" className="cta" onClick={() => setPage('store')} style={{display: 'inline-block', padding: '12px 32px', background: '#0a2342', color: '#60a5fa', borderRadius: 8, textDecoration: 'none', fontWeight: 'bold', border: '2px solid #60a5fa', fontSize: isMobile ? '1rem' : '1.1rem'}}>Shop Now</a>
@@ -332,20 +386,41 @@ export default function App() {
               </div>
             </section>
             <section className="shop" id="shop">
-              <h2>Featured Stickers</h2>
-              <div className="sticker-list">
-                <div className="sticker-card">
-                  <img src="/stickers/sticker7.png" alt="Sticker 1" />
-                  <p>Cool Cat</p>
-                </div>
-                <div className="sticker-card">
-                  <img src="/stickers/sticker40.png" alt="Sticker 2" />
-                  <p>Space Explorer</p>
-                </div>
-                <div className="sticker-card">
-                  <img src="/stickers/sticker50.png" alt="Sticker 3" />
-                  <p>Retro Vibes</p>
-                </div>
+              <h2>Shop by Category</h2>
+              <div
+                className="featured-categories"
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  gap: isMobile ? 12 : 24,
+                  margin: isMobile ? '18px 0' : '28px 0',
+                  padding: isMobile ? '0 4px' : '0',
+                }}
+              >
+                {Object.entries(categories).map(([key, category]) => (
+                  <button
+                    key={key}
+                    className="category-feature-btn"
+                    onClick={() => { setSelectedCategory(key); setPage('store'); }}
+                    style={{
+                      background: '#1e293b',
+                      color: '#6ec1ff',
+                      border: '2px solid #6ec1ff',
+                      borderRadius: 12,
+                      padding: isMobile ? '14px 18px' : '18px 32px',
+                      fontWeight: 'bold',
+                      fontSize: isMobile ? '1.05em' : '1.18em',
+                      letterSpacing: 1,
+                      boxShadow: '0 2px 12px #10182833',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
+                      outline: 'none',
+                    }}
+                  >
+                    {category.name}
+                  </button>
+                ))}
               </div>
             </section>
           </>
