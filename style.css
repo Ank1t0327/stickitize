@@ -583,7 +583,17 @@ footer {
 }
 @media (max-width: 600px) {
   .store-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .store-card {
+    width: 98%;
+    max-width: 180px;
+    padding: 10px 6px;
+  }
+  .store-card img {
+    width: 100px;
+    height: 100px;
   }
   .cart-list {
     grid-template-columns: 1fr;
