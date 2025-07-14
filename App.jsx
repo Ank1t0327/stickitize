@@ -162,7 +162,7 @@ export default function App() {
   });
   // Calculate checkout total (including delivery if selected)
   const cartSubtotal = cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0);
-  const deliveryCharge = (pickupType === 'DELIVERY' && cartSubtotal <= 50) ? 10 : 0;
+  const deliveryCharge = (pickupType === 'DELIVERY' && cartSubtotal <= 49) ? 10 : 0;
   const checkoutTotal = cartSubtotal + deliveryCharge;
 
   // Validate phone number format (must be exactly 10 digits)
@@ -682,7 +682,7 @@ export default function App() {
                       });
                       // Add delivery charge if applicable
                       const showDelivery = order.orderType === 'DELIVERY';
-                      const deliveryCharge = (showDelivery && adminOrderSubtotal <= 50) ? 10 : 0;
+                      const deliveryCharge = (showDelivery && adminOrderSubtotal <= 49) ? 10 : 0;
                       let total = adminOrderSubtotal;
                       if (showDelivery) total += deliveryCharge;
                       return (
@@ -832,7 +832,7 @@ export default function App() {
             <button onClick={closeCartDrawer} style={{background: 'none', border: 'none', color: '#fff', fontSize: '2em', cursor: 'pointer', lineHeight: 1}}>&times;</button>
           </div>
           {/* Free Delivery Dynamic Message */}
-          {cartDetails.length > 0 && cartSubtotal < 50 && (
+          {cartDetails.length > 0 && cartSubtotal < 49 && (
             <div style={{
               background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)', // softer blue-green
               color: '#101828',
@@ -849,7 +849,7 @@ export default function App() {
               marginLeft: 'auto',
               marginRight: 'auto',
             }}>
-              Add stickers worth <span style={{color: '#0a2342', fontWeight: 'bold'}}>₹{(50 - cartSubtotal).toFixed(2)}</span> for <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
+              Add stickers worth <span style={{color: '#0a2342', fontWeight: 'bold'}}>₹{(49 - cartSubtotal).toFixed(2)}</span> for <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
               <style>{`@keyframes fadeInHighlight { from { opacity: 0; background: #fff; } to { opacity: 1; background: linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%); } }`}</style>
             </div>
           )}
