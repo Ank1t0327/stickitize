@@ -922,29 +922,46 @@ export default function App() {
       )}
       {/* Checkout modal rendered globally so it always appears when showCheckout is true */}
       {showCheckout && (
-        <div className="checkout-modal" style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(10,20,40,0.97)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000}}>
+        <div className="checkout-modal" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(10,20,40,0.97)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          padding: isMobile ? '10px' : '32px',
+          boxSizing: 'border-box',
+        }}>
           <div className="checkout-form-wrapper" style={{
-            background: 'rgba(30,40,60,1)',
-            borderRadius: '16px',
-            padding: isMobile ? '20px 2vw' : '32px 24px',
-            maxWidth: isMobile ? '98vw' : '380px',
-            width: isMobile ? '98vw' : '100%',
+            background: 'rgba(30,40,60,0.98)',
+            borderRadius: '18px',
+            padding: isMobile ? '18px 4vw 28px 4vw' : '36px 36px 40px 36px',
+            maxWidth: isMobile ? '98vw' : 420,
+            width: '100%',
             margin: '0 auto',
-            boxShadow: '0 0 24px #000a',
+            boxShadow: '0 8px 32px #0008',
             position: 'relative',
             overflowX: 'hidden',
             wordBreak: 'break-word',
             boxSizing: 'border-box',
+            border: '1.5px solid #233',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
           }}>
-            <button onClick={() => setShowCheckout(false)} style={{position: 'absolute', top: 12, right: 12, background: 'rgba(30,40,60,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: 28, height: 28, fontSize: '1.1em', cursor: 'pointer'}}>×</button>
-            <h3 style={{color: '#6ec1ff', marginBottom: '12px', textAlign: 'center', fontSize: '1.45em', letterSpacing: 0.5, fontWeight: 700}}>Checkout</h3>
+            <button onClick={() => setShowCheckout(false)} style={{position: 'absolute', top: 18, right: 18, background: 'rgba(30,40,60,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: 32, height: 32, fontSize: '1.3em', cursor: 'pointer', zIndex: 2}}>×</button>
+            <h3 style={{color: '#6ec1ff', marginBottom: '18px', textAlign: 'center', fontSize: '2em', letterSpacing: 1, fontWeight: 700, width: '100%'}}>Checkout</h3>
             {/* Free Delivery Suggestion or Unlocked Message */}
-            {pickupType === 'DELIVERY' && checkoutTotal < 49 ? (
+            {pickupType === 'DELIVERY' && cartSubtotal < 49 && (
               <div style={{
                 background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
                 color: '#101828',
-                borderRadius: 8,
-                margin: '0 0 14px 0',
+                borderRadius: 10,
+                margin: '0 0 22px 0',
                 padding: isMobile ? '10px 8px' : '14px 24px',
                 fontWeight: 600,
                 fontSize: isMobile ? '0.98em' : '1.08em',
@@ -952,8 +969,6 @@ export default function App() {
                 boxShadow: '0 1.5px 6px #10182818',
                 maxWidth: isMobile ? '98vw' : 420,
                 width: '100%',
-                marginLeft: 'auto',
-                marginRight: 'auto',
                 wordBreak: 'break-word',
               }}>
                 <div style={{marginBottom: isMobile ? 8 : 12}}>
@@ -968,9 +983,9 @@ export default function App() {
                     background: '#6ec1ff',
                     color: '#101828',
                     border: 'none',
-                    borderRadius: '6px',
+                    borderRadius: '7px',
                     padding: isMobile ? '7px 16px' : '10px 32px',
-                    fontWeight: 600,
+                    fontWeight: 700,
                     fontSize: isMobile ? '1em' : '1.08em',
                     cursor: 'pointer',
                     boxShadow: '0 1px 4px #10182810',
@@ -980,46 +995,44 @@ export default function App() {
                   Add More Stickers
                 </button>
               </div>
-            ) : (
-              pickupType === 'DELIVERY' && checkoutTotal >= 49 && (
-                <div style={{
-                  background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
-                  color: '#101828',
-                  borderRadius: 8,
-                  margin: '0 0 14px 0',
-                  padding: '7px 10px',
-                  fontWeight: 600,
-                  fontSize: '0.98em',
-                  textAlign: 'center',
-                  boxShadow: '0 1px 4px #10182818',
-                  maxWidth: 260,
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                }}>
-                  🎉 You unlocked <span style={{color: '#059669', fontWeight: 700, textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
-                </div>
-              )
             )}
-            <form style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
-              <input type="text" placeholder="Name" value={orderName} onChange={e => setOrderName(e.target.value)} required style={{width: '100%', padding: '10px', borderRadius: '8px', border: '1.2px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: isMobile ? '1em' : '0.98em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}} />
-              <input type="tel" placeholder="Phone Number" value={orderPhone} onChange={e => setOrderPhone(e.target.value)} required style={{width: '100%', padding: '10px', borderRadius: '8px', border: '1.2px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: isMobile ? '1em' : '0.98em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}} />
-              <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-                <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '0.97em'}}>Order Type
-                  <div style={{display: 'flex', gap: '10px', marginTop: 4}}>
-                    <label style={{color: '#fff', fontWeight: 600, fontSize: '0.97em'}}>
-                      <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} /> Self-pickup
-                    </label>
-                    <label style={{color: '#fff', fontWeight: 600, fontSize: '0.97em'}}>
-                      <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} /> Delivery (₹10 delivery charge)
-                    </label>
-                  </div>
-                </label>
+            {pickupType === 'DELIVERY' && cartSubtotal >= 49 && (
+              <div style={{
+                background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
+                color: '#101828',
+                borderRadius: 10,
+                margin: '0 0 22px 0',
+                padding: isMobile ? '10px 8px' : '14px 24px',
+                fontWeight: 700,
+                fontSize: isMobile ? '0.98em' : '1.08em',
+                textAlign: 'center',
+                boxShadow: '0 1.5px 6px #10182818',
+                maxWidth: isMobile ? '98vw' : 420,
+                width: '100%',
+                wordBreak: 'break-word',
+              }}>
+                🎉 You unlocked <span style={{color: '#059669', fontWeight: 700, textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
+              </div>
+            )}
+            <form style={{display: 'flex', flexDirection: 'column', gap: '18px', width: '100%', alignItems: 'center', marginTop: 0}}>
+              <input type="text" placeholder="Name" value={orderName} onChange={e => setOrderName(e.target.value)} required style={{width: '100%', padding: '13px', borderRadius: '8px', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: isMobile ? '1.08em' : '1.08em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s', marginBottom: 0}} />
+              <input type="tel" placeholder="Phone Number" value={orderPhone} onChange={e => setOrderPhone(e.target.value)} required style={{width: '100%', padding: '13px', borderRadius: '8px', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: isMobile ? '1.08em' : '1.08em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s', marginBottom: 0}} />
+              <div style={{width: '100%'}}>
+                <label style={{color: '#6ec1ff', fontWeight: 700, fontSize: '1em', marginBottom: 4, display: 'block'}}>Order Type</label>
+                <div style={{display: 'flex', gap: '18px', marginTop: 4, marginBottom: 0}}>
+                  <label style={{color: '#fff', fontWeight: 600, fontSize: '1em'}}>
+                    <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} /> Self-pickup
+                  </label>
+                  <label style={{color: '#fff', fontWeight: 600, fontSize: '1em'}}>
+                    <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} /> Delivery (₹10 delivery charge)
+                  </label>
+                </div>
               </div>
               {pickupType === 'SELF-PICKUP' && (
-                <div style={{color: '#6ec1ff', background: '#101828', borderRadius: '6px', padding: '7px', textAlign: 'center', fontWeight: 600, fontSize: '0.97em'}}>You'll receive a call for when you pickup your order.</div>
+                <div style={{color: '#6ec1ff', background: '#101828', borderRadius: '7px', padding: '10px', textAlign: 'center', fontWeight: 600, fontSize: '1em', width: '100%'}}>You'll receive a call for when you pickup your order.</div>
               )}
               {pickupType === 'DELIVERY' && (
-                <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{width: '100%', padding: '10px', borderRadius: '8px', border: '1.2px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: isMobile ? '1em' : '0.98em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}}>
+                <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{width: '100%', padding: '13px', borderRadius: '8px', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: isMobile ? '1.08em' : '1.08em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s', marginBottom: 0}}>
                   <option value="">Select Delivery Address</option>
                   <option value="GH2">GH2</option>
                   <option value="GH5">GH5</option>
@@ -1036,17 +1049,16 @@ export default function App() {
                   <option value="BH7">BH7</option>
                 </select>
               )}
-              <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-                <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '0.97em'}}>Payment Mode
-                  <div style={{display: 'flex', gap: '10px', marginTop: 4}}>
-                    <label style={{color: '#fff', fontWeight: 600, fontSize: '0.97em'}}>
-                      <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} /> Pay on delivery/pickup
-                    </label>
-                    <label style={{color: '#888', fontWeight: 600, opacity: 0.5, cursor: 'not-allowed', fontSize: '0.97em'}}>
-                      <input type="radio" name="payment" value="Pay Online" disabled /> Pay Online (Available Soon)
-                    </label>
-                  </div>
-                </label>
+              <div style={{width: '100%'}}>
+                <label style={{color: '#6ec1ff', fontWeight: 700, fontSize: '1em', marginBottom: 4, display: 'block'}}>Payment Mode</label>
+                <div style={{display: 'flex', gap: '18px', marginTop: 4, marginBottom: 0}}>
+                  <label style={{color: '#fff', fontWeight: 600, fontSize: '1em'}}>
+                    <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} /> Pay on delivery/pickup
+                  </label>
+                  <label style={{color: '#888', fontWeight: 600, opacity: 0.5, cursor: 'not-allowed', fontSize: '1em'}}>
+                    <input type="radio" name="payment" value="Pay Online" disabled /> Pay Online (Available Soon)
+                  </label>
+                </div>
               </div>
               {/* Place Order button, hide after orderPlaced */}
               {!orderPlaced && (
@@ -1054,17 +1066,18 @@ export default function App() {
                   <div style={{
                     color: '#60a5fa',
                     fontWeight: 700,
-                    fontSize: '1.08em',
+                    fontSize: '1.15em',
                     textAlign: 'center',
-                    marginBottom: 6
+                    marginBottom: 8,
+                    width: '100%'
                   }}>
                     Total: ₹{checkoutTotal.toFixed(2)}{pickupType === 'DELIVERY' && deliveryCharge > 0 ? ' (includes ₹10 delivery)' : pickupType === 'DELIVERY' && deliveryCharge === 0 ? ' (Free delivery!)' : ''}
                   </div>
-                  <button type="button" disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment} onClick={handlePlaceOrder} style={{background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '8px', padding: '11px 0', fontWeight: 700, fontSize: '1.05em', cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer', marginTop: '6px', width: '100%', boxShadow: '0 1px 4px #10182818', transition: 'background 0.2s'}}>Place Order</button>
+                  <button type="button" disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment} onClick={handlePlaceOrder} style={{background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '8px', padding: '14px 0', fontWeight: 700, fontSize: '1.15em', cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer', marginTop: '2px', width: '100%', boxShadow: '0 1px 4px #10182818', transition: 'background 0.2s'}}>Place Order</button>
                 </>
               )}
               {orderPlaced && (
-                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '14px'}}>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '14px', width: '100%'}}>
                   <span style={{fontSize: '2.1em', color: '#2ecc40'}}>✔️</span>
                   <span style={{color: '#2ecc40', fontWeight: 700, marginTop: '6px'}}>Order Placed!</span>
                   <span style={{color: '#6ec1ff', marginTop: '7px', fontWeight: 700, fontSize: '1em'}}>You'll receive your stickers within 2-3 days.</span>
