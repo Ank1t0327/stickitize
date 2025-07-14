@@ -939,8 +939,8 @@ export default function App() {
           <div className="checkout-form-wrapper" style={{
             background: 'rgba(30,40,60,0.98)',
             borderRadius: '18px',
-            padding: isMobile ? '18px 4vw 28px 4vw' : '36px 48px 40px 48px',
-            maxWidth: isMobile ? '98vw' : 540,
+            padding: isMobile ? '14px 2vw 18px 2vw' : '22px 32px 28px 32px',
+            maxWidth: isMobile ? '98vw' : 650,
             width: '100%',
             margin: '0 auto',
             boxShadow: '0 8px 32px #0008',
@@ -952,6 +952,9 @@ export default function App() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            maxHeight: '95vh',
+            overflowY: 'auto',
+            justifyContent: 'center',
           }}>
             <button onClick={() => setShowCheckout(false)} style={{position: 'absolute', top: 18, right: 18, background: 'rgba(30,40,60,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: 32, height: 32, fontSize: '1.3em', cursor: 'pointer', zIndex: 2}}>×</button>
             <h3 style={{color: '#6ec1ff', marginBottom: '18px', textAlign: 'center', fontSize: '2em', letterSpacing: 1, fontWeight: 700, width: '100%'}}>Checkout</h3>
@@ -962,12 +965,12 @@ export default function App() {
                 color: '#101828',
                 borderRadius: 10,
                 margin: '0 0 22px 0',
-                padding: isMobile ? '10px 8px' : '14px 24px',
+                padding: isMobile ? '10px 8px' : '12px 18px',
                 fontWeight: 600,
                 fontSize: isMobile ? '0.98em' : '1.08em',
                 textAlign: 'center',
                 boxShadow: '0 1.5px 6px #10182818',
-                maxWidth: isMobile ? '98vw' : 480,
+                maxWidth: isMobile ? '98vw' : 560,
                 width: '100%',
                 wordBreak: 'break-word',
               }}>
@@ -1002,12 +1005,12 @@ export default function App() {
                 color: '#101828',
                 borderRadius: 10,
                 margin: '0 0 22px 0',
-                padding: isMobile ? '10px 8px' : '14px 24px',
+                padding: isMobile ? '10px 8px' : '12px 18px',
                 fontWeight: 700,
                 fontSize: isMobile ? '0.98em' : '1.08em',
                 textAlign: 'center',
                 boxShadow: '0 1.5px 6px #10182818',
-                maxWidth: isMobile ? '98vw' : 480,
+                maxWidth: isMobile ? '98vw' : 560,
                 width: '100%',
                 wordBreak: 'break-word',
               }}>
