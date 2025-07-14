@@ -139,6 +139,7 @@ export default function App() {
         // Remove from cart if already added
         return prev.filter(item => item.id !== stickerId);
       } else {
+        setCartBounce(true);
         return [...prev, { id: stickerId, qty: 1 }];
       }
     });
