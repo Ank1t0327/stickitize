@@ -365,11 +365,10 @@ export default function App() {
     <div className="container" style={{
       maxWidth: 1200,
       margin: '0 auto',
-      padding: isMobile ? '12px 2vw' : '24px 16px',
+      padding: isMobile ? '12px 0' : '24px 16px',
       boxSizing: 'border-box',
       minHeight: '100vh',
       background: '#101522',
-      zoom: 1,
     }}>
       {/* Loading Spinner Overlay */}
       {loading && (
