@@ -945,16 +945,18 @@ export default function App() {
                 color: '#101828',
                 borderRadius: 8,
                 margin: '0 0 14px 0',
-                padding: '10px 18px',
+                padding: isMobile ? '10px 8px' : '14px 24px',
                 fontWeight: 600,
-                fontSize: '1em',
+                fontSize: isMobile ? '0.98em' : '1.08em',
                 textAlign: 'center',
                 boxShadow: '0 1.5px 6px #10182818',
-                maxWidth: 340,
+                maxWidth: isMobile ? '98vw' : 420,
+                width: '100%',
                 marginLeft: 'auto',
                 marginRight: 'auto',
+                wordBreak: 'break-word',
               }}>
-                <div style={{whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                <div style={{marginBottom: isMobile ? 8 : 12}}>
                   Add stickers worth <span style={{color: '#0a2342', fontWeight: 700}}>₹{(49 - cartSubtotal).toFixed(2)}</span> for <span style={{color: '#059669', fontWeight: 700, textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
                 </div>
                 <button
@@ -962,14 +964,14 @@ export default function App() {
                   onClick={() => { setShowCheckout(false); setPage('store'); }}
                   style={{
                     display: 'block',
-                    margin: '10px auto 0',
+                    margin: '0 auto',
                     background: '#6ec1ff',
                     color: '#101828',
                     border: 'none',
                     borderRadius: '6px',
-                    padding: '8px 22px',
+                    padding: isMobile ? '7px 16px' : '10px 32px',
                     fontWeight: 600,
-                    fontSize: '1em',
+                    fontSize: isMobile ? '1em' : '1.08em',
                     cursor: 'pointer',
                     boxShadow: '0 1px 4px #10182810',
                     transition: 'background 0.2s',
