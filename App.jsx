@@ -75,6 +75,8 @@ export default function App() {
   const [isManual, setIsManual] = useState(false);
   const autoScrollTimeout = useRef();
   const carouselRef = useRef();
+  const categoryScrollRef = useRef();
+  const [catScrollPaused, setCatScrollPaused] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 800);
@@ -262,6 +264,36 @@ export default function App() {
     return () => clearTimeout(timeout);
   }, [isManual]);
 
+  // For infinite loop, calculate total width
+  const categoryKeys = Object.keys(categories);
+  const totalCategories = categoryKeys.length;
+  const repeatCount = 4; // Render categories 4 times for a robust loop
+
+  // Auto-scroll effect for category buttons (infinite loop)
+  useEffect(() => {
+    if (!categoryScrollRef.current) return;
+    if (catScrollPaused) return;
+    let scrollDiv = categoryScrollRef.current;
+    let reqId;
+    function autoScroll() {
+      const singleSetWidth = scrollDiv.scrollWidth / repeatCount;
+      // If scrolled past the first set, reset to the same position in the next set
+      if (scrollDiv.scrollLeft >= singleSetWidth * 3) {
+        scrollDiv.scrollLeft -= singleSetWidth;
+      }
+      scrollDiv.scrollLeft += 1;
+      reqId = requestAnimationFrame(autoScroll);
+    }
+    reqId = requestAnimationFrame(autoScroll);
+    return () => cancelAnimationFrame(reqId);
+  }, [catScrollPaused, isMobile]);
+
+  // Pause auto-scroll on user interaction
+  function handleCatScrollPause() {
+    setCatScrollPaused(true);
+    setTimeout(() => setCatScrollPaused(false), 4000);
+  }
+
   // Manual navigation handlers
   const handlePrev = () => {
     setCarouselTransition(true);
@@ -388,19 +420,30 @@ export default function App() {
             <section className="shop" id="shop">
               <h2>Shop by Category</h2>
               <div
-                className="featured-categories"
+                className="featured-categories-scroll"
+                ref={categoryScrollRef}
+                onMouseEnter={handleCatScrollPause}
+                onTouchStart={handleCatScrollPause}
                 style={{
                   display: 'flex',
-                  flexWrap: 'wrap',
-                  justifyContent: 'center',
+                  flexDirection: 'row',
+                  overflowX: 'auto',
+                  WebkitOverflowScrolling: 'touch',
+                  scrollBehavior: 'smooth',
                   gap: isMobile ? 12 : 24,
+                  padding: isMobile ? '8px 0 8px 2px' : '12px 0 12px 4px',
                   margin: isMobile ? '18px 0' : '28px 0',
-                  padding: isMobile ? '0 4px' : '0',
+                  borderRadius: 12,
+                  background: 'rgba(30,40,60,0.7)',
+                  boxShadow: '0 2px 12px #10182833',
+                  scrollbarWidth: 'none', // Firefox
+                  msOverflowStyle: 'none', // IE/Edge
                 }}
               >
-                {Object.entries(categories).map(([key, category]) => (
+                {/* Render categories 4 times for infinite loop */}
+                {Array.from({length: repeatCount}).flatMap((_, r) => categoryKeys.map((key, idx) => (
                   <button
-                    key={key}
+                    key={key + '-' + r + '-' + idx}
                     className="category-feature-btn"
                     onClick={() => { setSelectedCategory(key); setPage('store'); }}
                     style={{
@@ -416,11 +459,13 @@ export default function App() {
                       cursor: 'pointer',
                       transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
                       outline: 'none',
+                      minWidth: isMobile ? 120 : 160,
+                      flex: '0 0 auto',
                     }}
                   >
-                    {category.name}
+                    {categories[key].name}
                   </button>
-                ))}
+                )))}
               </div>
             </section>
           </>
@@ -767,6 +812,10 @@ export default function App() {
       <footer>
         <p>&copy; 2025 STICKITIZE. All rights reserved.</p>
       </footer>
+      <style>{`
+        .featured-categories-scroll::-webkit-scrollbar { display: none; height: 0; }
+        .featured-categories-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </div>
   );
 }
