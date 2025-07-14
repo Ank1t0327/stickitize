@@ -939,8 +939,8 @@ export default function App() {
           <div className="checkout-form-wrapper" style={{
             background: 'rgba(30,40,60,0.98)',
             borderRadius: '18px',
-            padding: isMobile ? '18px 4vw 28px 4vw' : '36px 36px 40px 36px',
-            maxWidth: isMobile ? '98vw' : 420,
+            padding: isMobile ? '18px 4vw 28px 4vw' : '36px 48px 40px 48px',
+            maxWidth: isMobile ? '98vw' : 540,
             width: '100%',
             margin: '0 auto',
             boxShadow: '0 8px 32px #0008',
@@ -967,7 +967,7 @@ export default function App() {
                 fontSize: isMobile ? '0.98em' : '1.08em',
                 textAlign: 'center',
                 boxShadow: '0 1.5px 6px #10182818',
-                maxWidth: isMobile ? '98vw' : 420,
+                maxWidth: isMobile ? '98vw' : 480,
                 width: '100%',
                 wordBreak: 'break-word',
               }}>
@@ -1007,7 +1007,7 @@ export default function App() {
                 fontSize: isMobile ? '0.98em' : '1.08em',
                 textAlign: 'center',
                 boxShadow: '0 1.5px 6px #10182818',
-                maxWidth: isMobile ? '98vw' : 420,
+                maxWidth: isMobile ? '98vw' : 480,
                 width: '100%',
                 wordBreak: 'break-word',
               }}>
