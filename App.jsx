@@ -91,6 +91,7 @@ export default function App() {
 
   // Helper to close mobile nav after navigation
   const handleNav = (targetPage) => {
+    console.log('handleNav called, setting page to:', targetPage);
     setPage(targetPage);
     setNavOpen(false);
   };
@@ -117,8 +118,9 @@ export default function App() {
   // Close drawer on outside click or ESC
   useEffect(() => {
     if (!cartDrawerOpen) return;
-    function handleKey(e) { if (e.key === 'Escape') closeCartDrawer(); }
+    function handleKey(e) { if (e.key === 'Escape' && !zoomImg) closeCartDrawer(); }
     function handleClick(e) {
+      if (zoomImg) return; // Don't close cart if zoom modal is open
       if (cartFabRef.current && !cartFabRef.current.contains(e.target) && !document.getElementById('cart-drawer').contains(e.target)) {
         closeCartDrawer();
       }
@@ -129,7 +131,7 @@ export default function App() {
       document.removeEventListener('keydown', handleKey);
       document.removeEventListener('mousedown', handleClick);
     };
-  }, [cartDrawerOpen]);
+  }, [cartDrawerOpen, zoomImg]);
 
   // When item is added to cart, show bounce and badge
   const handleAddToCart = (stickerId) => {
@@ -189,6 +191,7 @@ export default function App() {
       setTimeout(() => {
         setOrderPlaced(false);
         setShowCheckout(false);
+        console.log('Order placed, setting page to: home');
         setPage('home');
         setCart([]);
         setOrderName('');
@@ -347,6 +350,17 @@ export default function App() {
     setIsManual(true);
   };
 
+  // Prevent background scroll when cart drawer or zoom modal is open
+  useEffect(() => {
+    console.log('cartDrawerOpen:', cartDrawerOpen, 'zoomImg:', zoomImg, 'setting overflow:', (cartDrawerOpen || zoomImg) ? 'hidden' : 'auto');
+    if (cartDrawerOpen || zoomImg) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [cartDrawerOpen, zoomImg]);
+
   return (
     <div className="container" style={{
       maxWidth: 1200,
@@ -355,7 +369,6 @@ export default function App() {
       boxSizing: 'border-box',
       minHeight: '100vh',
       background: '#101522',
-      overflowX: 'hidden',
       zoom: 1,
     }}>
       {/* Loading Spinner Overlay */}
@@ -717,6 +730,39 @@ export default function App() {
         )}
       </div>
       {/* Floating Cart Icon (fixed, visible on all pages) */}
+      {/* Floating Up Arrow (store page only) */}
+      {page === 'store' && (
+        <button
+          className="scroll-up-fab"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          style={{
+            position: 'fixed',
+            bottom: 'calc(max(20px, env(safe-area-inset-bottom, 0px)) + 60px + 16px)', // 16px gap above cart button
+            right: 'calc(max(20px, env(safe-area-inset-right, 0px)) + 6px)',
+            zIndex: 2000,
+            width: 48,
+            height: 48,
+            borderRadius: '50%',
+            background: '#fff',
+            border: '3px solid #6ec1ff',
+            boxShadow: '0 2px 12px #6ec1ff22',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'background 0.2s, box-shadow 0.2s',
+            color: '#6ec1ff',
+            outline: 'none',
+            fontWeight: 'bold',
+          }}
+          aria-label="Scroll to Top"
+        >
+         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+           <circle cx="12" cy="12" r="11" stroke="#e0f2fe" strokeWidth="1.5" fill="#e0f2fe" />
+           <polyline points="18 15 12 9 6 15" />
+         </svg>
+        </button>
+      )}
       <button
         className={`cart-fab${cartBounce ? ' bounce' : ''}`}
         ref={cartFabRef}
