@@ -78,6 +78,10 @@ export default function App() {
   const carouselRef = useRef();
   const categoryScrollRef = useRef();
   const [catScrollPaused, setCatScrollPaused] = useState(false);
+  // Cart Drawer state
+  const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
+  const [cartBounce, setCartBounce] = useState(false);
+  const cartFabRef = useRef();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 800);
@@ -97,6 +101,37 @@ export default function App() {
   };
 
   // Add to cart logic
+  // Animate cart icon when item is added
+  useEffect(() => {
+    if (cartBounce > 0) {
+      setCartBounce(true);
+      const timeout = setTimeout(() => setCartBounce(false), 400);
+      return () => clearTimeout(timeout);
+    }
+  }, [cartBounce]);
+
+  // Open cart drawer when cart icon is clicked
+  const openCartDrawer = () => setCartDrawerOpen(true);
+  const closeCartDrawer = () => setCartDrawerOpen(false);
+
+  // Close drawer on outside click or ESC
+  useEffect(() => {
+    if (!cartDrawerOpen) return;
+    function handleKey(e) { if (e.key === 'Escape') closeCartDrawer(); }
+    function handleClick(e) {
+      if (cartFabRef.current && !cartFabRef.current.contains(e.target) && !document.getElementById('cart-drawer').contains(e.target)) {
+        closeCartDrawer();
+      }
+    }
+    document.addEventListener('keydown', handleKey);
+    document.addEventListener('mousedown', handleClick);
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.removeEventListener('mousedown', handleClick);
+    };
+  }, [cartDrawerOpen]);
+
+  // When item is added to cart, show bounce and badge
   const handleAddToCart = (stickerId) => {
     setCart(prev => {
       const found = prev.find(item => item.id === stickerId);
@@ -548,8 +583,8 @@ export default function App() {
                             Add to Cart
                           </button>
                         ) : (
-                          <button className={`store-btn added`} onClick={() => setPage('cart')}>
-                            View Cart
+                          <button className={`store-btn remove`} onClick={() => handleRemoveFromCart(sticker.id)} style={{background: '#ff4d4d', color: '#fff'}}>
+                            Remove
                           </button>
                         )}
                       </div>
@@ -559,60 +594,19 @@ export default function App() {
             </div>
           </section>
         )}
-        {page === 'cart' && (
-          <section className="cart-page" id="cart">
-            <h2>Your Cart</h2>
-            {cartDetails.length === 0 ? (
-              <p className="cart-empty">Your cart is empty.</p>
-            ) : (
-              <>
-                <div className="cart-list">
-                  {cartDetails.map(item => (
-                    <div className="cart-item" key={item.id} style={{display: 'flex', alignItems: 'center', gap: '24px', background: 'rgba(30,40,60,0.9)', borderRadius: '16px', padding: '16px', marginBottom: '16px'}}>
-                      <img
-                        src={item.img}
-                        alt={item.name}
-                        style={{width: '120px', height: '120px', objectFit: 'cover', borderRadius: '12px', flexShrink: 0, cursor: 'pointer'}}
-                        onClick={() => setZoomImg(item.img)}
-                      />
-                      <div className="cart-info" style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1, gap: '12px'}}>
-                        {/* <span className="cart-title" style={{fontSize: '1.3em', fontWeight: 'bold'}}>{item.name}</span> */}
-                        <span className="cart-price" style={{color: '#6ec1ff', fontSize: '1.1em', fontWeight: 'bold'}}>₹{item.price}</span>
-                        <span className="cart-qty">Qty: {item.qty}</span>
-                        <div className="cart-actions-row" style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px'}}>
-                          <button className="cart-remove-btn" onClick={() => handleRemoveFromCart(item.id)} style={{background: '#ff4d4d', color: '#fff', borderRadius: '6px', padding: '6px 16px', fontWeight: 'bold'}}>Remove</button>
-                          <div className="cart-qty-controls" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                            <button className="qty-btn" onClick={() => setCart(prev => prev.map(p => p.id === item.id && p.qty > 1 ? { ...p, qty: p.qty - 1 } : p))}>-</button>
-                            <span>{item.qty}</span>
-                            <button className="qty-btn" onClick={() => setCart(prev => prev.map(p => p.id === item.id ? { ...p, qty: p.qty + 1 } : p))}>+</button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {/* Cart total and buy button */}
-                <div className="cart-summary" style={{marginTop: '32px', background: 'rgba(30,40,60,0.95)', borderRadius: '16px', padding: '24px', maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto', textAlign: 'center'}}>
-                  <h3 style={{color: '#6ec1ff'}}>Total: ₹{cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0).toFixed(2)}</h3>
-                  <button className="buy-btn" style={{background: '#6ec1ff', color: '#101828', border: 'none', borderRadius: '8px', padding: '12px 0', fontWeight: 'bold', fontSize: '1.1em', cursor: 'pointer', marginTop: '18px', width: '100%'}} onClick={() => setShowCheckout(true)}>Buy</button>
-                </div>
-              </>
-            )}
-          </section>
-        )}
         {page === 'contact' && (
           <section className="contact-page" id="contact">
             <h2>Contact Us</h2>
             <div className="contact-form-wrapper" style={{maxWidth: '400px', margin: '0 auto', background: 'rgba(30,40,60,0.9)', borderRadius: '16px', padding: '24px', boxShadow: '0 0 24px #0006'}}>
               <form className="contact-form" style={{display: 'flex', flexDirection: 'column', gap: '18px'}} onSubmit={handleContactSubmit}>
                 <label style={{color: '#6ec1ff', fontWeight: 'bold'}}>Name
-                  <input type="text" name="name" required style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}} />
+                  <input type="text" name="name" required style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', fontSize: isMobile ? '1.05em' : undefined}} />
                 </label>
                 <label style={{color: '#6ec1ff', fontWeight: 'bold'}}>Email
-                  <input type="email" name="email" required style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}} />
+                  <input type="email" name="email" required style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', fontSize: isMobile ? '1.05em' : undefined}} />
                 </label>
                 <label style={{color: '#6ec1ff', fontWeight: 'bold'}}>Message
-                  <textarea name="message" rows={4} required style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}} />
+                  <textarea name="message" rows={4} required style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', fontSize: isMobile ? '1.05em' : undefined}} />
                 </label>
                 <button type="submit" className="contact-submit-btn" style={{background: '#6ec1ff', color: '#101828', border: 'none', borderRadius: '6px', padding: '10px 0', fontWeight: 'bold', fontSize: '1.1em', cursor: 'pointer'}}>Send Message</button>
                 {messageSent && (
@@ -641,8 +635,8 @@ export default function App() {
             {!adminLoggedIn ? (
               <div className="admin-login" style={{display: 'flex', flexDirection: 'column', gap: '18px', alignItems: 'center'}}>
                 <h2 style={{color: '#6ec1ff'}}>Admin Login</h2>
-                <input type="text" placeholder="Admin ID" value={adminId} onChange={e => setAdminId(e.target.value)} style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', width: '220px'}} />
-                <input type="password" placeholder="Password" value={adminPw} onChange={e => setAdminPw(e.target.value)} style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', width: '220px'}} />
+                <input type="text" placeholder="Admin ID" value={adminId} onChange={e => setAdminId(e.target.value)} style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', width: '220px', fontSize: isMobile ? '1.05em' : undefined}} />
+                <input type="password" placeholder="Password" value={adminPw} onChange={e => setAdminPw(e.target.value)} style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', width: '220px', fontSize: isMobile ? '1.05em' : undefined}} />
                 <button style={{background: '#6ec1ff', color: '#101828', border: 'none', borderRadius: '8px', padding: '10px 0', fontWeight: 'bold', fontSize: '1.1em', cursor: 'pointer', width: '220px'}} onClick={handleAdminLogin}>Login</button>
                 {adminError && <span style={{color: '#ff4d4d', fontWeight: 'bold'}}>{adminError}</span>}
               </div>
@@ -710,8 +704,9 @@ export default function App() {
       </div>
       {/* Floating Cart Icon (fixed, visible on all pages) */}
       <button
-        className="cart-fab"
-        onClick={() => handleNav('cart')}
+        className={`cart-fab${cartBounce ? ' bounce' : ''}`}
+        ref={cartFabRef}
+        onClick={openCartDrawer}
         style={{
           position: 'fixed',
           bottom: 'max(20px, env(safe-area-inset-bottom, 0px))',
@@ -728,6 +723,7 @@ export default function App() {
           justifyContent: 'center',
           cursor: 'pointer',
           transition: 'background 0.2s',
+          animation: cartBounce ? 'cartBounce 0.4s' : undefined,
         }}
         aria-label="View Cart"
       >
@@ -741,7 +737,7 @@ export default function App() {
             position: 'absolute',
             top: 8,
             right: 8,
-            background: '#ff4d4d',
+            background: '#2ecc40',
             color: '#fff',
             borderRadius: '50%',
             padding: '2px 7px',
@@ -750,34 +746,126 @@ export default function App() {
             minWidth: '22px',
             textAlign: 'center',
             boxShadow: '0 0 6px #0008',
+            transition: 'all 0.2s',
           }}>{cartCount}</span>
         )}
+        <style>{`
+          @keyframes cartBounce { 0% { transform: scale(1); } 30% { transform: scale(1.25); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
+        `}</style>
       </button>
+      {/* Cart Drawer/Sidebar */}
+      {cartDrawerOpen && (
+        <div id="cart-drawer" style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          width: isMobile ? '100vw' : 400,
+          height: '100vh',
+          background: '#181c2a',
+          boxShadow: '-8px 0 32px #0008',
+          zIndex: 3000,
+          display: 'flex',
+          flexDirection: 'column',
+          animation: 'drawerSlideIn 0.35s',
+        }}>
+          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', borderBottom: '1px solid #233', background: '#101828'}}>
+            <span style={{fontWeight: 'bold', fontSize: '1.2em', color: '#6ec1ff'}}>Your Cart</span>
+            <button onClick={closeCartDrawer} style={{background: 'none', border: 'none', color: '#fff', fontSize: '2em', cursor: 'pointer', lineHeight: 1}}>&times;</button>
+          </div>
+          <div style={{flex: 1, overflowY: 'auto', padding: '24px'}}>
+            {cartDetails.length === 0 ? (
+              <div style={{color: '#fff', textAlign: 'center', marginTop: 40, fontSize: '1.1em'}}>Your cart is empty.</div>
+            ) : (
+              cartDetails.map(item => (
+                <div key={item.id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 18,
+                  background: 'rgba(30,40,60,0.9)',
+                  borderRadius: '12px',
+                  padding: '12px',
+                  marginBottom: '18px',
+                  position: 'relative',
+                  minHeight: 90
+                }}>
+                  <img src={item.img} alt={item.name} style={{width: 80, height: 80, objectFit: 'cover', borderRadius: '10px', flexShrink: 0, cursor: 'pointer'}} onClick={() => setZoomImg(item.img)} />
+                  <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0}}>
+                    <span style={{color: '#6ec1ff', fontWeight: 'bold', fontSize: '1.1em'}}>₹{item.price}</span>
+                    <span style={{color: '#b3e0ff'}}>Qty: {item.qty}</span>
+                    <div style={{display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap'}}>
+                      <button onClick={() => setCart(prev => prev.map(p => p.id === item.id && p.qty > 1 ? { ...p, qty: p.qty - 1 } : p))} style={{background: '#233', color: '#fff', border: 'none', borderRadius: 4, padding: '2px 10px', fontWeight: 'bold', fontSize: '1.1em', cursor: 'pointer'}}>-</button>
+                      <span>{item.qty}</span>
+                      <button onClick={() => setCart(prev => prev.map(p => p.id === item.id ? { ...p, qty: p.qty + 1 } : p))} style={{background: '#233', color: '#fff', border: 'none', borderRadius: 4, padding: '2px 10px', fontWeight: 'bold', fontSize: '1.1em', cursor: 'pointer'}}>+</button>
+                      <button onClick={() => setCart(prev => prev.filter(p => p.id !== item.id))} style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 18px', fontWeight: 'bold', fontSize: '1.05em', cursor: 'pointer', marginLeft: 12, whiteSpace: 'nowrap'}}>Remove</button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          <div style={{padding: '18px 24px', borderTop: '1px solid #233', background: '#101828'}}>
+            <div style={{color: '#6ec1ff', fontWeight: 'bold', fontSize: '1.15em', marginBottom: 8}}>Total: ₹{cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0).toFixed(2)}</div>
+            <button
+              style={{
+                background: cartDetails.length === 0 ? '#233' : '#6ec1ff',
+                color: '#101828',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px 0',
+                fontWeight: 'bold',
+                fontSize: '1.1em',
+                cursor: cartDetails.length === 0 ? 'not-allowed' : 'pointer',
+                width: '100%'
+              }}
+              disabled={cartDetails.length === 0}
+              onClick={() => { if (cartDetails.length > 0) { setShowCheckout(true); closeCartDrawer(); } }}
+            >
+              Checkout
+            </button>
+          </div>
+          <style>{`
+            @keyframes drawerSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+          `}</style>
+        </div>
+      )}
       {/* Checkout modal rendered globally so it always appears when showCheckout is true */}
       {showCheckout && (
         <div className="checkout-modal" style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(10,20,40,0.97)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000}}>
-          <div className="checkout-form-wrapper" style={{background: 'rgba(30,40,60,1)', borderRadius: '18px', padding: '32px', minWidth: '320px', maxWidth: '90vw', boxShadow: '0 0 32px #000a', position: 'relative'}}>
+          <div className="checkout-form-wrapper" style={{
+            background: 'rgba(30,40,60,1)',
+            borderRadius: '18px',
+            padding: isMobile ? '18px 5vw' : '32px',
+            maxWidth: isMobile ? '95vw' : '420px',
+            width: isMobile ? '95vw' : '100%',
+            margin: '0 auto',
+            boxShadow: '0 0 32px #000a',
+            position: 'relative',
+            overflowX: 'hidden',
+            wordBreak: 'break-word',
+            boxSizing: 'border-box',
+          }}>
             <button onClick={() => setShowCheckout(false)} style={{position: 'absolute', top: 18, right: 18, background: 'rgba(30,40,60,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: 32, height: 32, fontSize: '1.3em', cursor: 'pointer'}}>×</button>
             <h3 style={{color: '#6ec1ff', marginBottom: '18px'}}>Checkout</h3>
             <form style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
-              <input type="text" placeholder="Name" value={orderName} onChange={e => setOrderName(e.target.value)} required style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}} />
-              <input type="tel" placeholder="Phone Number" value={orderPhone} onChange={e => setOrderPhone(e.target.value)} required style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}} />
+              <input type="text" placeholder="Name" value={orderName} onChange={e => setOrderName(e.target.value)} required style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', fontSize: isMobile ? '1.05em' : undefined}} />
+              <input type="tel" placeholder="Phone Number" value={orderPhone} onChange={e => setOrderPhone(e.target.value)} required style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', fontSize: isMobile ? '1.05em' : undefined}} />
               <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                <label style={{color: '#6ec1ff', fontWeight: 'bold'}}>Order Type</label>
-                <div style={{display: 'flex', gap: '12px'}}>
-                  <label style={{color: '#fff', fontWeight: 'bold'}}>
-                    <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} /> Self-pickup
-                  </label>
-                  <label style={{color: '#fff', fontWeight: 'bold'}}>
-                    <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} /> Delivery (₹10 delivery charge)
-                  </label>
-                </div>
+                <label style={{color: '#6ec1ff', fontWeight: 'bold'}}>Order Type
+                  <div style={{display: 'flex', gap: '12px'}}>
+                    <label style={{color: '#fff', fontWeight: 'bold'}}>
+                      <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} /> Self-pickup
+                    </label>
+                    <label style={{color: '#fff', fontWeight: 'bold'}}>
+                      <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} /> Delivery (₹10 delivery charge)
+                    </label>
+                  </div>
+                </label>
               </div>
               {pickupType === 'SELF-PICKUP' && (
                 <div style={{color: '#6ec1ff', background: '#101828', borderRadius: '8px', padding: '10px', textAlign: 'center', fontWeight: 'bold'}}>You'll receive a call for when you pickup your order.</div>
               )}
               {pickupType === 'DELIVERY' && (
-                <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff'}}>
+                <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', fontSize: isMobile ? '1.05em' : undefined}}>
                   <option value="">Select Delivery Address</option>
                   <option value="GH2">GH2</option>
                   <option value="GH5">GH5</option>
@@ -795,15 +883,16 @@ export default function App() {
                 </select>
               )}
               <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                <label style={{color: '#6ec1ff', fontWeight: 'bold'}}>Payment Mode</label>
-                <div style={{display: 'flex', gap: '12px'}}>
-                  <label style={{color: '#fff', fontWeight: 'bold'}}>
-                    <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} /> Pay on delivery/pickup
-                  </label>
-                  <label style={{color: '#888', fontWeight: 'bold', opacity: 0.5, cursor: 'not-allowed'}}>
-                    <input type="radio" name="payment" value="Pay Online" disabled /> Pay Online (Available Soon)
-                  </label>
-                </div>
+                <label style={{color: '#6ec1ff', fontWeight: 'bold'}}>Payment Mode
+                  <div style={{display: 'flex', gap: '12px'}}>
+                    <label style={{color: '#fff', fontWeight: 'bold'}}>
+                      <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} /> Pay on delivery/pickup
+                    </label>
+                    <label style={{color: '#888', fontWeight: 'bold', opacity: 0.5, cursor: 'not-allowed'}}>
+                      <input type="radio" name="payment" value="Pay Online" disabled /> Pay Online (Available Soon)
+                    </label>
+                  </div>
+                </label>
               </div>
               {/* Place Order button, hide after orderPlaced */}
               {!orderPlaced && (
