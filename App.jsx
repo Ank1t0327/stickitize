@@ -959,6 +959,20 @@ export default function App() {
             <style>{`
               .checkout-form-wrapper::-webkit-scrollbar { display: none; width: 0; height: 0; }
               @media (max-width: 768px) {
+                .checkout-form-wrapper {
+                  border-radius: 1.25rem !important;
+                  box-shadow: 0 8px 32px #0008 !important;
+                  max-width: 98vw !important;
+                  width: 100% !important;
+                  margin: 0 auto !important;
+                  padding: 20px 4vw 24px 4vw !important;
+                  box-sizing: border-box !important;
+                  display: flex !important;
+                  flex-direction: column !important;
+                  align-items: center !important;
+                  overflow: hidden !important;
+                  border: 1.5px solid #233 !important;
+                }
                 .checkout-form-wrapper input,
                 .checkout-form-wrapper select,
                 .checkout-form-wrapper button {
@@ -966,14 +980,34 @@ export default function App() {
                   max-width: 100% !important;
                   box-sizing: border-box !important;
                   font-size: 1.08em !important;
+                  border-radius: 0.75em !important;
                 }
-                .checkout-form-wrapper {
-                  padding-left: 4vw !important;
-                  padding-right: 4vw !important;
+                .checkout-form-wrapper .checkout-title {
+                  font-size: 1.4em !important;
+                  margin-bottom: 1.2rem !important;
+                  margin-top: 0 !important;
+                  text-align: center !important;
+                  font-weight: 700 !important;
+                  color: #6ec1ff !important;
+                }
+                .checkout-form-wrapper .checkout-x {
+                  top: 10px !important;
+                  right: 10px !important;
+                  width: 28px !important;
+                  height: 28px !important;
+                  font-size: 1.1em !important;
+                }
+                .checkout-form-wrapper .section-label {
+                  font-size: 1.08em !important;
+                  margin-bottom: 0.7em !important;
+                  font-weight: 700 !important;
+                  color: #6ec1ff !important;
+                  display: block !important;
                 }
                 .checkout-form-wrapper .radio-group {
+                  display: flex !important;
                   flex-direction: row !important;
-                  gap: 2.2em !important;
+                  gap: 1.5em !important;
                   align-items: flex-start !important;
                   width: 100% !important;
                   margin-bottom: 1.1em !important;
@@ -986,35 +1020,56 @@ export default function App() {
                   align-items: center !important;
                   gap: 0.5em !important;
                   font-size: 1em !important;
-                  white-space: nowrap !important;
+                  white-space: normal !important;
                   line-height: 1.3 !important;
-                  word-break: normal !important;
+                  word-break: break-word !important;
                   justify-content: flex-start !important;
+                  min-width: 0 !important;
                 }
                 .checkout-form-wrapper .radio-group label span {
                   display: inline-block !important;
                   vertical-align: middle !important;
                   word-break: break-word !important;
                 }
-                .checkout-form-wrapper .section-label {
-                  font-size: 1.08em !important;
-                  margin-bottom: 0.7em !important;
-                }
-                .checkout-form-wrapper .checkout-title {
-                  font-size: 1.3em !important;
-                  margin-bottom: 1.2rem !important;
-                  margin-top: 0 !important;
-                  text-align: center !important;
-                }
-                .checkout-form-wrapper .checkout-x {
-                  top: 10px !important;
-                  right: 10px !important;
-                  width: 28px !important;
-                  height: 28px !important;
-                  font-size: 1.1em !important;
-                }
                 .checkout-form-wrapper .checkout-section {
                   margin-bottom: 1.2em !important;
+                }
+                .checkout-form-wrapper .note-box {
+                  width: 100% !important;
+                  background: #18223a !important;
+                  color: #6ec1ff !important;
+                  border-radius: 0.75em !important;
+                  padding: 0.85em 1em !important;
+                  text-align: center !important;
+                  font-weight: 600 !important;
+                  font-size: 1em !important;
+                  margin-bottom: -0.5em !important;
+                }
+                .checkout-form-wrapper .total-row {
+                  width: 100% !important;
+                  text-align: center !important;
+                  color: #60a5fa !important;
+                  font-weight: 700 !important;
+                  font-size: 1.15em !important;
+                  margin: 0.5em 0 0.2em 0 !important;
+                }
+                .checkout-form-wrapper .place-order-btn {
+                  background: #6ec1ff !important;
+                  color: #101828 !important;
+                  border: none !important;
+                  border-radius: 0.75em !important;
+                  padding: 1em 0 !important;
+                  font-weight: 700 !important;
+                  font-size: 1.15em !important;
+                  margin-top: 0.5em !important;
+                  width: 100% !important;
+                  box-shadow: 0 1px 4px #10182818 !important;
+                  transition: background 0.2s !important;
+                }
+                .checkout-form-wrapper .place-order-btn[disabled] {
+                  background: #233 !important;
+                  color: #101828 !important;
+                  cursor: not-allowed !important;
                 }
               }
             `}</style>
@@ -1116,7 +1171,7 @@ export default function App() {
                   </label>
                   <label style={{color: '#fff', fontWeight: 600, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.5em', whiteSpace: 'normal'}}>
                     <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} style={{margin: 0}} />
-                    Delivery (₹10 delivery charge)
+                    {isMobile ? (<span>Delivery (₹10<br/>delivery charge)</span>) : 'Delivery (₹10 delivery charge)'}
                   </label>
                 </div>
               </div>
@@ -1146,13 +1201,13 @@ export default function App() {
               <div style={{width: '100%', marginBottom: isMobile ? '1.2em' : '1.5em'}}>
                 <label style={{color: '#6ec1ff', fontWeight: 700, fontSize: '1em', marginBottom: 8, display: 'block'}}>Payment Mode</label>
                 <div className="radio-group" style={{display: 'flex', flexDirection: isMobile ? 'row' : 'row', gap: isMobile ? '2.2em' : '1.5rem', alignItems: isMobile ? 'flex-start' : 'center', width: '100%'}}>
-                  <label style={{color: '#fff', fontWeight: 600, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.5em', whiteSpace: 'nowrap'}}>
+                  <label style={{color: '#fff', fontWeight: 600, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.5em', whiteSpace: 'normal'}}>
                     <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} style={{margin: 0}} />
-                    Pay on delivery/pickup
+                    {isMobile ? (<span>Pay on delivery/<br/>pickup</span>) : 'Pay on delivery/pickup'}
                   </label>
-                  <label style={{color: '#888', fontWeight: 600, opacity: 0.5, cursor: 'not-allowed', fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.5em', whiteSpace: 'nowrap'}}>
+                  <label style={{color: '#888', fontWeight: 600, opacity: 0.5, cursor: 'not-allowed', fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.5em', whiteSpace: 'normal'}}>
                     <input type="radio" name="payment" value="Pay Online" disabled style={{margin: 0}} />
-                    Pay Online (Available Soon)
+                    {isMobile ? (<span>Pay Online<br/>(Available Soon)</span>) : 'Pay Online (Available Soon)'}
                   </label>
                 </div>
               </div>
