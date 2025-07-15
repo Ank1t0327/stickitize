@@ -612,52 +612,42 @@ export default function App() {
             <h2>Our Stickers & Posters</h2>
             {/* Subcategory Filter Buttons */}
             <div className="category-filters" style={{marginBottom: '32px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center'}}>
-              {selectedCategory === 'all' && (
-                <>
-                  <button 
-                    className={`category-btn${selectedCategory === 'all' ? ' active' : ''}`}
-                    onClick={() => setSelectedCategory('all')}
-                    style={{
-                      background: selectedCategory === 'all' ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
-                      color: selectedCategory === 'all' ? '#101828' : '#fff',
-                      border: '1px solid #6ec1ff',
-                      borderRadius: '8px',
-                      padding: '10px 20px',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    All Stickers
-                  </button>
-                  {Object.entries(categories).map(([key, category]) => (
-                    <button 
-                      key={key}
-                      className={`category-btn${selectedCategory === key ? ' active' : ''}`}
-                      onClick={() => setSelectedCategory(key)}
-                      style={{
-                        background: selectedCategory === key ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
-                        color: selectedCategory === key ? '#101828' : '#fff',
-                        border: '1px solid #6ec1ff',
-                        borderRadius: '8px',
-                        padding: '10px 20px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      {category.name}
-                    </button>
-                  ))}
-                </>
-              )}
+              <button 
+                className={`category-btn${selectedCategory === 'all' ? ' active' : ''}`}
+                onClick={() => setSelectedCategory('all')}
+                style={{
+                  background: selectedCategory === 'all' ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
+                  color: selectedCategory === 'all' ? '#101828' : '#fff',
+                  border: '1px solid #6ec1ff',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                All Stickers
+              </button>
+              {Object.entries(categories).map(([key, category]) => (
+                <button 
+                  key={key}
+                  className={`category-btn${selectedCategory === key ? ' active' : ''}`}
+                  onClick={() => setSelectedCategory(key)}
+                  style={{
+                    background: selectedCategory === key ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
+                    color: selectedCategory === key ? '#101828' : '#fff',
+                    border: '1px solid #6ec1ff',
+                    borderRadius: '8px',
+                    padding: '10px 20px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {category.name}
+                </button>
+              ))}
             </div>
-            {/* Category Title */}
-            {selectedCategory !== 'all' && (
-              <h3 style={{color: '#6ec1ff', textAlign: 'center', marginBottom: '24px', fontSize: '1.5em', fontWeight: 'bold'}}>
-                {categories[selectedCategory]?.name} Stickers
-              </h3>
-            )}
             <div className="store-grid">
               {(() => {
                 let products = [];
