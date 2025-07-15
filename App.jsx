@@ -398,7 +398,7 @@ export default function App() {
       background: '#101522',
     }}>
       {/* Loading Spinner Overlay */}
-      {loading && (
+      {loading && page !== 'admin' && page !== 'store' && page !== 'contact' && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -748,7 +748,16 @@ export default function App() {
                 <h2 style={{color: '#6ec1ff'}}>Admin Login</h2>
                 <input type="text" placeholder="Admin ID" value={adminId} onChange={e => setAdminId(e.target.value)} style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', width: '220px', fontSize: isMobile ? '1.05em' : undefined}} />
                 <input type="password" placeholder="Password" value={adminPw} onChange={e => setAdminPw(e.target.value)} style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', width: '220px', fontSize: isMobile ? '1.05em' : undefined}} />
-                <button style={{background: '#6ec1ff', color: '#101828', border: 'none', borderRadius: '8px', padding: '10px 0', fontWeight: 'bold', fontSize: '1.1em', cursor: 'pointer', width: '220px'}} onClick={handleAdminLogin}>Login</button>
+                <button style={{background: '#6ec1ff', color: '#101828', border: 'none', borderRadius: '8px', padding: '10px 0', fontWeight: 'bold', fontSize: '1.1em', cursor: 'pointer', width: '220px'}} onClick={handleAdminLogin} disabled={loading}>
+                  {loading ? (
+                    <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24}}>
+                      <span className="checkout-spinner" style={{width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite'}}></span>
+                      <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                    </span>
+                  ) : (
+                    'Login'
+                  )}
+                </button>
                 {adminError && <span style={{color: '#ff4d4d', fontWeight: 'bold'}}>{adminError}</span>}
               </div>
             ) : (
@@ -798,7 +807,16 @@ export default function App() {
                               <span style={{color: '#059669', fontWeight: 'bold', fontSize: '1em', marginLeft: 8}}>🎉 You unlocked Free Delivery!</span>
                             )}
                           </div>
-                          <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearOrder(order._id)}>CLEAR</button>
+                          <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearOrder(order._id)} disabled={loading}>
+                            {loading ? (
+                              <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24}}>
+                                <span className="checkout-spinner" style={{width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite'}}></span>
+                                <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                              </span>
+                            ) : (
+                              'CLEAR'
+                            )}
+                          </button>
                         </div>
                       );
                     })}
@@ -819,7 +837,16 @@ export default function App() {
                               <span style={{color: '#6ec1ff'}}>{msg.email}</span>
                               <span style={{color: '#b3e0ff'}}>{msg.message}</span>
                             </div>
-                            <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearContact(msg._id)}>CLEAR</button>
+                            <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearContact(msg._id)} disabled={loading}>
+                              {loading ? (
+                                <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24}}>
+                                  <span className="checkout-spinner" style={{width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite'}}></span>
+                                  <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                                </span>
+                              ) : (
+                                'CLEAR'
+                              )}
+                            </button>
                           </div>
                         ))}
                       </div>
