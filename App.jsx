@@ -966,16 +966,16 @@ export default function App() {
             background: '#181c2a',
             borderRadius: isMobile ? '0.75rem' : '1.25rem',
             boxShadow: isMobile ? 'none' : '0 8px 32px #0008',
-            maxWidth: isMobile ? 'calc(100vw - 10px)' : 500,
-            width: isMobile ? 'calc(100vw - 10px)' : '100%',
-            margin: isMobile ? '10px 5px' : 'auto',
+            maxWidth: isMobile ? 'calc(100vw - 30px)' : 500,
+            width: isMobile ? 'calc(100vw - 30px)' : '100%',
+            margin: isMobile ? '20px 10px' : 'auto',
             position: 'relative',
-            padding: isMobile ? '18px 0 0 0' : '36px 36px 24px 36px',
+            padding: isMobile ? '10px 0 0 0' : '36px 36px 24px 36px',
             boxSizing: 'border-box',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            maxHeight: isMobile ? 'calc(100vh - 20px)' : '90vh',
+            maxHeight: isMobile ? 'calc(100vh - 40px)' : '90vh',
             overflowY: 'auto',
             overflowX: isMobile ? 'hidden' : undefined,
           }}>
@@ -1007,7 +1007,7 @@ export default function App() {
               marginTop: isMobile ? 8 : 0
             }}>Checkout</h2>
             {/* Order Summary */}
-            <div style={{width: '100%', marginBottom: 18}}>
+            <div style={{width: '100%', marginBottom: 18, paddingLeft: isMobile ? 5 : 0, paddingRight: isMobile ? 5 : 0}}>
               <h3 style={{color: '#b3e0ff', fontSize: '1.1em', marginBottom: 8, fontWeight: 600}}>Order Summary</h3>
               <div style={{
                 background: '#101828',
@@ -1032,17 +1032,17 @@ export default function App() {
                   </div>
                 ))}
               </div>
-              <div style={{display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '1em'}}>
+              <div style={{display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '1em', maxWidth: '100%', boxSizing: 'border-box'}}>
                 <span>Subtotal</span>
                 <span>₹{cartSubtotal.toFixed(2)}</span>
               </div>
               {pickupType === 'DELIVERY' && (
-                <div style={{display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '1em'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '1em', maxWidth: '100%', boxSizing: 'border-box'}}>
                   <span>Delivery</span>
                   <span>{deliveryCharge > 0 ? `₹${deliveryCharge}` : 'Free'}</span>
                 </div>
               )}
-              <div style={{display: 'flex', justifyContent: 'space-between', color: '#60a5fa', fontWeight: 700, fontSize: '1.1em', marginTop: 4}}>
+              <div style={{display: 'flex', justifyContent: 'space-between', color: '#60a5fa', fontWeight: 700, fontSize: '1.1em', marginTop: 4, maxWidth: '100%', boxSizing: 'border-box'}}>
                 <span>Total</span>
                 <span>₹{checkoutTotal.toFixed(2)}</span>
               </div>
@@ -1104,18 +1104,18 @@ export default function App() {
               )}
             </div>
             {/* Customer Info */}
-            <form style={{width: '100%', display: 'flex', flexDirection: 'column', gap: '1.1rem', alignItems: 'center', marginTop: 0}}>
-              <div style={{width: '100%'}}>
+            <form style={{width: '100%', display: 'flex', flexDirection: 'column', gap: isMobile ? '0.7rem' : '1.1rem', alignItems: 'center', marginTop: 0}}>
+              <div style={{width: '100%', marginBottom: isMobile ? 6 : undefined, paddingLeft: isMobile ? 5 : 0, paddingRight: isMobile ? 5 : 0}}>
                 <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>Name *</label>
-                <input type="text" placeholder="Your Name" value={orderName} onChange={e => setOrderName(e.target.value)} required style={{width: '100%', padding: '0.85em 1em', borderRadius: '0.75em', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}} />
+                <input type="text" placeholder="Your Name" value={orderName} onChange={e => setOrderName(e.target.value)} required style={{width: '100%', maxWidth: '100%', boxSizing: 'border-box', padding: '0.85em 1em', borderRadius: '0.75em', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}} />
               </div>
-              <div style={{width: '100%'}}>
+              <div style={{width: '100%', marginBottom: isMobile ? 6 : undefined, paddingLeft: isMobile ? 5 : 0, paddingRight: isMobile ? 5 : 0}}>
                 <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>Phone Number *</label>
-                <input type="tel" placeholder="10-digit Phone Number" value={orderPhone} onChange={e => setOrderPhone(e.target.value)} required maxLength={10} style={{width: '100%', padding: '0.85em 1em', borderRadius: '0.75em', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}} />
+                <input type="tel" placeholder="10-digit Phone Number" value={orderPhone} onChange={e => setOrderPhone(e.target.value)} required maxLength={10} style={{width: '100%', maxWidth: '100%', boxSizing: 'border-box', padding: '0.85em 1em', borderRadius: '0.75em', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}} />
                 {!isValidPhone && orderPhone && <span style={{color: '#ff4d4d', fontSize: '0.95em'}}>Enter a valid 10-digit phone number.</span>}
               </div>
               {/* Delivery/Pickup Options */}
-              <div style={{width: '100%'}}>
+              <div style={{width: '100%', marginBottom: isMobile ? 6 : undefined, paddingLeft: isMobile ? 5 : 0, paddingRight: isMobile ? 5 : 0}}>
                 <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>Order Type *</label>
                 <div className="radio-group" style={{display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '1em', alignItems: isMobile ? 'flex-start' : 'center', width: '100%'}}>
                   <label style={{color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer'}}>
@@ -1130,9 +1130,9 @@ export default function App() {
               </div>
               {/* Delivery Address Dropdown */}
               {pickupType === 'DELIVERY' && (
-                <div style={{width: '100%'}}>
+                <div style={{width: '100%', marginBottom: isMobile ? 6 : undefined, paddingLeft: isMobile ? 5 : 0, paddingRight: isMobile ? 5 : 0}}>
                   <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>Delivery Address *</label>
-                  <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{width: '100%', padding: '11px', borderRadius: '8px', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}}>
+                  <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{width: '100%', maxWidth: '100%', boxSizing: 'border-box', padding: '11px', borderRadius: '8px', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}}>
                     <option value="">Select Delivery Address</option>
                     <option value="GH2">GH2</option>
                     <option value="GH5">GH5</option>
@@ -1152,7 +1152,7 @@ export default function App() {
                 </div>
               )}
               {/* Payment Method */}
-              <div style={{width: '100%'}}>
+              <div style={{width: '100%', marginBottom: isMobile ? 6 : undefined, paddingLeft: isMobile ? 5 : 0, paddingRight: isMobile ? 5 : 0}}>
                 <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>Payment Method *</label>
                 <div className="radio-group" style={{display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '1em', alignItems: isMobile ? 'flex-start' : 'center', width: '100%'}}>
                   <label style={{color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer'}}>
@@ -1167,7 +1167,7 @@ export default function App() {
               </div>
               {/* Privacy Note */}
               {pickupType === 'SELF-PICKUP' && (
-                <div style={{width: '100%', background: '#101828', color: '#b3e0ff', borderRadius: '0.75em', padding: '0.85em 1em', textAlign: 'center', fontWeight: 500, fontSize: '0.98em', marginBottom: '-0.5em', marginTop: 4}}>
+                <div style={{width: '100%', background: '#101828', color: '#b3e0ff', borderRadius: '0.75em', padding: isMobile ? '0.5em 0.7em' : '0.85em 1em', textAlign: 'center', fontWeight: 500, fontSize: '0.98em', marginBottom: '-0.5em', marginTop: isMobile ? 2 : 4, paddingLeft: isMobile ? 5 : undefined, paddingRight: isMobile ? 5 : undefined}}>
                   You'll receive a call for when to pick up your order from BH3.
                 </div>
               )}
