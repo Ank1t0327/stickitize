@@ -162,7 +162,8 @@ export default function App() {
   });
   // Calculate checkout total (including delivery if selected)
   const cartSubtotal = cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0);
-  const deliveryCharge = (pickupType === 'DELIVERY' && cartSubtotal <= 49) ? 10 : 0;
+  // Free delivery if subtotal >= 49 or address is BH3
+  const deliveryCharge = (pickupType === 'DELIVERY' && cartSubtotal < 49 && orderAddress !== 'BH3') ? 10 : 0;
   const checkoutTotal = cartSubtotal + deliveryCharge;
 
   // Validate phone number format (must be exactly 10 digits)
@@ -399,7 +400,7 @@ export default function App() {
       {zoomImg && (
         <div
           className="zoom-modal"
-          style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(10,20,40,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 4000}}
+          style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(10,20,40,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999}}
           onClick={() => setZoomImg(null)}
         >
           <button className="zoom-close" onClick={() => setZoomImg(null)} style={{position: 'absolute', top: 32, right: 32, background: 'rgba(30,40,60,0.8)', color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, fontSize: '1.5em', cursor: 'pointer', zIndex: 1001}}>×</button>
@@ -680,9 +681,9 @@ export default function App() {
                         const qty = qtyMatch ? parseInt(qtyMatch[1], 10) : 1;
                         adminOrderSubtotal += 7 * qty; // All stickers are 7.00
                       });
-                      // Add delivery charge if applicable
+                      // Add delivery charge if applicable (free if subtotal >= 49)
                       const showDelivery = order.orderType === 'DELIVERY';
-                      const deliveryCharge = (showDelivery && adminOrderSubtotal <= 49) ? 10 : 0;
+                      const deliveryCharge = (showDelivery && adminOrderSubtotal < 49) ? 10 : 0;
                       let total = adminOrderSubtotal;
                       if (showDelivery) total += deliveryCharge;
                       return (
@@ -694,6 +695,9 @@ export default function App() {
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
                             <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery && deliveryCharge > 0 ? ' (includes ₹10 delivery)' : showDelivery && deliveryCharge === 0 ? ' (Free delivery!)' : ''}</span>
+                            {showDelivery && adminOrderSubtotal >= 49 && (
+                              <span style={{color: '#059669', fontWeight: 'bold', fontSize: '1em', marginLeft: 8}}>🎉 You unlocked Free Delivery!</span>
+                            )}
                           </div>
                           <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearOrder(order._id)}>CLEAR</button>
                         </div>
@@ -832,9 +836,9 @@ export default function App() {
             <button onClick={closeCartDrawer} style={{background: 'none', border: 'none', color: '#fff', fontSize: '2em', cursor: 'pointer', lineHeight: 1}}>&times;</button>
           </div>
           {/* Free Delivery Dynamic Message */}
-          {cartDetails.length > 0 && cartSubtotal < 49 && (
+          {cartDetails.length > 0 && pickupType === 'DELIVERY' && cartSubtotal < 49 && (
             <div style={{
-              background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)', // softer blue-green
+              background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
               color: '#101828',
               borderRadius: 10,
               margin: '14px 24px 0 24px',
@@ -851,6 +855,27 @@ export default function App() {
             }}>
               Add stickers worth <span style={{color: '#0a2342', fontWeight: 'bold'}}>₹{(49 - cartSubtotal).toFixed(2)}</span> for <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
               <style>{`@keyframes fadeInHighlight { from { opacity: 0; background: #fff; } to { opacity: 1; background: linear-gradient(90deg, #6ec1ff 0%,rgb(74, 222, 178) 100%); } }`}</style>
+            </div>
+          )}
+          {cartDetails.length > 0 && pickupType === 'DELIVERY' && cartSubtotal >= 49 && (
+            <div style={{
+              background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
+              color: '#101828',
+              borderRadius: 10,
+              margin: '14px 24px 0 24px',
+              padding: '8px 10px',
+              fontWeight: 'bold',
+              fontSize: '1em',
+              textAlign: 'center',
+              boxShadow: '0 2px 8px #10182822',
+              animation: 'fadeInHighlight 0.7s',
+              letterSpacing: 0.1,
+              maxWidth: 320,
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            }}>
+              🎉 You unlocked <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
+              <style>{`@keyframes fadeInHighlight { from { opacity: 0; background: #fff; } to { opacity: 1; background: linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%); } }`}</style>
             </div>
           )}
           <div style={{flex: 1, overflowY: 'auto', padding: '24px', marginBottom: isMobile ? 90 : 90}}>
@@ -926,156 +951,37 @@ export default function App() {
           position: 'fixed',
           top: 0,
           left: 0,
-          width: '100vw',
+          width: isMobile ? '100vw' : '100vw',
           height: '100vh',
+          overflowX: isMobile ? 'hidden' : undefined,
           background: 'rgba(10,20,40,0.97)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 2000,
-          padding: isMobile ? '10px' : '32px',
+          zIndex: 4000,
+          padding: isMobile ? '0' : '32px',
           boxSizing: 'border-box',
         }}>
           <div className="checkout-form-wrapper" style={{
-            background: 'rgba(30,40,60,0.98)',
-            borderRadius: '1.25rem',
-            boxShadow: '0 8px 32px #0008',
-            maxWidth: isMobile ? '98vw' : '520px',
-            width: '100%',
-            margin: isMobile ? '0 auto' : 'auto',
+            background: '#181c2a',
+            borderRadius: isMobile ? '0.75rem' : '1.25rem',
+            boxShadow: isMobile ? 'none' : '0 8px 32px #0008',
+            maxWidth: isMobile ? 'calc(100vw - 10px)' : 500,
+            width: isMobile ? 'calc(100vw - 10px)' : '100%',
+            margin: isMobile ? '10px 5px' : 'auto',
             position: 'relative',
-            padding: isMobile ? '20px 4vw 24px 4vw' : '48px 48px 48px 48px',
+            padding: isMobile ? '18px 0 0 0' : '36px 36px 24px 36px',
             boxSizing: 'border-box',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            overflow: isMobile ? 'hidden' : 'visible',
-            border: '1.5px solid #233',
-            maxHeight: isMobile ? undefined : '90vh',
-            overflowY: isMobile ? undefined : 'auto',
-            top: isMobile ? undefined : 0,
-            bottom: isMobile ? undefined : 0,
+            maxHeight: isMobile ? 'calc(100vh - 20px)' : '90vh',
+            overflowY: 'auto',
+            overflowX: isMobile ? 'hidden' : undefined,
           }}>
-            <style>{`
-              .checkout-form-wrapper::-webkit-scrollbar { display: none; width: 0; height: 0; }
-              @media (max-width: 768px) {
-                .checkout-form-wrapper {
-                  border-radius: 1.25rem !important;
-                  box-shadow: 0 8px 32px #0008 !important;
-                  max-width: 98vw !important;
-                  width: 100% !important;
-                  margin: 0 auto !important;
-                  padding: 20px 4vw 24px 4vw !important;
-                  box-sizing: border-box !important;
-                  display: flex !important;
-                  flex-direction: column !important;
-                  align-items: center !important;
-                  overflow: hidden !important;
-                  border: 1.5px solid #233 !important;
-                }
-                .checkout-form-wrapper input,
-                .checkout-form-wrapper select,
-                .checkout-form-wrapper button {
-                  width: 100% !important;
-                  max-width: 100% !important;
-                  box-sizing: border-box !important;
-                  font-size: 1.08em !important;
-                  border-radius: 0.75em !important;
-                }
-                .checkout-form-wrapper .checkout-title {
-                  font-size: 1.4em !important;
-                  margin-bottom: 1.2rem !important;
-                  margin-top: 0 !important;
-                  text-align: center !important;
-                  font-weight: 700 !important;
-                  color: #6ec1ff !important;
-                }
-                .checkout-form-wrapper .checkout-x {
-                  top: 10px !important;
-                  right: 10px !important;
-                  width: 28px !important;
-                  height: 28px !important;
-                  font-size: 1.1em !important;
-                }
-                .checkout-form-wrapper .section-label {
-                  font-size: 1.08em !important;
-                  margin-bottom: 0.7em !important;
-                  font-weight: 700 !important;
-                  color: #6ec1ff !important;
-                  display: block !important;
-                }
-                .checkout-form-wrapper .radio-group {
-                  display: flex !important;
-                  flex-direction: row !important;
-                  gap: 1.5em !important;
-                  align-items: flex-start !important;
-                  width: 100% !important;
-                  margin-bottom: 1.1em !important;
-                  justify-content: flex-start !important;
-                }
-                .checkout-form-wrapper .radio-group label {
-                  width: auto !important;
-                  display: flex !important;
-                  flex-direction: row !important;
-                  align-items: center !important;
-                  gap: 0.5em !important;
-                  font-size: 1em !important;
-                  white-space: normal !important;
-                  line-height: 1.3 !important;
-                  word-break: break-word !important;
-                  justify-content: flex-start !important;
-                  min-width: 0 !important;
-                }
-                .checkout-form-wrapper .radio-group label span {
-                  display: inline-block !important;
-                  vertical-align: middle !important;
-                  word-break: break-word !important;
-                }
-                .checkout-form-wrapper .checkout-section {
-                  margin-bottom: 1.2em !important;
-                }
-                .checkout-form-wrapper .note-box {
-                  width: 100% !important;
-                  background: #18223a !important;
-                  color: #6ec1ff !important;
-                  border-radius: 0.75em !important;
-                  padding: 0.85em 1em !important;
-                  text-align: center !important;
-                  font-weight: 600 !important;
-                  font-size: 1em !important;
-                  margin-bottom: -0.5em !important;
-                }
-                .checkout-form-wrapper .total-row {
-                  width: 100% !important;
-                  text-align: center !important;
-                  color: #60a5fa !important;
-                  font-weight: 700 !important;
-                  font-size: 1.15em !important;
-                  margin: 0.5em 0 0.2em 0 !important;
-                }
-                .checkout-form-wrapper .place-order-btn {
-                  background: #6ec1ff !important;
-                  color: #101828 !important;
-                  border: none !important;
-                  border-radius: 0.75em !important;
-                  padding: 1em 0 !important;
-                  font-weight: 700 !important;
-                  font-size: 1.15em !important;
-                  margin-top: 0.5em !important;
-                  width: 100% !important;
-                  box-shadow: 0 1px 4px #10182818 !important;
-                  transition: background 0.2s !important;
-                }
-                .checkout-form-wrapper .place-order-btn[disabled] {
-                  background: #233 !important;
-                  color: #101828 !important;
-                  cursor: not-allowed !important;
-                }
-              }
-            `}</style>
             <button className="checkout-x" onClick={() => setShowCheckout(false)} style={{
               position: 'absolute',
-              top: 18,
+              top: 14,
               right: 18,
               background: 'rgba(30,40,60,0.8)',
               color: '#fff',
@@ -1090,97 +996,143 @@ export default function App() {
               alignItems: 'center',
               justifyContent: 'center',
             }}>×</button>
-            <h3 className="checkout-title" style={{
+            <h2 style={{
               color: '#6ec1ff',
-              marginBottom: '1.5rem',
+              marginBottom: '1.1rem',
               textAlign: 'center',
-              fontSize: isMobile ? '1.4em' : '2em',
+              fontSize: isMobile ? '1.3em' : '2em',
               letterSpacing: 1,
               fontWeight: 700,
               width: '100%',
-              marginTop: 0
-            }}>Checkout</h3>
-            {/* Free Delivery Suggestion or Unlocked Message */}
-            {pickupType === 'DELIVERY' && cartSubtotal < 49 && (
+              marginTop: isMobile ? 8 : 0
+            }}>Checkout</h2>
+            {/* Order Summary */}
+            <div style={{width: '100%', marginBottom: 18}}>
+              <h3 style={{color: '#b3e0ff', fontSize: '1.1em', marginBottom: 8, fontWeight: 600}}>Order Summary</h3>
               <div style={{
-                background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
-                color: '#101828',
+                background: '#101828',
                 borderRadius: 10,
-                margin: '0 0 18px 0',
-                padding: isMobile ? '10px 8px' : '12px 18px',
-                fontWeight: 600,
-                fontSize: isMobile ? '1em' : '1.08em',
-                textAlign: 'center',
-                boxShadow: '0 1.5px 6px #10182818',
-                maxWidth: isMobile ? '98vw' : 560,
-                width: '100%',
-                wordBreak: 'break-word',
+                padding: '10px 12px',
+                marginBottom: 8,
+                maxHeight: 160,
+                overflowY: 'auto',
               }}>
-                <div style={{marginBottom: isMobile ? 8 : 12}}>
-                  Add stickers worth <span style={{color: '#0a2342', fontWeight: 700}}>₹{(49 - cartSubtotal).toFixed(2)}</span> for <span style={{color: '#059669', fontWeight: 700, textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => { setShowCheckout(false); setPage('store'); }}
-                  style={{
-                    display: 'block',
-                    margin: '0 auto',
-                    background: '#6ec1ff',
-                    color: '#101828',
-                    border: 'none',
-                    borderRadius: '7px',
-                    padding: isMobile ? '7px 16px' : '10px 32px',
-                    fontWeight: 700,
-                    fontSize: isMobile ? '1em' : '1.08em',
-                    cursor: 'pointer',
-                    boxShadow: '0 1px 4px #10182810',
-                    transition: 'background 0.2s',
-                  }}
-                >
-                  Add More Stickers
-                </button>
+                {cartDetails.map(item => (
+                  <div key={item.id} style={{display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8}}>
+                    <img
+                      src={item.img}
+                      alt="Sticker"
+                      style={{width: 38, height: 38, borderRadius: 7, objectFit: 'cover', border: '1.5px solid #6ec1ff', cursor: 'pointer'}}
+                      onClick={() => setZoomImg(item.img)}
+                    />
+                    <div style={{flex: 1, minWidth: 0, display: 'flex', alignItems: 'center'}}>
+                      <span style={{color: '#b3e0ff', fontSize: '1em', marginLeft: 8}}>x{item.qty}</span>
+                    </div>
+                    <span style={{color: '#6ec1ff', fontWeight: 600}}>₹{(parseFloat(item.price) * item.qty).toFixed(2)}</span>
+                  </div>
+                ))}
               </div>
-            )}
-            {pickupType === 'DELIVERY' && cartSubtotal >= 49 && (
-              <div style={{
-                background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
-                color: '#101828',
-                borderRadius: 10,
-                margin: '0 0 18px 0',
-                padding: isMobile ? '10px 8px' : '12px 18px',
-                fontWeight: 700,
-                fontSize: isMobile ? '1em' : '1.08em',
-                textAlign: 'center',
-                boxShadow: '0 1.5px 6px #10182818',
-                maxWidth: isMobile ? '98vw' : 560,
-                width: '100%',
-                wordBreak: 'break-word',
-              }}>
-                🎉 You unlocked <span style={{color: '#059669', fontWeight: 700, textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
+              <div style={{display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '1em'}}>
+                <span>Subtotal</span>
+                <span>₹{cartSubtotal.toFixed(2)}</span>
               </div>
-            )}
-            <form style={{width: '100%', display: 'flex', flexDirection: 'column', gap: '1.2rem', alignItems: 'center', marginTop: 0}}>
-              <input type="text" placeholder="Name" value={orderName} onChange={e => setOrderName(e.target.value)} required style={{width: '100%', padding: '0.85em 1em', borderRadius: '0.75em', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}} />
-              <input type="tel" placeholder="Phone Number" value={orderPhone} onChange={e => setOrderPhone(e.target.value)} required style={{width: '100%', padding: '0.85em 1em', borderRadius: '0.75em', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}} />
-              <div style={{width: '100%', marginBottom: isMobile ? '1.2em' : '1.5em'}}>
-                <label style={{color: '#6ec1ff', fontWeight: 700, fontSize: '1em', marginBottom: 8, display: 'block'}}>Order Type</label>
-                <div className="radio-group" style={{display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '0.5rem' : '1.5rem', alignItems: isMobile ? 'flex-start' : 'center'}}>
-                  <label style={{color: '#fff', fontWeight: 600, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.5em', whiteSpace: 'normal'}}>
-                    <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} style={{margin: 0}} />
-                    Self-pickup
-                  </label>
-                  <label style={{color: '#fff', fontWeight: 600, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.5em', whiteSpace: 'normal'}}>
-                    <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} style={{margin: 0}} />
-                    {isMobile ? (<span>Delivery (₹10<br/>delivery charge)</span>) : 'Delivery (₹10 delivery charge)'}
-                  </label>
-                </div>
-              </div>
-              {pickupType === 'SELF-PICKUP' && (
-                <div style={{width: '100%', background: '#18223a', color: '#6ec1ff', borderRadius: '0.75em', padding: '0.85em 1em', textAlign: 'center', fontWeight: 600, fontSize: '1em', marginBottom: '-0.5em'}}>You'll receive a call for when you pickup your order.</div>
-              )}
               {pickupType === 'DELIVERY' && (
-                <div style={{width: '100%', marginBottom: isMobile ? '1.2em' : '1.5em'}}>
-                  <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{width: '100%', padding: isMobile ? '11px' : '13px', borderRadius: '8px', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: isMobile ? '1em' : '1.08em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s', marginBottom: 0}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '1em'}}>
+                  <span>Delivery</span>
+                  <span>{deliveryCharge > 0 ? `₹${deliveryCharge}` : 'Free'}</span>
+                </div>
+              )}
+              <div style={{display: 'flex', justifyContent: 'space-between', color: '#60a5fa', fontWeight: 700, fontSize: '1.1em', marginTop: 4}}>
+                <span>Total</span>
+                <span>₹{checkoutTotal.toFixed(2)}</span>
+              </div>
+              {/* Free Delivery Suggestion for Delivery option */}
+              {pickupType === 'DELIVERY' && cartSubtotal < 49 && (
+                <div style={{
+                  background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
+                  color: '#101828',
+                  borderRadius: 10,
+                  margin: '14px 0 0 0',
+                  padding: '8px 10px',
+                  fontWeight: 'bold',
+                  fontSize: '1em',
+                  textAlign: 'center',
+                  boxShadow: '0 2px 8px #10182822',
+                  maxWidth: 320,
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+                }}>
+                  Add stickers worth <span style={{color: '#0a2342', fontWeight: 'bold'}}>₹{(49 - cartSubtotal).toFixed(2)}</span> for <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>Free Delivery</span>!<br />
+                  <button
+                    type="button"
+                    onClick={() => { setShowCheckout(false); setPage('store'); }}
+                    style={{
+                      marginTop: 10,
+                      background: '#6ec1ff',
+                      color: '#101828',
+                      border: 'none',
+                      borderRadius: 7,
+                      padding: '8px 22px',
+                      fontWeight: 700,
+                      fontSize: '1em',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 4px #10182810',
+                      transition: 'background 0.2s',
+                    }}
+                  >
+                    Add Stickers
+                  </button>
+                </div>
+              )}
+              {pickupType === 'DELIVERY' && cartSubtotal >= 49 && (
+                <div style={{
+                  background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
+                  color: '#101828',
+                  borderRadius: 10,
+                  margin: '14px 0 0 0',
+                  padding: '8px 10px',
+                  fontWeight: 'bold',
+                  fontSize: '1em',
+                  textAlign: 'center',
+                  boxShadow: '0 2px 8px #10182822',
+                  maxWidth: 320,
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+                }}>
+                  🎉 You unlocked <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>Free Delivery!</span>
+                </div>
+              )}
+            </div>
+            {/* Customer Info */}
+            <form style={{width: '100%', display: 'flex', flexDirection: 'column', gap: '1.1rem', alignItems: 'center', marginTop: 0}}>
+              <div style={{width: '100%'}}>
+                <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>Name *</label>
+                <input type="text" placeholder="Your Name" value={orderName} onChange={e => setOrderName(e.target.value)} required style={{width: '100%', padding: '0.85em 1em', borderRadius: '0.75em', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}} />
+              </div>
+              <div style={{width: '100%'}}>
+                <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>Phone Number *</label>
+                <input type="tel" placeholder="10-digit Phone Number" value={orderPhone} onChange={e => setOrderPhone(e.target.value)} required maxLength={10} style={{width: '100%', padding: '0.85em 1em', borderRadius: '0.75em', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}} />
+                {!isValidPhone && orderPhone && <span style={{color: '#ff4d4d', fontSize: '0.95em'}}>Enter a valid 10-digit phone number.</span>}
+              </div>
+              {/* Delivery/Pickup Options */}
+              <div style={{width: '100%'}}>
+                <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>Order Type *</label>
+                <div className="radio-group" style={{display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '1em', alignItems: isMobile ? 'flex-start' : 'center', width: '100%'}}>
+                  <label style={{color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer'}}>
+                    <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} style={{margin: 0, accentColor: '#6ec1ff', width: 20, height: 20}} />
+                    <span>Self-pickup</span>
+                  </label>
+                  <label style={{color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer'}}>
+                    <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} style={{margin: 0, accentColor: '#6ec1ff', width: 20, height: 20}} />
+                    <span>Delivery</span>
+                  </label>
+                </div>
+              </div>
+              {/* Delivery Address Dropdown */}
+              {pickupType === 'DELIVERY' && (
+                <div style={{width: '100%'}}>
+                  <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>Delivery Address *</label>
+                  <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{width: '100%', padding: '11px', borderRadius: '8px', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}}>
                     <option value="">Select Delivery Address</option>
                     <option value="GH2">GH2</option>
                     <option value="GH5">GH5</option>
@@ -1196,22 +1148,30 @@ export default function App() {
                     <option value="BH6">BH6</option>
                     <option value="BH7">BH7</option>
                   </select>
+                  {!orderAddress && <span style={{color: '#ff4d4d', fontSize: '0.95em'}}>Please select a delivery address.</span>}
                 </div>
               )}
-              <div style={{width: '100%', marginBottom: isMobile ? '1.2em' : '1.5em'}}>
-                <label style={{color: '#6ec1ff', fontWeight: 700, fontSize: '1em', marginBottom: 8, display: 'block'}}>Payment Mode</label>
-                <div className="radio-group" style={{display: 'flex', flexDirection: isMobile ? 'row' : 'row', gap: isMobile ? '2.2em' : '1.5rem', alignItems: isMobile ? 'flex-start' : 'center', width: '100%'}}>
-                  <label style={{color: '#fff', fontWeight: 600, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.5em', whiteSpace: 'normal'}}>
-                    <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} style={{margin: 0}} />
-                    {isMobile ? (<span>Pay on delivery/<br/>pickup</span>) : 'Pay on delivery/pickup'}
+              {/* Payment Method */}
+              <div style={{width: '100%'}}>
+                <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>Payment Method *</label>
+                <div className="radio-group" style={{display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '1em', alignItems: isMobile ? 'flex-start' : 'center', width: '100%'}}>
+                  <label style={{color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer'}}>
+                    <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} style={{margin: 0, accentColor: '#6ec1ff', width: 20, height: 20}} />
+                    <span>Pay on delivery/pickup</span>
                   </label>
-                  <label style={{color: '#888', fontWeight: 600, opacity: 0.5, cursor: 'not-allowed', fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.5em', whiteSpace: 'normal'}}>
-                    <input type="radio" name="payment" value="Pay Online" disabled style={{margin: 0}} />
-                    {isMobile ? (<span>Pay Online<br/>(Available Soon)</span>) : 'Pay Online (Available Soon)'}
+                  <label style={{color: '#888', fontWeight: 500, opacity: 0.5, cursor: 'not-allowed', fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em'}}>
+                    <input type="radio" name="payment" value="Pay Online" disabled style={{margin: 0, accentColor: '#6ec1ff', width: 20, height: 20}} />
+                    <span>Pay Online (Coming Soon)</span>
                   </label>
                 </div>
               </div>
-              <div style={{width: '100%', textAlign: 'center', color: '#60a5fa', fontWeight: 700, fontSize: '1.15em', margin: '0.5em 0 0.2em 0'}}>Total: ₹{checkoutTotal.toFixed(2)}{pickupType === 'DELIVERY' && deliveryCharge > 0 ? ' (includes ₹10 delivery)' : pickupType === 'DELIVERY' && deliveryCharge === 0 ? ' (Free delivery!)' : ''}</div>
+              {/* Privacy Note */}
+              {pickupType === 'SELF-PICKUP' && (
+                <div style={{width: '100%', background: '#101828', color: '#b3e0ff', borderRadius: '0.75em', padding: '0.85em 1em', textAlign: 'center', fontWeight: 500, fontSize: '0.98em', marginBottom: '-0.5em', marginTop: 4}}>
+                  You'll receive a call for when to pick up your order from BH3.
+                </div>
+              )}
+              {/* Place Order Button */}
               <button type="button" disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment} onClick={handlePlaceOrder} style={{background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '0.75em', padding: '1em 0', fontWeight: 700, fontSize: '1.15em', cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer', marginTop: '0.5em', width: '100%', boxShadow: '0 1px 4px #10182818', transition: 'background 0.2s'}}>Place Order</button>
             </form>
           </div>
