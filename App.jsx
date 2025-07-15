@@ -189,19 +189,14 @@ export default function App() {
         body: JSON.stringify(orderData)
       });
       setOrderPlaced(true);
-      setTimeout(() => {
-        setOrderPlaced(false);
-        setShowCheckout(false);
-        console.log('Order placed, setting page to: home');
-        setPage('home');
-        setCart([]);
-        setOrderName('');
-        setOrderPhone('');
-        setOrderAddress('');
-        setOrderPayment('Pay on delivery/pickup');
-        setPickupType('SELF-PICKUP');
-        setLoading(false);
-      }, 3000);
+      setShowCheckout(false);
+      setCart([]);
+      setOrderName('');
+      setOrderPhone('');
+      setOrderAddress('');
+      setOrderPayment('Pay on delivery/pickup');
+      setPickupType('SELF-PICKUP');
+      setLoading(false);
     } catch (err) {
       setLoading(false);
       alert('Failed to place order. Please try again.');
@@ -410,6 +405,54 @@ export default function App() {
             style={{maxWidth: '90vw', maxHeight: '80vh', borderRadius: '18px', boxShadow: '0 0 32px #0008'}}
             onClick={e => e.stopPropagation()}
           />
+        </div>
+      )}
+      {/* Order Placed Popup */}
+      {orderPlaced && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(10,20,40,0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #101828 0%, #2563eb 100%)',
+            color: '#e0f2fe',
+            borderRadius: '1.3em',
+            boxShadow: '0 6px 32px #000b',
+            padding: '32px 24px 24px 24px',
+            minWidth: 280,
+            maxWidth: '90vw',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 18,
+            border: '2px solid #233',
+          }}>
+            <div style={{fontSize: '1.35em', fontWeight: 700, marginBottom: 12, color: '#6ec1ff', letterSpacing: 1}}>Order Placed!</div>
+            <div style={{fontSize: '1.08em', marginBottom: 18, color: '#e0f2fe'}}>Thank you for your order.<br />You will receive a call soon for confirmation and pickup/delivery details.</div>
+            <button onClick={() => { setOrderPlaced(false); setPage('home'); }} style={{
+              background: 'linear-gradient(90deg, #6ec1ff 0%, #2563eb 100%)',
+              color: '#101828',
+              border: 'none',
+              borderRadius: '0.8em',
+              padding: '12px 38px',
+              fontWeight: 700,
+              fontSize: '1.13em',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px #10182822',
+              transition: 'background 0.2s',
+              marginTop: 8,
+              letterSpacing: 1
+            }}>OK</button>
+          </div>
         </div>
       )}
       <nav className="navbar" style={{
