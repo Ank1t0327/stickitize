@@ -33,10 +33,10 @@ for (let i = 1; i <= 57; i++) {
 
 // Generate stickers for each category folder
 Object.entries(categories).forEach(([categoryKey, categoryData]) => {
-  // Assuming each category folder has 8 stickers (sticker1.png to sticker8.png)
+  // Assuming each category folder has 10 stickers (sticker1.png to sticker10.png)
   for (let i = 1; i <= 10; i++) {
     stickers.push({
-      id: `${categoryKey}_${i}`, // Unique ID for each sticker
+      id: `${categoryKey}_${i}`,
       name: `${categoryData.name} Sticker ${i}`,
       price: '7.00',
       img: `/stickers/${categoryData.folder}/sticker${i}.png`, // Path to folder-specific image
@@ -89,9 +89,36 @@ export default function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Add useEffect to sync page state with URL hash
+  useEffect(() => {
+    function syncPageWithHash() {
+      if (window.location.hash === '#shop') {
+        setPage('store');
+      } else if (window.location.hash === '#contact') {
+        setPage('contact');
+      } else if (window.location.hash === '#admin') {
+        setPage('admin');
+      } else {
+        setPage('home');
+      }
+    }
+    window.addEventListener('hashchange', syncPageWithHash);
+    syncPageWithHash(); // Initial sync
+    return () => window.removeEventListener('hashchange', syncPageWithHash);
+  }, []);
+
   // Helper to close mobile nav after navigation
   const handleNav = (targetPage) => {
-    console.log('handleNav called, setting page to:', targetPage);
+    if (targetPage === 'store') {
+      window.location.hash = '#shop';
+      window.scrollTo({ top: 0, behavior: 'auto' }); // instant scroll
+    } else if (targetPage === 'contact') {
+      window.location.hash = '#contact';
+    } else if (targetPage === 'admin') {
+      window.location.hash = '#admin';
+    } else {
+      window.location.hash = '';
+    }
     setPage(targetPage);
     setNavOpen(false);
   };
@@ -155,10 +182,14 @@ export default function App() {
   // Get total items in cart
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
-  // Get cart sticker details
+  // Get cart product details (stickers, posters, packs)
+  const getProductById = (id) => {
+    return stickers.find(s => s.id === id);
+  };
+
   const cartDetails = cart.map(item => {
-    const sticker = stickers.find(s => s.id === item.id);
-    return { ...sticker, qty: item.qty };
+    const product = getProductById(item.id);
+    return { ...product, qty: item.qty };
   });
   // Calculate checkout total (including delivery if selected)
   const cartSubtotal = cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0);
@@ -513,7 +544,7 @@ export default function App() {
             }}>
               <h1 style={{fontSize: isMobile ? '2.2rem' : '3rem', marginBottom: 12, letterSpacing: 2, color: '#60a5fa'}}>STICKITIZE</h1>
               <p style={{fontSize: isMobile ? '1.1rem' : '1.3rem', marginBottom: 24, color: '#dbeafe'}}>Your one-stop shop for awesome stickers!</p>
-              <a href="#shop" className="cta" onClick={() => setPage('store')} style={{display: 'inline-block', padding: '12px 32px', background: '#0a2342', color: '#60a5fa', borderRadius: 8, textDecoration: 'none', fontWeight: 'bold', border: '2px solid #60a5fa', fontSize: isMobile ? '1rem' : '1.1rem'}}>Shop Now</a>
+              <a href="#shop" className="cta" onClick={e => { e.preventDefault(); window.location.hash = '#shop'; setPage('store'); window.scrollTo({ top: 0, behavior: 'auto' }); }} style={{display: 'inline-block', padding: '12px 32px', background: '#0a2342', color: '#60a5fa', borderRadius: 8, textDecoration: 'none', fontWeight: 'bold', border: '2px solid #60a5fa', fontSize: isMobile ? '1rem' : '1.1rem'}}>Shop Now</a>
             </header>
             <section className="features" style={{margin: isMobile ? '24px 0' : '40px 0', boxSizing: 'border-box'}}>
               <h2 style={{textAlign: 'center', marginBottom: 24, color: '#60a5fa'}}>Why Choose Us?</h2>
@@ -578,87 +609,99 @@ export default function App() {
         )}
         {page === 'store' && (
           <section className="store" id="store" style={{position: 'relative'}}>
-            {/* Removed top-right cart icon */}
-            <h2>Our Stickers</h2>
-            
-            {/* Category Filter Buttons */}
+            <h2>Our Stickers & Posters</h2>
+            {/* Subcategory Filter Buttons */}
             <div className="category-filters" style={{marginBottom: '32px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center'}}>
-              <button 
-                className={`category-btn${selectedCategory === 'all' ? ' active' : ''}`}
-                onClick={() => setSelectedCategory('all')}
-                style={{
-                  background: selectedCategory === 'all' ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
-                  color: selectedCategory === 'all' ? '#101828' : '#fff',
-                  border: '1px solid #6ec1ff',
-                  borderRadius: '8px',
-                  padding: '10px 20px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                All Stickers
-              </button>
-              {Object.entries(categories).map(([key, category]) => (
-                <button 
-                  key={key}
-                  className={`category-btn${selectedCategory === key ? ' active' : ''}`}
-                  onClick={() => setSelectedCategory(key)}
-                  style={{
-                    background: selectedCategory === key ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
-                    color: selectedCategory === key ? '#101828' : '#fff',
-                    border: '1px solid #6ec1ff',
-                    borderRadius: '8px',
-                    padding: '10px 20px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  {category.name}
-                </button>
-              ))}
+              {selectedCategory === 'all' && (
+                <>
+                  <button 
+                    className={`category-btn${selectedCategory === 'all' ? ' active' : ''}`}
+                    onClick={() => setSelectedCategory('all')}
+                    style={{
+                      background: selectedCategory === 'all' ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
+                      color: selectedCategory === 'all' ? '#101828' : '#fff',
+                      border: '1px solid #6ec1ff',
+                      borderRadius: '8px',
+                      padding: '10px 20px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    All Stickers
+                  </button>
+                  {Object.entries(categories).map(([key, category]) => (
+                    <button 
+                      key={key}
+                      className={`category-btn${selectedCategory === key ? ' active' : ''}`}
+                      onClick={() => setSelectedCategory(key)}
+                      style={{
+                        background: selectedCategory === key ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
+                        color: selectedCategory === key ? '#101828' : '#fff',
+                        border: '1px solid #6ec1ff',
+                        borderRadius: '8px',
+                        padding: '10px 20px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                </>
+              )}
             </div>
-
             {/* Category Title */}
             {selectedCategory !== 'all' && (
               <h3 style={{color: '#6ec1ff', textAlign: 'center', marginBottom: '24px', fontSize: '1.5em', fontWeight: 'bold'}}>
-                {categories[selectedCategory].name} Stickers
+                {categories[selectedCategory]?.name} Stickers
               </h3>
             )}
-
             <div className="store-grid">
-              {stickers
-                .filter(sticker => {
-                  if (selectedCategory === 'all') {
-                    return sticker.category === 'all'; // Show only main folder stickers
-                  } else {
-                    return sticker.category === selectedCategory; // Show category-specific stickers
-                  }
-                })
-                .map(sticker => {
-                  const inCart = cart.find(item => item.id === sticker.id);
+              {(() => {
+                let products = [];
+                if (selectedCategory === 'all') {
+                  products = stickers.filter(sticker => {
+                    return sticker.category === 'all';
+                  });
+                } else {
+                  products = stickers.filter(sticker => {
+                    return sticker.category === selectedCategory;
+                  });
+                }
+                if (!products || products.length === 0) {
+                  return <div style={{ color: '#fff', textAlign: 'center', marginTop: 40 }}>No products found.</div>;
+                }
+                return products.map(item => {
+                  const inCart = cart.find(cartItem => cartItem.id === item.id);
                   return (
-                    <div className="store-card" key={sticker.id}>
-                      <img src={sticker.img} alt={sticker.name} style={{cursor: 'pointer'}} onClick={() => setZoomImg(sticker.img)} />
+                    <div className="store-card" key={item.id}>
+                      <img
+                        src={item.img}
+                        alt="Product"
+                        style={{cursor: 'pointer'}}
+                        onClick={() => setZoomImg(item.img)}
+                        onError={e => { e.target.style.display = 'none'; }}
+                      />
                       <div className="store-info">
-                        {/* Removed sticker name */}
-                        <span className="store-price">₹{sticker.price}</span>
+                        <span className="store-price">₹{item.price}</span>
                       </div>
                       <div className="store-actions">
                         {!inCart ? (
-                          <button className={`store-btn`} onClick={() => handleAddToCart(sticker.id)}>
+                          <button className={`store-btn`} onClick={() => handleAddToCart(item.id)}>
                             Add to Cart
                           </button>
                         ) : (
-                          <button className={`store-btn remove`} onClick={() => handleRemoveFromCart(sticker.id)} style={{background: '#ff4d4d', color: '#fff'}}>
+                          <button className={`store-btn remove`} onClick={() => handleRemoveFromCart(item.id)} style={{background: '#ff4d4d', color: '#fff'}}>
                             Remove
                           </button>
                         )}
                       </div>
                     </div>
                   );
-                })}
+                });
+              })()}
             </div>
           </section>
         )}
@@ -719,10 +762,23 @@ export default function App() {
                       // Calculate total price for this order
                       let adminOrderSubtotal = 0;
                       order.stickers.forEach(stickerStr => {
-                        // Extract quantity from string like "Sticker 1 (x2)"
-                        const qtyMatch = stickerStr.match(/\(x(\d+)\)/);
-                        const qty = qtyMatch ? parseInt(qtyMatch[1], 10) : 1;
-                        adminOrderSubtotal += 7 * qty; // All stickers are 7.00
+                        // Extract name and quantity
+                        const nameMatch = stickerStr.match(/^(.*) \(x(\d+)\)$/);
+                        let name = stickerStr;
+                        let qty = 1;
+                        if (nameMatch) {
+                          name = nameMatch[1];
+                          qty = parseInt(nameMatch[2], 10);
+                        }
+                        // Find the product by name in all arrays
+                        const product =
+                          stickers.find(s => s.name === name) ||
+                          allPosters.find(p => p.name === name) ||
+                          posters.find(p => p.name === name) ||
+                          allStickerPacks.find(p => p.name === name) ||
+                          stickerPacks.find(p => p.name === name);
+                        const price = product ? parseFloat(product.price) : 7;
+                        adminOrderSubtotal += price * qty;
                       });
                       // Add delivery charge if applicable (free if subtotal >= 49)
                       const showDelivery = order.orderType === 'DELIVERY';
@@ -1215,7 +1271,16 @@ export default function App() {
                 </div>
               )}
               {/* Place Order Button */}
-              <button type="button" disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment} onClick={handlePlaceOrder} style={{background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '0.75em', padding: '1em 0', fontWeight: 700, fontSize: '1.15em', cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer', marginTop: '0.5em', width: '100%', boxShadow: '0 1px 4px #10182818', transition: 'background 0.2s'}}>Place Order</button>
+              <button type="button" disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading} onClick={handlePlaceOrder} style={{background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '0.75em', padding: '1em 0', fontWeight: 700, fontSize: '1.15em', cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer', marginTop: '0.5em', width: '100%', boxShadow: '0 1px 4px #10182818', transition: 'background 0.2s'}}>
+                {loading ? (
+                  <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24}}>
+                    <span className="checkout-spinner" style={{width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite'}}></span>
+                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                  </span>
+                ) : (
+                  'Place Order'
+                )}
+              </button>
             </form>
           </div>
         </div>
