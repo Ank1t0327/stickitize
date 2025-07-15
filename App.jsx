@@ -435,6 +435,8 @@ export default function App() {
             alt="Zoomed Sticker"
             style={{maxWidth: '90vw', maxHeight: '80vh', borderRadius: '18px', boxShadow: '0 0 32px #0008'}}
             onClick={e => e.stopPropagation()}
+            onContextMenu={e => e.preventDefault()}
+            onTouchStart={e => e.preventDefault()}
           />
         </div>
       )}
@@ -495,7 +497,7 @@ export default function App() {
         minHeight: 70
       }}>
         <div className="navbar-logo" style={{padding: '8px 0'}}>
-          <img src="/logo.png" alt="STICKITIZE Logo" style={{borderRadius: '8px', width: '180px', height: '60px', maxWidth: '100%'}} />
+          <img src="/logo.png" alt="STICKITIZE Logo" style={{borderRadius: '8px', width: '180px', height: '60px', maxWidth: '100%'}} onContextMenu={e => e.preventDefault()} onTouchStart={e => e.preventDefault()} />
         </div>
         {isMobile && (
           <div className="nav-toggle-label" onClick={handleNavToggle} style={{display: 'flex', alignItems: 'center', marginLeft: 12, cursor: 'pointer', padding: '0 4px'}}>
@@ -673,6 +675,8 @@ export default function App() {
                         style={{cursor: 'pointer'}}
                         onClick={() => setZoomImg(item.img)}
                         onError={e => { e.target.style.display = 'none'; }}
+                        onContextMenu={e => e.preventDefault()}
+                        onTouchStart={e => e.preventDefault()}
                       />
                       <div className="store-info">
                         <span className="store-price">₹{item.price}</span>
