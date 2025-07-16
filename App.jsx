@@ -50,6 +50,18 @@ Object.entries(categories).forEach(([categoryKey, categoryData]) => {
 // Fix API_BASE to support both localhost and production
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : 'https://stickitize-backend.onrender.com';
 
+// Add this above the App component to define top picks stickers from the 'home' folder
+const topPicks = [];
+for (let i = 1; i <= 8; i++) {
+  topPicks.push({
+    id: `home_${i}`,
+    name: `Top Pick Sticker ${i}`,
+    price: '7.00',
+    img: `/stickers/home/sticker${i}.png`,
+    category: 'home'
+  });
+}
+
 export default function App() {
   const [page, setPage] = useState('home');
   const [cart, setCart] = useState([]); // [{id, qty}]
@@ -548,25 +560,18 @@ export default function App() {
           <>
             <header className="hero" style={{
               margin: isMobile ? '18px 0 0 0' : '32px 0 0 0',
-              padding: isMobile ? '32px 4vw 24px 4vw' : '60px 0 40px 0',
+              padding: isMobile ? '18px 4vw 12px 4vw' : '32px 0 20px 0',
               borderRadius: 16,
               background: 'linear-gradient(90deg, #0a2342 0%, #1e3a8a 100%)',
               textAlign: 'center',
               color: '#f4f8fb',
               boxSizing: 'border-box',
             }}>
-              <h1 style={{fontSize: isMobile ? '2.2rem' : '3rem', marginBottom: 12, letterSpacing: 2, color: '#60a5fa'}}>STICKITIZE</h1>
-              <p style={{fontSize: isMobile ? '1.1rem' : '1.3rem', marginBottom: 24, color: '#dbeafe'}}>Your one-stop shop for awesome stickers!</p>
+              <h1 style={{fontSize: isMobile ? '2.2rem' : '2.9rem', marginBottom: 8, marginTop: isMobile ? '2px' : '6px', letterSpacing: 2, color: '#60a5fa'}}>STICKITIZE</h1>
+              <p style={{fontSize: isMobile ? '1rem' : '1.1rem', marginBottom: 16, color: '#dbeafe'}}>Your one-stop shop for awesome stickers!</p>
+              <p style={{fontSize: isMobile ? '1.13rem' : '1.18rem', color: '#b3e0ff', marginTop: -10, marginBottom: 16, fontWeight: 600}}>Buy stickers at just ₹7</p>
               <a href="#shop" className="cta" onClick={e => { e.preventDefault(); window.location.hash = '#shop'; setPage('store'); window.scrollTo({ top: 0, behavior: 'auto' }); }} style={{display: 'inline-block', padding: '12px 32px', background: '#0a2342', color: '#60a5fa', borderRadius: 8, textDecoration: 'none', fontWeight: 'bold', border: '2px solid #60a5fa', fontSize: isMobile ? '1rem' : '1.1rem'}}>Shop Now</a>
             </header>
-            <section className="features" style={{margin: isMobile ? '24px 0' : '40px 0', boxSizing: 'border-box'}}>
-              <h2 style={{textAlign: 'center', marginBottom: 24, color: '#60a5fa'}}>Why Choose Us?</h2>
-              <div className="feature-list" style={{display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: isMobile ? 'center' : 'space-around', gap: isMobile ? 18 : 24, boxSizing: 'border-box'}}>
-                <div className="feature" style={{background: '#1e293b', padding: 20, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.12)', flex: 1, textAlign: 'center', color: '#dbeafe', margin: isMobile ? '0 0 12px 0' : 0}}> <h3>Unique Designs</h3> <p>Find stickers you won't see anywhere else.</p> </div>
-                <div className="feature" style={{background: '#1e293b', padding: 20, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.12)', flex: 1, textAlign: 'center', color: '#dbeafe', margin: isMobile ? '0 0 12px 0' : 0}}> <h3>High Quality</h3> <p>Durable, waterproof, and vibrant prints.</p> </div>
-                <div className="feature" style={{background: '#1e293b', padding: 20, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.12)', flex: 1, textAlign: 'center', color: '#dbeafe', margin: 0}}> <h3>Fast Shipping</h3> <p>Get your stickers delivered quickly worldwide.</p> </div>
-              </div>
-            </section>
             <section className="shop" id="shop">
               <h2>Shop by Category</h2>
               <div
@@ -616,6 +621,112 @@ export default function App() {
                     {categoryData.name}
                   </button>
                 )))}
+              </div>
+            </section>
+            {/* Top Picks Section */}
+            <section className="top-picks" style={{margin: isMobile ? '18px 0 0 0' : '32px 0 0 0'}}>
+              <h2 style={{textAlign: 'center', color: '#60a5fa', marginBottom: isMobile ? 16 : 24}}>Top Picks</h2>
+              <div className="top-picks-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+                gap: isMobile ? 12 : 24,
+                justifyItems: 'center',
+                alignItems: 'stretch',
+                maxWidth: 1000,
+                margin: '0 auto',
+                padding: isMobile ? '0 2px' : '0 8px',
+              }}>
+                {/* 8 Top Picks from home folder */}
+                {topPicks.map((item, idx) => {
+                  const inCart = cart.find(cartItem => cartItem.id === item.id);
+                  return (
+                    <div className="store-card" key={item.id} style={{
+                      background: '#1e293b',
+                      borderRadius: 16,
+                      boxShadow: '0 2px 12px rgba(16,21,34,0.10)',
+                      padding: '18px 16px 16px 16px',
+                      width: '100%',
+                      maxWidth: 220,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      transition: 'transform 0.2s, box-shadow 0.3s',
+                      boxSizing: 'border-box',
+                      position: 'relative',
+                    }}>
+                      {/* NEW tag for first and seventh sticker */}
+                      {(idx === 0 || idx === 6) && (
+                        <span style={{
+                          position: 'absolute',
+                          top: 10,
+                          left: 10,
+                          background: 'linear-gradient(90deg, #6ec1ff 0%, #2563eb 100%)',
+                          color: '#101828',
+                          fontWeight: 700,
+                          fontSize: '0.92em',
+                          borderRadius: 7,
+                          padding: '3px 12px',
+                          boxShadow: '0 2px 8px #10182822',
+                          letterSpacing: 1,
+                          zIndex: 2,
+                        }}>NEW</span>
+                      )}
+                      <div style={{
+                        width: '100%',
+                        maxWidth: '100%',
+                        margin: '0 auto',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}>
+                        <img
+                          src={item.img}
+                          alt="Product"
+                          style={{
+                            cursor: 'pointer',
+                            width: '100%',
+                            height: 'auto',
+                            objectFit: 'contain',
+                            borderRadius: 12,
+                            marginBottom: 12,
+                            border: '2px solid #60a5fa',
+                            background: '#101522',
+                            display: 'block',
+                            boxSizing: 'border-box',
+                          }}
+                          onClick={() => setZoomImg(item.img)}
+                          onError={e => { e.target.style.display = 'none'; }}
+                          onContextMenu={e => e.preventDefault()}
+                          onTouchStart={e => e.preventDefault()}
+                          onDragStart={e => e.preventDefault()}
+                          draggable={false}
+                        />
+                      </div>
+                      <div className="store-info">
+                        <span className="store-price">₹{item.price}</span>
+                      </div>
+                      <div className="store-actions">
+                        {!inCart ? (
+                          <button className={`store-btn`} onClick={() => handleAddToCart(item.id)}>
+                            Add to Cart
+                          </button>
+                        ) : (
+                          <button className={`store-btn remove`} onClick={() => handleRemoveFromCart(item.id)} style={{background: '#ff4d4d', color: '#fff'}}>
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+            <section className="features" style={{margin: isMobile ? '24px 0' : '40px 0', boxSizing: 'border-box'}}>
+              <h2 style={{textAlign: 'center', marginBottom: 24, color: '#60a5fa'}}>Why Choose Us?</h2>
+              <div className="feature-list" style={{display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: isMobile ? 'center' : 'space-around', gap: isMobile ? 18 : 24, boxSizing: 'border-box'}}>
+                <div className="feature" style={{background: '#1e293b', padding: 20, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.12)', flex: 1, textAlign: 'center', color: '#dbeafe', margin: isMobile ? '0 0 12px 0' : 0}}> <h3>Unique Designs</h3> <p>Find stickers you won't see anywhere else.</p> </div>
+                <div className="feature" style={{background: '#1e293b', padding: 20, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.12)', flex: 1, textAlign: 'center', color: '#dbeafe', margin: isMobile ? '0 0 12px 0' : 0}}> <h3>High Quality</h3> <p>Durable, waterproof, and vibrant prints.</p> </div>
+                <div className="feature" style={{background: '#1e293b', padding: 20, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.12)', flex: 1, textAlign: 'center', color: '#dbeafe', margin: 0}}> <h3>Fast Shipping</h3> <p>Get your stickers delivered quickly worldwide.</p> </div>
               </div>
             </section>
           </>
