@@ -46,7 +46,7 @@ for (let i = 0; i < maxLen; i++) {
 // Now build the stickers array for all categories (excluding 'all')
 const stickers = [];
 Object.entries(categories).forEach(([categoryKey, categoryData]) => {
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 40; i++) {
     stickers.push({
       id: `${categoryKey}_${i}`,
       name: `${categoryData.name} Sticker ${i}`,
@@ -131,6 +131,7 @@ export default function App() {
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [cartBounce, setCartBounce] = useState(false);
   const cartFabRef = useRef();
+  const [hiddenStickers, setHiddenStickers] = useState([]); // Track stickers whose images failed to load
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 800);
@@ -443,6 +444,11 @@ export default function App() {
     Object.keys(categories).slice(perRow)
   ];
 
+  // Helper to handle image load error
+  const handleImageError = (id) => {
+    setHiddenStickers(prev => prev.includes(id) ? prev : [...prev, id]);
+  };
+
   return (
     <div className="container fade-page" style={{
       maxWidth: 1200,
@@ -672,7 +678,7 @@ export default function App() {
                 padding: isMobile ? '0 2px' : '0 8px',
               }}>
                 {/* 8 Top Picks from home folder */}
-                {topPicks.map((item, idx) => {
+                {topPicks.filter(item => !hiddenStickers.includes(item.id)).map((item, idx) => {
                   const inCart = cart.find(cartItem => cartItem.id === item.id);
                   return (
                     <div className="store-card" key={item.id} style={{
@@ -730,7 +736,7 @@ export default function App() {
                             boxSizing: 'border-box',
                           }}
                           onClick={() => setZoomImg(item.img)}
-                          onError={e => { e.target.style.display = 'none'; }}
+                          onError={() => handleImageError(item.id)}
                           onContextMenu={e => e.preventDefault()}
                           onTouchStart={e => e.preventDefault()}
                           onDragStart={e => e.preventDefault()}
@@ -837,6 +843,8 @@ export default function App() {
                     return sticker.category === selectedCategory;
                   });
                 }
+                // Filter out hidden stickers
+                products = products.filter(item => !hiddenStickers.includes(item.id));
                 if (!products || products.length === 0) {
                   return <div style={{ color: '#fff', textAlign: 'center', marginTop: 40 }}>No products found.</div>;
                 }
@@ -880,7 +888,7 @@ export default function App() {
                             boxSizing: 'border-box',
                           }}
                           onClick={() => setZoomImg(item.img)}
-                          onError={e => { e.target.style.display = 'none'; }}
+                          onError={() => handleImageError(item.id)}
                           onContextMenu={e => e.preventDefault()}
                           onTouchStart={e => e.preventDefault()}
                           onDragStart={e => e.preventDefault()}
