@@ -933,56 +933,58 @@ export default function App() {
          </svg>
         </button>
       )}
-      <button
-        className={`cart-fab${cartBounce ? ' bounce' : ''}`}
-        ref={cartFabRef}
-        onClick={openCartDrawer}
-        style={{
-          position: 'fixed',
-          bottom: 'max(20px, env(safe-area-inset-bottom, 0px))',
-          right: 'max(20px, env(safe-area-inset-right, 0px))',
-          zIndex: 2000,
-          width: 60,
-          height: 60,
-          borderRadius: '50%',
-          background: '#101828',
-          border: '3px solid #6ec1ff',
-          boxShadow: '0 4px 24px #0007',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'background 0.2s',
-          animation: cartBounce ? 'cartBounce 0.4s' : undefined,
-        }}
-        aria-label="View Cart"
-      >
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6ec1ff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="9" cy="21" r="1.5" />
-          <circle cx="19" cy="21" r="1.5" />
-          <path d="M2.5 4H4.5L6.5 17H19.5L21.5 8H7" />
-        </svg>
-        {cartCount > 0 && (
-          <span style={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            background: '#2ecc40',
-            color: '#fff',
+      {page !== 'admin' && (
+        <button
+          className={`cart-fab${cartBounce ? ' bounce' : ''}`}
+          ref={cartFabRef}
+          onClick={openCartDrawer}
+          style={{
+            position: 'fixed',
+            bottom: 'max(20px, env(safe-area-inset-bottom, 0px))',
+            right: 'max(20px, env(safe-area-inset-right, 0px))',
+            zIndex: 2000,
+            width: 60,
+            height: 60,
             borderRadius: '50%',
-            padding: '2px 7px',
-            fontSize: '1em',
-            fontWeight: 'bold',
-            minWidth: '22px',
-            textAlign: 'center',
-            boxShadow: '0 0 6px #0008',
-            transition: 'all 0.2s',
-          }}>{cartCount}</span>
-        )}
-        <style>{`
-          @keyframes cartBounce { 0% { transform: scale(1); } 30% { transform: scale(1.25); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
-        `}</style>
-      </button>
+            background: '#101828',
+            border: '3px solid #6ec1ff',
+            boxShadow: '0 4px 24px #0007',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'background 0.2s',
+            animation: cartBounce ? 'cartBounce 0.4s' : undefined,
+          }}
+          aria-label="View Cart"
+        >
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6ec1ff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="9" cy="21" r="1.5" />
+            <circle cx="19" cy="21" r="1.5" />
+            <path d="M2.5 4H4.5L6.5 17H19.5L21.5 8H7" />
+          </svg>
+          {cartCount > 0 && (
+            <span style={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              background: '#2ecc40',
+              color: '#fff',
+              borderRadius: '50%',
+              padding: '2px 7px',
+              fontSize: '1em',
+              fontWeight: 'bold',
+              minWidth: '22px',
+              textAlign: 'center',
+              boxShadow: '0 0 6px #0008',
+              transition: 'all 0.2s',
+            }}>{cartCount}</span>
+          )}
+          <style>{`
+            @keyframes cartBounce { 0% { transform: scale(1); } 30% { transform: scale(1.25); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
+          `}</style>
+        </button>
+      )}
       {/* Cart Drawer/Sidebar */}
       {cartDrawerOpen && (
         <div id="cart-drawer" style={{
