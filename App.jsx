@@ -62,6 +62,30 @@ for (let i = 1; i <= 8; i++) {
   });
 }
 
+// Custom hook for Intersection Observer
+function useInView(options) {
+  const ref = useRef();
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      setInView(true);
+      return;
+    }
+    const observer = new window.IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect(); // Only animate once
+        }
+      },
+      options
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [options]);
+  return [ref, inView];
+}
+
 export default function App() {
   const [page, setPage] = useState('home');
   const [cart, setCart] = useState([]); // [{id, qty}]
@@ -410,13 +434,14 @@ export default function App() {
   ];
 
   return (
-    <div className="container" style={{
+    <div className="container fade-page" style={{
       maxWidth: 1200,
       margin: '0 auto',
       padding: isMobile ? '12px 0' : '24px 16px',
       boxSizing: 'border-box',
       minHeight: '100vh',
       background: '#101522',
+      transition: 'background 0.5s cubic-bezier(.4,0,.2,1), color 0.5s cubic-bezier(.4,0,.2,1), box-shadow 0.5s cubic-bezier(.4,0,.2,1)',
     }}>
       {/* Loading Spinner Overlay */}
       {loading && page !== 'admin' && page !== 'store' && page !== 'contact' && (
@@ -555,7 +580,7 @@ export default function App() {
         </div>
       </nav>
       {/* Main content wrapper for padding */}
-      <div style={{padding: isMobile ? '0 8px' : '0 24px', boxSizing: 'border-box', width: '100%'}}>
+      <div style={{padding: isMobile ? '0 8px' : '0 24px', boxSizing: 'border-box', width: '100%'}} key={page} className="page-content-fade">
         {page === 'home' && (
           <>
             <header className="hero" style={{
@@ -1500,6 +1525,16 @@ export default function App() {
       <style>{`
         .featured-categories-scroll::-webkit-scrollbar { display: none; height: 0; }
         .featured-categories-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .fade-page {
+          transition: background 0.5s cubic-bezier(.4,0,.2,1), color 0.5s cubic-bezier(.4,0,.2,1), box-shadow 0.5s cubic-bezier(.4,0,.2,1);
+        }
+        .page-content-fade {
+          animation: fadeInPage 0.7s cubic-bezier(.4,0,.2,1);
+        }
+        @keyframes fadeInPage {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
       `}</style>
     </div>
   );

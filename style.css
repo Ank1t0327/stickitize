@@ -3,6 +3,7 @@ body {
   font-family: 'Segoe UI', Arial, sans-serif;
   background: #101522;
   color: #f4f8fb;
+  transition: background 0.5s cubic-bezier(.4,0,.2,1), color 0.5s cubic-bezier(.4,0,.2,1);
 }
 .container {
   max-width: 1200px;
@@ -581,6 +582,9 @@ footer {
   background: #1e3a8a;
   color: #fff;
 }
+button, .store-card, .modal, .zoom-modal, .cart-fab, .scroll-up-fab {
+  transition: background 0.3s cubic-bezier(.4,0,.2,1), color 0.3s cubic-bezier(.4,0,.2,1), box-shadow 0.3s cubic-bezier(.4,0,.2,1), border 0.3s cubic-bezier(.4,0,.2,1), transform 0.2s cubic-bezier(.4,0,.2,1);
+}
 @media (max-width: 600px) {
   .store-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -620,4 +624,13 @@ footer {
   .cart-qty {
     font-size: 0.9rem;
   }
+}
+.fade-in-on-scroll {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(.4,0,.2,1), transform 0.7s cubic-bezier(.4,0,.2,1);
+}
+.fade-in-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
