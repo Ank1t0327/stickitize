@@ -706,9 +706,9 @@ export default function App() {
                           style={{
                             cursor: 'pointer',
                             width: '100%',
-                            height: 'auto',
+                            height: (item.category === 'stickerpack' || item.category === 'posters') ? 'auto' : 180,
                             maxHeight: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 220 : 320) : 180,
-                            objectFit: 'contain',
+                            objectFit: (item.category === 'stickerpack' || item.category === 'posters') ? 'contain' : 'cover',
                             borderRadius: 12,
                             marginBottom: 12,
                             border: '2px solid #60a5fa',
