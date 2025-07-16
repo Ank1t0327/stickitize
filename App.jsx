@@ -692,29 +692,38 @@ export default function App() {
                       transition: 'transform 0.2s, box-shadow 0.3s',
                       boxSizing: 'border-box',
                     }}>
-                      <img
-                        src={item.img}
-                        alt="Product"
-                        style={{
-                          cursor: 'pointer',
-                          width: '100%',
-                          height: 'auto',
-                          maxHeight: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 220 : 320) : 180,
-                          objectFit: 'contain',
-                          borderRadius: 12,
-                          marginBottom: 12,
-                          border: '2px solid #60a5fa',
-                          background: '#101522',
-                          display: 'block',
-                          boxSizing: 'border-box',
-                        }}
-                        onClick={() => setZoomImg(item.img)}
-                        onError={e => { e.target.style.display = 'none'; }}
-                        onContextMenu={e => e.preventDefault()}
-                        onTouchStart={e => e.preventDefault()}
-                        onDragStart={e => e.preventDefault()}
-                        draggable={false}
-                      />
+                      <div style={{
+                        width: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 150 : 180) : '100%',
+                        maxWidth: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 150 : 180) : '100%',
+                        margin: '0 auto',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}>
+                        <img
+                          src={item.img}
+                          alt="Product"
+                          style={{
+                            cursor: 'pointer',
+                            width: '100%',
+                            height: 'auto',
+                            maxHeight: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 220 : 320) : 180,
+                            objectFit: 'contain',
+                            borderRadius: 12,
+                            marginBottom: 12,
+                            border: '2px solid #60a5fa',
+                            background: '#101522',
+                            display: 'block',
+                            boxSizing: 'border-box',
+                          }}
+                          onClick={() => setZoomImg(item.img)}
+                          onError={e => { e.target.style.display = 'none'; }}
+                          onContextMenu={e => e.preventDefault()}
+                          onTouchStart={e => e.preventDefault()}
+                          onDragStart={e => e.preventDefault()}
+                          draggable={false}
+                        />
+                      </div>
                       <div className="store-info">
                         <span className="store-price">₹{item.price}</span>
                         {item.category === 'posters' && (
