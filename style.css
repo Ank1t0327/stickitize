@@ -634,3 +634,14 @@ button, .store-card, .modal, .zoom-modal, .cart-fab, .scroll-up-fab {
   opacity: 1;
   transform: translateY(0);
 }
+/* Completely hide scrollbars for all browsers */
+html, body, .container, .page-content-fade, .store-grid, .top-picks-grid, .featured-categories-scroll {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar, .container::-webkit-scrollbar, .page-content-fade::-webkit-scrollbar, .store-grid::-webkit-scrollbar, .top-picks-grid::-webkit-scrollbar, .featured-categories-scroll::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+  display: none !important;
+}
