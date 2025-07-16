@@ -17,31 +17,41 @@ const categories = {
   sports: { name: 'Sports', folder: 'sports' }
 };
 
-// Create stickers array based on folder structure
-// Each category will have its own stickers from its respective folder
-const stickers = [];
-
-// Add stickers from main stickers folder (for "All Stickers" category)
-// These are the existing stickers in the main stickers folder
-for (let i = 1; i <= 57; i++) {
-  stickers.push({
-    id: `main_${i}`,
-    name: `Sticker ${i}`,
-    price: '7.00',
-    img: `/stickers/sticker${i}.png`, // Path to main stickers folder 
-    category: 'all'
+// Build per-category sticker arrays (excluding 'stickerpack' and 'posters' for 'all')
+const categoryStickerArrays = Object.entries(categories)
+  .filter(([key]) => key !== 'stickerpack' && key !== 'posters')
+  .map(([categoryKey, categoryData]) => {
+    const arr = [];
+    for (let i = 1; i <= 10; i++) {
+      arr.push({
+        id: `${categoryKey}_${i}`,
+        name: `${categoryData.name} Sticker ${i}`,
+        price: categoryKey === 'stickerpack' ? '100.00' : categoryKey === 'posters' ? '120.00' : '7.00',
+        img: `/stickers/${categoryData.folder}/sticker${i}.png`,
+        category: categoryKey
+      });
+    }
+    return arr;
   });
+
+// Interleave stickers from all subcategories for 'all' (round-robin)
+const interleavedAllStickers = [];
+let maxLen = Math.max(...categoryStickerArrays.map(arr => arr.length));
+for (let i = 0; i < maxLen; i++) {
+  for (let arr of categoryStickerArrays) {
+    if (arr[i]) interleavedAllStickers.push(arr[i]);
+  }
 }
 
-// Generate stickers for each category folder
+// Now build the stickers array for all categories (excluding 'all')
+const stickers = [];
 Object.entries(categories).forEach(([categoryKey, categoryData]) => {
-  // Assuming each category folder has 10 stickers (sticker1.png to sticker10.png)
   for (let i = 1; i <= 10; i++) {
     stickers.push({
       id: `${categoryKey}_${i}`,
       name: `${categoryData.name} Sticker ${i}`,
       price: categoryKey === 'stickerpack' ? '100.00' : categoryKey === 'posters' ? '120.00' : '7.00',
-      img: `/stickers/${categoryData.folder}/sticker${i}.png`, // Path to folder-specific image
+      img: `/stickers/${categoryData.folder}/sticker${i}.png`,
       category: categoryKey
     });
   }
@@ -821,9 +831,7 @@ export default function App() {
               {(() => {
                 let products = [];
                 if (selectedCategory === 'all') {
-                  products = stickers.filter(sticker => {
-                    return sticker.category === 'all';
-                  });
+                  products = interleavedAllStickers;
                 } else {
                   products = stickers.filter(sticker => {
                     return sticker.category === selectedCategory;
@@ -996,7 +1004,7 @@ export default function App() {
                             <span style={{color: '#b3e0ff', fontSize: '1em'}}>{order.phone}</span>
                             <span style={{color: '#6ec1ff', fontSize: '0.98em', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap'}}>
                               {order.stickers && order.stickers.map((sticker, i) => (
-                                <span key={i}>{sticker}</span>
+                                <span key={i}>{sticker} <span style={{color: '#60a5fa', fontSize: '0.95em', marginLeft: 4}}>[{categories[stickers.find(s => s.name === sticker).category]?.name || 'Unknown'}]</span></span>
                               ))}
                             </span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
