@@ -683,26 +683,26 @@ export default function App() {
                       background: '#1e293b',
                       borderRadius: 16,
                       boxShadow: '0 2px 12px rgba(16,21,34,0.10)',
-                      padding: (item.category === 'stickerpack' || item.category === 'posters') ? '8px 4px 12px 4px' : '18px 16px 16px 16px',
+                      padding: (item.category === 'stickerpack' || item.category === 'posters') ? 0 : '18px 16px 16px 16px',
                       width: '100%',
                       maxWidth: 220,
+                      aspectRatio: (item.category === 'stickerpack' || item.category === 'posters') ? '3/4' : undefined,
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       transition: 'transform 0.2s, box-shadow 0.3s',
                       boxSizing: 'border-box',
+                      overflow: 'hidden',
                     }}>
                       <img
                         src={item.img}
                         alt="Product"
                         style={{
-                          cursor: 'pointer',
                           width: '100%',
-                          height: 'auto',
-                          maxHeight: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 220 : 320) : 180,
-                          objectFit: 'contain',
-                          borderRadius: 12,
-                          marginBottom: 12,
+                          height: (item.category === 'stickerpack' || item.category === 'posters') ? '100%' : 180,
+                          objectFit: (item.category === 'stickerpack' || item.category === 'posters') ? 'cover' : 'contain',
+                          borderRadius: 16,
+                          marginBottom: (item.category === 'stickerpack' || item.category === 'posters') ? 0 : 12,
                           border: '2px solid #60a5fa',
                           background: '#101522',
                           display: 'block',
