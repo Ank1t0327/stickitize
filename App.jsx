@@ -46,7 +46,7 @@ for (let i = 0; i < maxLen; i++) {
 // Now build the stickers array for all categories (excluding 'all')
 const stickers = [];
 Object.entries(categories).forEach(([categoryKey, categoryData]) => {
-  for (let i = 1; i <= 40; i++) {
+  for (let i = 1; i <= 35; i++) {
     stickers.push({
       id: `${categoryKey}_${i}`,
       name: `${categoryData.name} Sticker ${i}`,
