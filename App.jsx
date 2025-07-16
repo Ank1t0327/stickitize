@@ -720,6 +720,26 @@ export default function App() {
                   );
                 })}
               </div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: isMobile ? 12 : 20 }}>
+                <button
+                  onClick={() => { setPage('store'); window.location.hash = '#shop'; window.scrollTo({ top: 0, behavior: 'auto' }); }}
+                  style={{
+                    background: '#6ec1ff',
+                    color: '#101828',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '12px 38px',
+                    fontWeight: 700,
+                    fontSize: isMobile ? '1.05em' : '1.13em',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px #10182822',
+                    transition: 'background 0.2s',
+                    letterSpacing: 1
+                  }}
+                >
+                  View More
+                </button>
+              </div>
             </section>
             <section className="features" style={{margin: isMobile ? '24px 0' : '40px 0', boxSizing: 'border-box'}}>
               <h2 style={{textAlign: 'center', marginBottom: 24, color: '#60a5fa'}}>Why Choose Us?</h2>
