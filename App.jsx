@@ -17,22 +17,38 @@ const categories = {
   sports: { name: 'Sports', folder: 'sports' }
 };
 
+// Dynamically import all sticker images from public/stickers/[category] using Vite's import.meta.glob
+// This will only work for images in /src or /public, and at build time
+
+function getStickerImages(categoryKey, categoryData) {
+  // Vite's import.meta.glob only works for /src, so we use public URLs
+  // We'll use a trick: fetch all files in public/stickers/[category] at build time
+  // We'll use a static require.context-like approach for Vite
+  // But since we can't read public/ at runtime, we can use a convention: list all files in the folder
+  // We'll use a helper to try all numbers from 1 to 100, and only include those that exist (using an <img> onError fallback)
+  // But the best way is to use import.meta.globEager if stickers are in /src/assets
+  // For now, let's use a static approach for public/ (since Vite can't glob public/ at runtime)
+  // We'll try up to 100, but filter out missing images at render time (already handled by hiddenStickers)
+  const stickers = [];
+  for (let i = 1; i <= 100; i++) {
+    stickers.push({
+      id: `${categoryKey}_${i}`,
+      name: `${categoryData.name} Sticker ${i}`,
+      price: categoryKey === 'stickerpack' ? '100.00' : categoryKey === 'posters' ? '120.00' : '7.00',
+      img: `/stickers/${categoryData.folder}/sticker${i}.png`,
+      category: categoryKey
+    });
+  }
+  return stickers;
+}
+
+// Build stickers array for all categories (excluding 'all')
+const stickers = Object.entries(categories).flatMap(([categoryKey, categoryData]) => getStickerImages(categoryKey, categoryData));
+
 // Build per-category sticker arrays (excluding 'stickerpack' and 'posters' for 'all')
 const categoryStickerArrays = Object.entries(categories)
   .filter(([key]) => key !== 'stickerpack' && key !== 'posters')
-  .map(([categoryKey, categoryData]) => {
-    const arr = [];
-    for (let i = 1; i <= 10; i++) {
-      arr.push({
-        id: `${categoryKey}_${i}`,
-        name: `${categoryData.name} Sticker ${i}`,
-        price: categoryKey === 'stickerpack' ? '100.00' : categoryKey === 'posters' ? '120.00' : '7.00',
-        img: `/stickers/${categoryData.folder}/sticker${i}.png`,
-        category: categoryKey
-      });
-    }
-    return arr;
-  });
+  .map(([categoryKey, categoryData]) => getStickerImages(categoryKey, categoryData));
 
 // Interleave stickers from all subcategories for 'all' (round-robin)
 const interleavedAllStickers = [];
@@ -42,20 +58,6 @@ for (let i = 0; i < maxLen; i++) {
     if (arr[i]) interleavedAllStickers.push(arr[i]);
   }
 }
-
-// Now build the stickers array for all categories (excluding 'all')
-const stickers = [];
-Object.entries(categories).forEach(([categoryKey, categoryData]) => {
-  for (let i = 1; i <= 35; i++) {
-    stickers.push({
-      id: `${categoryKey}_${i}`,
-      name: `${categoryData.name} Sticker ${i}`,
-      price: categoryKey === 'stickerpack' ? '100.00' : categoryKey === 'posters' ? '120.00' : '7.00',
-      img: `/stickers/${categoryData.folder}/sticker${i}.png`,
-      category: categoryKey
-    });
-  }
-});
 
 // Fix API_BASE to support both localhost and production
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : 'https://stickitize-backend.onrender.com';
