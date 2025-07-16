@@ -847,9 +847,6 @@ export default function App() {
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
                             <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery && deliveryCharge > 0 ? ' (includes ₹10 delivery)' : showDelivery && deliveryCharge === 0 ? ' (Free delivery!)' : ''}</span>
-                            {showDelivery && adminOrderSubtotal >= 49 && (
-                              <span style={{color: '#059669', fontWeight: 'bold', fontSize: '1em', marginLeft: 8}}>🎉 You unlocked Free Delivery!</span>
-                            )}
                           </div>
                           <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearOrder(order._id)} disabled={loading}>
                             {loading ? (
