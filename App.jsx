@@ -679,16 +679,27 @@ export default function App() {
                 return products.map(item => {
                   const inCart = cart.find(cartItem => cartItem.id === item.id);
                   return (
-                    <div className="store-card" key={item.id}>
+                    <div className="store-card" key={item.id} style={{
+                      background: '#1e293b',
+                      borderRadius: 16,
+                      boxShadow: '0 2px 12px rgba(16,21,34,0.10)',
+                      padding: (item.category === 'stickerpack' || item.category === 'posters') ? '8px 4px 12px 4px' : '18px 16px 16px 16px',
+                      width: '100%',
+                      maxWidth: 220,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      transition: 'transform 0.2s, box-shadow 0.3s',
+                      boxSizing: 'border-box',
+                    }}>
                       <img
                         src={item.img}
                         alt="Product"
                         style={{
                           cursor: 'pointer',
                           width: '100%',
-                          maxWidth: item.category === 'stickerpack' || item.category === 'posters' ? (isMobile ? '100%' : 220) : 180,
-                          height: item.category === 'stickerpack' || item.category === 'posters' ? (isMobile ? 'auto' : 320) : 180,
-                          maxHeight: isMobile ? 220 : (item.category === 'stickerpack' || item.category === 'posters' ? 320 : 180),
+                          height: 'auto',
+                          maxHeight: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 220 : 320) : 180,
                           objectFit: 'contain',
                           borderRadius: 12,
                           marginBottom: 12,
