@@ -685,9 +685,11 @@ export default function App() {
                         alt="Product"
                         style={{
                           cursor: 'pointer',
-                          height: item.category === 'stickerpack' || item.category === 'posters' ? 320 : 180,
-                          width: item.category === 'stickerpack' || item.category === 'posters' ? 220 : 180,
-                          objectFit: item.category === 'stickerpack' || item.category === 'posters' ? 'contain' : 'cover',
+                          width: '100%',
+                          maxWidth: item.category === 'stickerpack' || item.category === 'posters' ? (isMobile ? '100%' : 220) : 180,
+                          height: item.category === 'stickerpack' || item.category === 'posters' ? (isMobile ? 'auto' : 320) : 180,
+                          maxHeight: isMobile ? 220 : (item.category === 'stickerpack' || item.category === 'posters' ? 320 : 180),
+                          objectFit: 'contain',
                           borderRadius: 12,
                           marginBottom: 12,
                           border: '2px solid #60a5fa',
