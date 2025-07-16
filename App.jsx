@@ -4,7 +4,7 @@ const allowedPrices = [5.00, 7.00, 10.00, 120.00];
 
 // Define categories and their folder structure
 const categories = {
-  stickerpack: { name: 'Sticker Pack', folder: 'stickerpack', price: '100.00' },
+  stickerpack: { name: 'Sticker Packs', folder: 'stickerpack', price: '100.00' },
   posters: { name: 'Posters', folder: 'posters', price: '120.00' },
   cars: { name: 'Cars', folder: 'cars' },
   anime: { name: 'Anime', folder: 'anime' },
