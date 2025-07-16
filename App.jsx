@@ -199,7 +199,7 @@ export default function App() {
 
   // Get cart product details (stickers, posters, packs)
   const getProductById = (id) => {
-    return stickers.find(s => s.id === id);
+    return stickers.find(s => s.id === id) || topPicks.find(s => s.id === id);
   };
 
   const cartDetails = cart.map(item => {
@@ -654,8 +654,8 @@ export default function App() {
                       boxSizing: 'border-box',
                       position: 'relative',
                     }}>
-                      {/* NEW tag for first and seventh sticker */}
-                      {(idx === 0 || idx === 6) && (
+                      {/* NEW tag for first and sixth sticker */}
+                      {(idx === 0 || idx === 5) && (
                         <span style={{
                           position: 'absolute',
                           top: 10,
