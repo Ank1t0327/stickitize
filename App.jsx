@@ -1011,9 +1011,19 @@ export default function App() {
                             <span style={{color: '#fff', fontWeight: 'bold', fontSize: '1.1em'}}>{order.name}</span>
                             <span style={{color: '#b3e0ff', fontSize: '1em'}}>{order.phone}</span>
                             <span style={{color: '#6ec1ff', fontSize: '0.98em', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap'}}>
-                              {order.stickers && order.stickers.map((sticker, i) => (
-                                <span key={i}>{sticker} <span style={{color: '#60a5fa', fontSize: '0.95em', marginLeft: 4}}>[{categories[stickers.find(s => s.name === sticker).category]?.name || 'Unknown'}]</span></span>
-                              ))}
+                              {order.stickers && order.stickers.map((sticker, i) => {
+                                // Extract name
+                                const nameMatch = sticker.match(/^(.*) \(x(\d+)\)$/);
+                                let name = sticker;
+                                if (nameMatch) {
+                                  name = nameMatch[1];
+                                }
+                                const product = stickers.find(s => s.name === name);
+                                const category = product ? categories[product.category]?.name || product.category : 'Unknown';
+                                return (
+                                  <span key={i}>{sticker} <span style={{color: '#60a5fa', fontSize: '0.95em', marginLeft: 4}}>[{category}]</span></span>
+                                );
+                              })}
                             </span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
