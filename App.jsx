@@ -693,8 +693,8 @@ export default function App() {
                       boxSizing: 'border-box',
                     }}>
                       <div style={{
-                        width: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 150 : 180) : '100%',
-                        maxWidth: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 150 : 180) : '100%',
+                        width: '100%',
+                        maxWidth: '100%',
                         margin: '0 auto',
                         display: 'flex',
                         justifyContent: 'center',
@@ -706,9 +706,8 @@ export default function App() {
                           style={{
                             cursor: 'pointer',
                             width: '100%',
-                            height: (item.category === 'stickerpack' || item.category === 'posters') ? 'auto' : 180,
-                            maxHeight: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 220 : 320) : 180,
-                            objectFit: (item.category === 'stickerpack' || item.category === 'posters') ? 'contain' : 'cover',
+                            height: 'auto',
+                            objectFit: 'contain',
                             borderRadius: 12,
                             marginBottom: 12,
                             border: '2px solid #60a5fa',
