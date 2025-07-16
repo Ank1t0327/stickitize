@@ -26,7 +26,7 @@ for (let i = 1; i <= 57; i++) {
     id: `main_${i}`,
     name: `Sticker ${i}`,
     price: '7.00',
-    img: `/stickers/sticker${i}.png`, // Path to main stickers folder
+    img: `/stickers/sticker${i}.png`, // Path to main stickers folder 
     category: 'all'
   });
 }
@@ -45,7 +45,8 @@ Object.entries(categories).forEach(([categoryKey, categoryData]) => {
   }
 });
 
-const API_BASE = 'https://stickitize-backend.onrender.com';
+// Fix API_BASE to support both localhost and production
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : 'https://stickitize-backend.onrender.com';
 
 export default function App() {
   const [page, setPage] = useState('home');
@@ -203,7 +204,6 @@ export default function App() {
   // Place order logic (add to orders)
   const handlePlaceOrder = async () => {
     setLoading(true);
-    // Save sticker names and quantities
     const stickerList = cartDetails.map(item => `${item.name} (x${item.qty})`);
     const orderData = {
       name: orderName,
@@ -612,7 +612,7 @@ export default function App() {
         {page === 'store' && (
           <section className="store" id="store" style={{position: 'relative'}}>
             <h2>Our Stickers & Posters</h2>
-            {/* Subcategory Filter Buttons */}
+            {/* Category filters and sticker grid as before */}
             <div className="category-filters" style={{marginBottom: '32px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center'}}>
               <button 
                 className={`category-btn${selectedCategory === 'all' ? ' active' : ''}`}
@@ -773,14 +773,11 @@ export default function App() {
                           name = nameMatch[1];
                           qty = parseInt(nameMatch[2], 10);
                         }
-                        // Find the product by name in all arrays
-                        const product =
-                          stickers.find(s => s.name === name) ||
-                          allPosters.find(p => p.name === name) ||
-                          posters.find(p => p.name === name) ||
-                          allStickerPacks.find(p => p.name === name) ||
-                          stickerPacks.find(p => p.name === name);
-                        const price = product ? parseFloat(product.price) : 7;
+                        // Find the product by name in stickers only (remove undefined arrays)
+                        const product = stickers.find(s => s.name === name);
+                        // If it's a custom sticker, price is 10
+                        const isCustom = name === 'Custom Sticker';
+                        const price = isCustom ? 10 : product ? parseFloat(product.price) : 7;
                         adminOrderSubtotal += price * qty;
                       });
                       // Add delivery charge if applicable (free if subtotal >= 49)
@@ -789,16 +786,33 @@ export default function App() {
                       let total = adminOrderSubtotal;
                       if (showDelivery) total += deliveryCharge;
                       return (
-                        <div key={idx} style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#101828', borderRadius: '8px', padding: '12px 18px'}}>
-                          <div style={{display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                        <div key={idx} style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#101828', borderRadius: '8px', padding: '12px 18px', marginBottom: 12}}>
+                          <div style={{display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0}}>
                             <span style={{color: '#fff', fontWeight: 'bold', fontSize: '1.1em'}}>{order.name}</span>
                             <span style={{color: '#b3e0ff', fontSize: '1em'}}>{order.phone}</span>
-                            <span style={{color: '#6ec1ff', fontSize: '0.98em'}}>{order.stickers.join(', ')}</span>
+                            <span style={{color: '#6ec1ff', fontSize: '0.98em', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap'}}>
+                              {order.stickers && order.stickers.map((sticker, i) => (
+                                <span key={i}>{sticker}</span>
+                              ))}
+                            </span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
                             <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery && deliveryCharge > 0 ? ' (includes ₹10 delivery)' : showDelivery && deliveryCharge === 0 ? ' (Free delivery!)' : ''}</span>
                             {showDelivery && adminOrderSubtotal >= 49 && (
                               <span style={{color: '#059669', fontWeight: 'bold', fontSize: '1em', marginLeft: 8}}>🎉 You unlocked Free Delivery!</span>
+                            )}
+                            {/* Show custom images if present */}
+                            {order.customImages && order.customImages.length > 0 && (
+                              <div style={{marginTop: 8}}>
+                                <span style={{color: '#6ec1ff', fontWeight: 600}}>Custom Images:</span>
+                                <div style={{display: 'flex', flexWrap: 'wrap', gap: 8, overflowX: 'auto', maxWidth: 320, paddingBottom: 4, marginTop: 4}}>
+                                  {order.customImages.map((imgUrl, i) => (
+                                    <a key={i} href={imgUrl} target="_blank" rel="noopener noreferrer" style={{display: 'block'}}>
+                                      <img src={imgUrl} alt="Custom" style={{width: 60, height: 60, objectFit: 'cover', borderRadius: 7, border: '2px solid #6ec1ff', boxShadow: '0 1px 4px #10182822'}} />
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
                             )}
                           </div>
                           <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearOrder(order._id)} disabled={loading}>
