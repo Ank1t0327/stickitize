@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const allowedPrices = [5.00, 7.00, 10.00];
+const allowedPrices = [5.00, 7.00, 10.00, 120.00];
 
 // Define categories and their folder structure
 const categories = {
+  stickerpack: { name: 'Sticker Pack', folder: 'stickerpack', price: '100.00' },
+  posters: { name: 'Posters', folder: 'posters', price: '120.00' },
   cars: { name: 'Cars', folder: 'cars' },
   anime: { name: 'Anime', folder: 'anime' },
   coding: { name: 'Coding', folder: 'coding' },
@@ -38,7 +40,7 @@ Object.entries(categories).forEach(([categoryKey, categoryData]) => {
     stickers.push({
       id: `${categoryKey}_${i}`,
       name: `${categoryData.name} Sticker ${i}`,
-      price: '7.00',
+      price: categoryKey === 'stickerpack' ? '100.00' : categoryKey === 'posters' ? '120.00' : '7.00',
       img: `/stickers/${categoryData.folder}/sticker${i}.png`, // Path to folder-specific image
       category: categoryKey
     });
@@ -336,8 +338,7 @@ export default function App() {
   }, [isManual]);
 
   // For infinite loop, calculate total width
-  const categoryKeys = Object.keys(categories);
-  const totalCategories = categoryKeys.length;
+  const totalCategories = Object.keys(categories).length;
   const repeatCount = 4; // Render categories 4 times for a robust loop
 
   // Auto-scroll effect for category buttons (infinite loop)
@@ -387,6 +388,14 @@ export default function App() {
     }
     return () => { document.body.style.overflow = 'auto'; };
   }, [cartDrawerOpen, zoomImg]);
+
+  // Calculate balanced rows for categories
+  const numRows = 2;
+  const perRow = Math.ceil(totalCategories / numRows);
+  const categoryRows = [
+    Object.keys(categories).slice(0, perRow),
+    Object.keys(categories).slice(perRow)
+  ];
 
   return (
     <div className="container" style={{
@@ -582,7 +591,7 @@ export default function App() {
                 }}
               >
                 {/* Render categories 4 times for infinite loop */}
-                {Array.from({length: repeatCount}).flatMap((_, r) => categoryKeys.map((key, idx) => (
+                {Array.from({length: repeatCount}).flatMap((_, r) => Object.entries(categories).map(([key, categoryData], idx) => (
                   <button
                     key={key + '-' + r + '-' + idx}
                     className="category-feature-btn"
@@ -604,7 +613,7 @@ export default function App() {
                       flex: '0 0 auto',
                     }}
                   >
-                    {categories[key].name}
+                    {categoryData.name}
                   </button>
                 )))}
               </div>
@@ -674,7 +683,18 @@ export default function App() {
                       <img
                         src={item.img}
                         alt="Product"
-                        style={{cursor: 'pointer'}}
+                        style={{
+                          cursor: 'pointer',
+                          height: item.category === 'stickerpack' || item.category === 'posters' ? 320 : 180,
+                          width: item.category === 'stickerpack' || item.category === 'posters' ? 220 : 180,
+                          objectFit: item.category === 'stickerpack' || item.category === 'posters' ? 'contain' : 'cover',
+                          borderRadius: 12,
+                          marginBottom: 12,
+                          border: '2px solid #60a5fa',
+                          background: '#101522',
+                          display: 'block',
+                          boxSizing: 'border-box',
+                        }}
                         onClick={() => setZoomImg(item.img)}
                         onError={e => { e.target.style.display = 'none'; }}
                         onContextMenu={e => e.preventDefault()}
@@ -684,6 +704,9 @@ export default function App() {
                       />
                       <div className="store-info">
                         <span className="store-price">₹{item.price}</span>
+                        {item.category === 'posters' && (
+                          <div style={{ color: '#b3e0ff', fontWeight: 600, fontSize: '0.98em', marginBottom: 2 }}>Size : A3</div>
+                        )}
                       </div>
                       <div className="store-actions">
                         {!inCart ? (
