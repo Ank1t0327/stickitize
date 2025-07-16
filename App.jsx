@@ -693,12 +693,17 @@ export default function App() {
                       boxSizing: 'border-box',
                     }}>
                       <div style={{
-                        width: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 150 : 180) : '100%',
-                        maxWidth: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 150 : 180) : '100%',
+                        width: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 150 : 180) : 180,
+                        height: (item.category === 'stickerpack' || item.category === 'posters') ? 'auto' : 180,
+                        maxWidth: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 150 : 180) : 180,
+                        maxHeight: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 220 : 320) : 180,
                         margin: '0 auto',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
+                        overflow: 'hidden',
+                        borderRadius: 12,
+                        background: '#101522',
                       }}>
                         <img
                           src={item.img}
@@ -706,13 +711,10 @@ export default function App() {
                           style={{
                             cursor: 'pointer',
                             width: '100%',
-                            height: (item.category === 'stickerpack' || item.category === 'posters') ? 'auto' : 180,
-                            maxHeight: (item.category === 'stickerpack' || item.category === 'posters') ? (isMobile ? 220 : 320) : 180,
+                            height: '100%',
                             objectFit: (item.category === 'stickerpack' || item.category === 'posters') ? 'contain' : 'cover',
                             borderRadius: 12,
-                            marginBottom: 12,
                             border: '2px solid #60a5fa',
-                            background: '#101522',
                             display: 'block',
                             boxSizing: 'border-box',
                           }}
