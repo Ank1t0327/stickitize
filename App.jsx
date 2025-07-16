@@ -437,6 +437,8 @@ export default function App() {
             onClick={e => e.stopPropagation()}
             onContextMenu={e => e.preventDefault()}
             onTouchStart={e => e.preventDefault()}
+            onDragStart={e => e.preventDefault()}
+            draggable={false}
           />
         </div>
       )}
@@ -497,7 +499,7 @@ export default function App() {
         minHeight: 70
       }}>
         <div className="navbar-logo" style={{padding: '8px 0'}}>
-          <img src="/logo.png" alt="STICKITIZE Logo" style={{borderRadius: '8px', width: '180px', height: '60px', maxWidth: '100%'}} onContextMenu={e => e.preventDefault()} onTouchStart={e => e.preventDefault()} />
+          <img src="/logo.png" alt="STICKITIZE Logo" style={{borderRadius: '8px', width: '180px', height: '60px', maxWidth: '100%'}} onContextMenu={e => e.preventDefault()} onTouchStart={e => e.preventDefault()} onDragStart={e => e.preventDefault()} draggable={false} />
         </div>
         {isMobile && (
           <div className="nav-toggle-label" onClick={handleNavToggle} style={{display: 'flex', alignItems: 'center', marginLeft: 12, cursor: 'pointer', padding: '0 4px'}}>
@@ -677,6 +679,8 @@ export default function App() {
                         onError={e => { e.target.style.display = 'none'; }}
                         onContextMenu={e => e.preventDefault()}
                         onTouchStart={e => e.preventDefault()}
+                        onDragStart={e => e.preventDefault()}
+                        draggable={false}
                       />
                       <div className="store-info">
                         <span className="store-price">₹{item.price}</span>
@@ -800,19 +804,6 @@ export default function App() {
                             <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery && deliveryCharge > 0 ? ' (includes ₹10 delivery)' : showDelivery && deliveryCharge === 0 ? ' (Free delivery!)' : ''}</span>
                             {showDelivery && adminOrderSubtotal >= 49 && (
                               <span style={{color: '#059669', fontWeight: 'bold', fontSize: '1em', marginLeft: 8}}>🎉 You unlocked Free Delivery!</span>
-                            )}
-                            {/* Show custom images if present */}
-                            {order.customImages && order.customImages.length > 0 && (
-                              <div style={{marginTop: 8}}>
-                                <span style={{color: '#6ec1ff', fontWeight: 600}}>Custom Images:</span>
-                                <div style={{display: 'flex', flexWrap: 'wrap', gap: 8, overflowX: 'auto', maxWidth: 320, paddingBottom: 4, marginTop: 4}}>
-                                  {order.customImages.map((imgUrl, i) => (
-                                    <a key={i} href={imgUrl} target="_blank" rel="noopener noreferrer" style={{display: 'block'}}>
-                                      <img src={imgUrl} alt="Custom" style={{width: 60, height: 60, objectFit: 'cover', borderRadius: 7, border: '2px solid #6ec1ff', boxShadow: '0 1px 4px #10182822'}} />
-                                    </a>
-                                  ))}
-                                </div>
-                              </div>
                             )}
                           </div>
                           <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearOrder(order._id)} disabled={loading}>
@@ -1028,7 +1019,16 @@ export default function App() {
                   position: 'relative',
                   minHeight: 90
                 }}>
-                  <img src={item.img} alt={item.name} style={{width: 80, height: 80, objectFit: 'cover', borderRadius: '10px', flexShrink: 0, cursor: 'pointer'}} onClick={() => setZoomImg(item.img)} />
+                  <img
+                    src={item.img}
+                    alt={item.name}
+                    style={{width: 80, height: 80, objectFit: 'cover', borderRadius: '10px', flexShrink: 0, cursor: 'pointer'}}
+                    onClick={() => setZoomImg(item.img)}
+                    onContextMenu={e => e.preventDefault()}
+                    onTouchStart={e => e.preventDefault()}
+                    onDragStart={e => e.preventDefault()}
+                    draggable={false}
+                  />
                   <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0}}>
                     <span style={{color: '#6ec1ff', fontWeight: 'bold', fontSize: '1.1em'}}>₹{item.price}</span>
                     <span style={{color: '#b3e0ff'}}>Qty: {item.qty}</span>
