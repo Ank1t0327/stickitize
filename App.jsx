@@ -4,7 +4,6 @@ const allowedPrices = [5.00, 7.00, 10.00, 120.00];
 
 // Define categories and their folder structure
 const categories = {
-  stickerpack: { name: 'Sticker Packs', folder: 'stickerpack', price: '100.00' },
   posters: { name: 'Posters', folder: 'posters', price: '120.00' },
   cars: { name: 'Cars', folder: 'cars' },
   anime: { name: 'Anime', folder: 'anime' },
@@ -47,7 +46,7 @@ const stickers = Object.entries(categories).flatMap(([categoryKey, categoryData]
 
 // Build per-category sticker arrays (excluding 'stickerpack' and 'posters' for 'all')
 const categoryStickerArrays = Object.entries(categories)
-  .filter(([key]) => key !== 'stickerpack' && key !== 'posters')
+  .filter(([key]) => key !== 'posters') // Only exclude 'posters' now
   .map(([categoryKey, categoryData]) => getStickerImages(categoryKey, categoryData));
 
 // Interleave stickers from all subcategories for 'all' (round-robin)
@@ -815,7 +814,7 @@ export default function App() {
               >
                 All Stickers
               </button>
-              {Object.entries(categories).map(([key, category]) => (
+              {Object.entries(categories).filter(([key]) => key !== 'stickerpack').map(([key, category]) => (
                 <button 
                   key={key}
                   className={`category-btn${selectedCategory === key ? ' active' : ''}`}
