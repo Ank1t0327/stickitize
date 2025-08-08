@@ -149,6 +149,14 @@ export default function App() {
         setPage('contact');
       } else if (window.location.hash === '#admin') {
         setPage('admin');
+      } else if (window.location.hash === '#privacy') {
+        setPage('privacy');
+      } else if (window.location.hash === '#terms') {
+        setPage('terms');
+      } else if (window.location.hash === '#refund') {
+        setPage('refund');
+      } else if (window.location.hash === '#shipping') {
+        setPage('shipping');
       } else {
         setPage('home');
       }
@@ -167,6 +175,14 @@ export default function App() {
       window.location.hash = '#contact';
     } else if (targetPage === 'admin') {
       window.location.hash = '#admin';
+    } else if (targetPage === 'privacy') {
+      window.location.hash = '#privacy';
+    } else if (targetPage === 'terms') {
+      window.location.hash = '#terms';
+    } else if (targetPage === 'refund') {
+      window.location.hash = '#refund';
+    } else if (targetPage === 'shipping') {
+      window.location.hash = '#shipping';
     } else {
       window.location.hash = '';
     }
@@ -954,6 +970,17 @@ export default function App() {
               </div>
               <p style={{color: '#b3e0ff', marginTop: '24px', fontSize: '0.95em'}}>For more info, contact us or fill the form above!</p>
             </div>
+            
+            {/* Policy Links */}
+            <div style={{margin: '32px auto 0', maxWidth: '600px', textAlign: 'center'}}>
+              <h4 style={{color: '#6ec1ff', marginBottom: '16px'}}>Legal Information</h4>
+              <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '12px'}}>
+                <button onClick={() => handleNav('privacy')} style={{background: 'transparent', color: '#6ec1ff', border: '1px solid #6ec1ff', borderRadius: '6px', padding: '8px 16px', fontSize: '0.9em', cursor: 'pointer'}}>Privacy Policy</button>
+                <button onClick={() => handleNav('terms')} style={{background: 'transparent', color: '#6ec1ff', border: '1px solid #6ec1ff', borderRadius: '6px', padding: '8px 16px', fontSize: '0.9em', cursor: 'pointer'}}>Terms & Conditions</button>
+                <button onClick={() => handleNav('refund')} style={{background: 'transparent', color: '#6ec1ff', border: '1px solid #6ec1ff', borderRadius: '6px', padding: '8px 16px', fontSize: '0.9em', cursor: 'pointer'}}>Refund Policy</button>
+                <button onClick={() => handleNav('shipping')} style={{background: 'transparent', color: '#6ec1ff', border: '1px solid #6ec1ff', borderRadius: '6px', padding: '8px 16px', fontSize: '0.9em', cursor: 'pointer'}}>Shipping Policy</button>
+              </div>
+            </div>
           </section>
         )}
         {page === 'admin' && (
@@ -1078,6 +1105,186 @@ export default function App() {
                 )}
               </div>
             )}
+          </section>
+        )}
+        
+        {/* Privacy Policy Page */}
+        {page === 'privacy' && (
+          <section className="privacy-page" id="privacy" style={{maxWidth: '800px', margin: '32px auto', background: 'rgba(30,40,60,0.95)', borderRadius: '16px', padding: '32px', boxShadow: '0 0 24px #0006'}}>
+            <h2 style={{color: '#6ec1ff', marginBottom: '24px', textAlign: 'center'}}>Privacy Policy</h2>
+            <div style={{color: '#fff', lineHeight: '1.6'}}>
+              <p style={{marginBottom: '16px'}}><strong>Last updated:</strong> {new Date().toLocaleDateString()}</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>1. Information We Collect</h3>
+              <p style={{marginBottom: '16px'}}>We collect information you provide directly to us, such as when you create an account, make a purchase, or contact us. This may include:</p>
+              <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
+                <li>Name and contact information</li>
+                <li>Payment information (processed securely through Razorpay)</li>
+                <li>Order history and preferences</li>
+                <li>Communication records</li>
+              </ul>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>2. How We Use Your Information</h3>
+              <p style={{marginBottom: '16px'}}>We use the information we collect to:</p>
+              <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
+                <li>Process and fulfill your orders</li>
+                <li>Communicate with you about your orders</li>
+                <li>Provide customer support</li>
+                <li>Improve our services</li>
+                <li>Send marketing communications (with your consent)</li>
+              </ul>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Information Sharing</h3>
+              <p style={{marginBottom: '16px'}}>We do not sell, trade, or otherwise transfer your personal information to third parties except:</p>
+              <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
+                <li>To process payments through Razorpay</li>
+                <li>To fulfill orders through our delivery partners</li>
+                <li>When required by law</li>
+                <li>With your explicit consent</li>
+              </ul>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>4. Data Security</h3>
+              <p style={{marginBottom: '16px'}}>We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>5. Your Rights</h3>
+              <p style={{marginBottom: '16px'}}>You have the right to:</p>
+              <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
+                <li>Access your personal information</li>
+                <li>Correct inaccurate information</li>
+                <li>Request deletion of your data</li>
+                <li>Opt-out of marketing communications</li>
+              </ul>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>6. Contact Us</h3>
+              <p style={{marginBottom: '16px'}}>If you have any questions about this Privacy Policy, please contact us at:</p>
+              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:info@stickitize.com" style={{color: '#6ec1ff'}}>info@stickitize.com</a></p>
+              <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919999999999" style={{color: '#6ec1ff'}}>+91 99999 99999</a></p>
+            </div>
+          </section>
+        )}
+        
+        {/* Terms and Conditions Page */}
+        {page === 'terms' && (
+          <section className="terms-page" id="terms" style={{maxWidth: '800px', margin: '32px auto', background: 'rgba(30,40,60,0.95)', borderRadius: '16px', padding: '32px', boxShadow: '0 0 24px #0006'}}>
+            <h2 style={{color: '#6ec1ff', marginBottom: '24px', textAlign: 'center'}}>Terms and Conditions</h2>
+            <div style={{color: '#fff', lineHeight: '1.6'}}>
+              <p style={{marginBottom: '16px'}}><strong>Last updated:</strong> {new Date().toLocaleDateString()}</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>1. Acceptance of Terms</h3>
+              <p style={{marginBottom: '16px'}}>By accessing and using STICKITIZE's website and services, you accept and agree to be bound by these Terms and Conditions.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>2. Products and Services</h3>
+              <p style={{marginBottom: '16px'}}>We offer high-quality stickers and related products. All products are subject to availability and may be discontinued without notice.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Pricing and Payment</h3>
+              <p style={{marginBottom: '16px'}}>All prices are in Indian Rupees (₹) and include applicable taxes. Payment is processed securely through Razorpay. We reserve the right to modify prices at any time.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>4. Order Processing</h3>
+              <p style={{marginBottom: '16px'}}>Orders are processed upon receipt of payment confirmation. We will notify you of order status via email or phone.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>5. Intellectual Property</h3>
+              <p style={{marginBottom: '16px'}}>All content on this website, including designs, logos, and product images, is the property of STICKITIZE and is protected by copyright laws.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>6. Limitation of Liability</h3>
+              <p style={{marginBottom: '16px'}}>STICKITIZE shall not be liable for any indirect, incidental, or consequential damages arising from the use of our products or services.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>7. Governing Law</h3>
+              <p style={{marginBottom: '16px'}}>These terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of courts in India.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>8. Contact Information</h3>
+              <p style={{marginBottom: '16px'}}>For questions about these terms, contact us at:</p>
+              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:info@stickitize.com" style={{color: '#6ec1ff'}}>info@stickitize.com</a></p>
+              <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919999999999" style={{color: '#6ec1ff'}}>+91 99999 99999</a></p>
+            </div>
+          </section>
+        )}
+        
+        {/* Cancellation and Refund Policy Page */}
+        {page === 'refund' && (
+          <section className="refund-page" id="refund" style={{maxWidth: '800px', margin: '32px auto', background: 'rgba(30,40,60,0.95)', borderRadius: '16px', padding: '32px', boxShadow: '0 0 24px #0006'}}>
+            <h2 style={{color: '#6ec1ff', marginBottom: '24px', textAlign: 'center'}}>Cancellation and Refund Policy</h2>
+            <div style={{color: '#fff', lineHeight: '1.6'}}>
+              <p style={{marginBottom: '16px'}}><strong>Last updated:</strong> {new Date().toLocaleDateString()}</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>1. Order Cancellation</h3>
+              <p style={{marginBottom: '16px'}}>You may cancel your order within 2 hours of placing it, provided the order has not been processed for shipping. To cancel, contact us immediately.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>2. Refund Eligibility</h3>
+              <p style={{marginBottom: '16px'}}>Refunds are available in the following cases:</p>
+              <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
+                <li>Order cancelled within 2 hours of placement</li>
+                <li>Product received in damaged condition</li>
+                <li>Wrong product delivered</li>
+                <li>Product quality issues</li>
+              </ul>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Refund Process</h3>
+              <p style={{marginBottom: '16px'}}>To request a refund:</p>
+              <ol style={{marginLeft: '20px', marginBottom: '16px'}}>
+                <li>Contact us within 48 hours of receiving your order</li>
+                <li>Provide order details and reason for refund</li>
+                <li>Include photos if applicable (for damaged products)</li>
+                <li>We will review and process within 3-5 business days</li>
+              </ol>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>4. Refund Timeline</h3>
+              <p style={{marginBottom: '16px'}}>Once approved, refunds will be processed within 5-7 business days and credited to your original payment method.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>5. Non-Refundable Items</h3>
+              <p style={{marginBottom: '16px'}}>The following are not eligible for refunds:</p>
+              <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
+                <li>Custom or personalized stickers</li>
+                <li>Products used or damaged by customer</li>
+                <li>Orders cancelled after 2 hours</li>
+              </ul>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>6. Contact Us</h3>
+              <p style={{marginBottom: '16px'}}>For refund requests or questions, contact us at:</p>
+              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:info@stickitize.com" style={{color: '#6ec1ff'}}>info@stickitize.com</a></p>
+              <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919999999999" style={{color: '#6ec1ff'}}>+91 99999 99999</a></p>
+            </div>
+          </section>
+        )}
+        
+        {/* Shipping and Delivery Policy Page */}
+        {page === 'shipping' && (
+          <section className="shipping-page" id="shipping" style={{maxWidth: '800px', margin: '32px auto', background: 'rgba(30,40,60,0.95)', borderRadius: '16px', padding: '32px', boxShadow: '0 0 24px #0006'}}>
+            <h2 style={{color: '#6ec1ff', marginBottom: '24px', textAlign: 'center'}}>Shipping and Delivery Policy</h2>
+            <div style={{color: '#fff', lineHeight: '1.6'}}>
+              <p style={{marginBottom: '16px'}}><strong>Last updated:</strong> {new Date().toLocaleDateString()}</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>1. Delivery Areas</h3>
+              <p style={{marginBottom: '16px'}}>We currently deliver to all major cities and towns across India. Delivery availability will be confirmed at checkout.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>2. Delivery Options</h3>
+              <p style={{marginBottom: '16px'}}>We offer two delivery options:</p>
+              <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
+                <li><strong>Standard Delivery:</strong> 3-5 business days (₹10 charge for orders under ₹49)</li>
+                <li><strong>Express Delivery:</strong> 1-2 business days (₹25 additional charge)</li>
+              </ul>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Free Delivery</h3>
+              <p style={{marginBottom: '16px'}}>Free standard delivery is available on orders of ₹49 and above.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>4. Order Processing</h3>
+              <p style={{marginBottom: '16px'}}>Orders are typically processed within 24 hours of payment confirmation. You will receive tracking information via email/SMS.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>5. Delivery Partners</h3>
+              <p style={{marginBottom: '16px'}}>We partner with reliable courier services including India Post, DTDC, and other regional couriers to ensure safe delivery.</p>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>6. Delivery Issues</h3>
+              <p style={{marginBottom: '16px'}}>If you experience delivery issues:</p>
+              <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
+                <li>Contact us immediately</li>
+                <li>Provide order number and issue details</li>
+                <li>We will coordinate with the courier to resolve</li>
+              </ul>
+              
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>7. Contact Information</h3>
+              <p style={{marginBottom: '16px'}}>For delivery-related queries, contact us at:</p>
+              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:info@stickitize.com" style={{color: '#6ec1ff'}}>info@stickitize.com</a></p>
+              <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919999999999" style={{color: '#6ec1ff'}}>+91 99999 99999</a></p>
+            </div>
           </section>
         )}
       </div>
