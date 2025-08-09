@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 
 // Define categories and their folder structure
 const categories = {
@@ -79,7 +80,16 @@ export default function App() {
   const [zoomImg, setZoomImg] = useState(null); // holds image url for zoom view
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderName, setOrderName] = useState('');
-  const [orderPhone, setOrderPhone] = useState('');
+  // OTP/Phone states
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpRequested, setOtpRequested] = useState(false);
+  const [otpMessage, setOtpMessage] = useState('');
+  const [otpMessageType, setOtpMessageType] = useState('');
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const [orderAddress, setOrderAddress] = useState('');
   const [orderPayment, setOrderPayment] = useState('Pay on delivery/pickup');
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -236,7 +246,7 @@ export default function App() {
   const checkoutTotal = cartSubtotal + deliveryCharge;
 
   // Validate phone number format (must be exactly 10 digits)
-  const isValidPhone = /^\d{10}$/.test(orderPhone);
+  const isValidPhone = /^\d{10}$/.test(phone);
 
   // Place order logic (add to orders)
   const handlePlaceOrder = async () => {
@@ -244,7 +254,7 @@ export default function App() {
     const stickerList = cartDetails.map(item => `${item.name} (x${item.qty})`);
     const orderData = {
       name: orderName,
-      phone: orderPhone,
+      phone: phone,
       stickers: stickerList,
       orderType: pickupType,
       address: pickupType === 'DELIVERY' ? orderAddress : 'SELF-PICKUP',
@@ -260,7 +270,7 @@ export default function App() {
       setShowCheckout(false);
       setCart([]);
       setOrderName('');
-      setOrderPhone('');
+      setPhone('');
       setOrderAddress('');
       setOrderPayment('Pay on delivery/pickup');
       setPickupType('SELF-PICKUP');
@@ -270,6 +280,67 @@ export default function App() {
       alert('Failed to place order. Please try again.');
     }
   };
+
+  // Send OTP handler
+  const handleSendOtp = async () => {
+    if (!isValidPhone) {
+      alert('Enter a valid 10-digit phone number.');
+      return;
+    }
+    try {
+      setSendingOtp(true);
+      setCountdown(30);
+      const fullPhone = `+91${phone}`;
+      await axios.post(`${API_BASE}/api/send-otp`, { phone: fullPhone });
+      setOtpRequested(true);
+      setOtpMessageType('success');
+      setOtpMessage('OTP sent. Please check your messages.');
+    } catch (err) {
+      console.error(err);
+      setCountdown(0);
+      alert(err?.response?.data?.error || err?.response?.data?.message || 'Failed to send OTP');
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  // Verify OTP handler
+  const handleVerifyOtp = async () => {
+    if (!otp || otp.length !== 6) {
+      alert('Enter the 6-digit OTP');
+      return;
+    }
+    try {
+      setVerifyingOtp(true);
+      const fullPhone = `+91${phone}`;
+      const res = await axios.post(`${API_BASE}/api/verify-otp`, { phone: fullPhone, code: otp });
+      if (res.data?.success) {
+        setOtpVerified(true);
+        setOtpMessageType('success');
+        setOtpMessage('Phone verified');
+      } else {
+        setOtpVerified(false);
+        setOtpMessageType('error');
+        setOtpMessage('Invalid OTP');
+      }
+    } catch (err) {
+      console.error(err);
+      setOtpVerified(false);
+      setOtpMessageType('error');
+      setOtpMessage(err?.response?.data?.error || err?.response?.data?.message || 'OTP verification failed');
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
+
+  // Countdown effect for Send OTP cooldown
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const intervalId = setInterval(() => {
+      setCountdown(prev => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, [countdown]);
 
   // Contact form submit handler
   const handleContactSubmit = async (e) => {
@@ -1517,7 +1588,7 @@ export default function App() {
               width: '100%',
               marginTop: isMobile ? 8 : 0
             }}>Checkout</h2>
-            <div style={{flex: 1, width: '100%', overflowY: 'auto', paddingBottom: isMobile ? 100 : 80, maxHeight: isMobile ? 'calc(100vh - 160px)' : undefined}}>
+            <div className="checkout-content-scroll" style={{flex: 1, width: '100%', overflowY: 'auto', paddingBottom: isMobile ? 100 : 80, maxHeight: isMobile ? 'calc(100vh - 160px)' : undefined}}>
               {/* Order Summary and Form Fields */}
               <div style={{width: '100%', marginBottom: 18, paddingLeft: isMobile ? 5 : 0, paddingRight: isMobile ? 5 : 0}}>
                 <h3 style={{color: '#b3e0ff', fontSize: '1.1em', marginBottom: 8, fontWeight: 600}}>Order Summary</h3>
@@ -1622,8 +1693,53 @@ export default function App() {
                 </div>
                 <div style={{width: '100%', marginBottom: isMobile ? 6 : undefined, paddingLeft: isMobile ? 5 : 0, paddingRight: isMobile ? 5 : 0}}>
                   <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>Phone Number *</label>
-                  <input type="tel" placeholder="10-digit Phone Number" value={orderPhone} onChange={e => setOrderPhone(e.target.value)} required maxLength={10} style={{width: '100%', maxWidth: '100%', boxSizing: 'border-box', padding: '0.85em 1em', borderRadius: '0.75em', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}} />
-                  {!isValidPhone && orderPhone && <span style={{color: '#ff4d4d', fontSize: '0.95em'}}>Enter a valid 10-digit phone number.</span>}
+                  <div style={{display: 'flex', gap: 8, width: '100%'}}>
+                    <div style={{background: '#101828', color: '#b3e0ff', border: '1.5px solid #6ec1ff', borderRadius: '0.75em', padding: '0.85em 0.9em', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>+91</div>
+                    <input
+                      type="tel"
+                      placeholder="10-digit phone number"
+                      value={phone}
+                      onChange={e => { setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0,10)); setOtpVerified(false); setOtpRequested(false); setOtpMessage(''); setOtpMessageType(''); }}
+                      required
+                      style={{flex: 1, maxWidth: '100%', boxSizing: 'border-box', padding: '0.85em 1em', borderRadius: '0.75em', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={sendingOtp || countdown > 0}
+                      style={{whiteSpace: 'nowrap', background: (sendingOtp || countdown > 0) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '0.75em', padding: '0.85em 1em', fontWeight: 700, cursor: (sendingOtp || countdown > 0) ? 'not-allowed' : 'pointer'}}
+                    >
+                      {countdown > 0 ? `Send OTP (${countdown}s)` : (sendingOtp ? 'Sending...' : 'Send OTP')}
+                    </button>
+                  </div>
+                  {otpMessage && (
+                    <div style={{marginTop: 8, color: otpMessageType === 'success' ? '#2ecc40' : '#ff4d4d', fontWeight: 600}}>{otpMessage}</div>
+                  )}
+                  {!isValidPhone && phone && <span style={{color: '#ff4d4d', fontSize: '0.95em'}}>Enter a valid 10-digit phone number.</span>}
+                </div>
+                <div style={{width: '100%', marginBottom: isMobile ? 6 : undefined, paddingLeft: isMobile ? 5 : 0, paddingRight: isMobile ? 5 : 0}}>
+                  <label style={{color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block'}}>OTP Code *</label>
+                  <div style={{display: 'flex', gap: 8, width: '100%', opacity: otpRequested ? 1 : 0.6}}>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="\\d{6}"
+                      placeholder="6-digit OTP"
+                      value={otp}
+                      onChange={e => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0,6))}
+                      disabled={!otpRequested}
+                      style={{flex: 1, maxWidth: '100%', boxSizing: 'border-box', padding: '0.85em 1em', borderRadius: '0.75em', border: '1.5px solid #6ec1ff', background: '#101828', color: '#fff', fontSize: '1em', boxShadow: '0 1px 4px #10182818', outline: 'none', transition: 'border 0.2s'}}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleVerifyOtp}
+                      disabled={verifyingOtp || !isValidPhone || !otpRequested}
+                      style={{whiteSpace: 'nowrap', background: (verifyingOtp || !isValidPhone || !otpRequested) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '0.75em', padding: '0.85em 1em', fontWeight: 700, cursor: (verifyingOtp || !isValidPhone || !otpRequested) ? 'not-allowed' : 'pointer'}}
+                    >
+                      {verifyingOtp ? 'Verifying...' : 'Verify OTP'}
+                    </button>
+                  </div>
+                  {otpVerified && <span style={{color: '#2ecc40', fontWeight: 700}}>Phone verified ✅</span>}
                 </div>
                 {/* Delivery/Pickup Options */}
                 <div style={{width: '100%', marginBottom: isMobile ? 6 : undefined, paddingLeft: isMobile ? 5 : 0, paddingRight: isMobile ? 5 : 0}}>
@@ -1684,6 +1800,10 @@ export default function App() {
                 )}
               </form>
             </div>
+            <style>{`
+              .checkout-content-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+              .checkout-content-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
+            `}</style>
             {/* Fixed Place Order Button at the bottom */}
             <div style={{
               position: 'absolute',
@@ -1698,7 +1818,7 @@ export default function App() {
               display: 'flex',
               justifyContent: 'center',
             }}>
-              <button type="button" disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading} onClick={handlePlaceOrder} style={{background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '0.75em', padding: '1em 0', fontWeight: 700, fontSize: '1.15em', cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer', width: '100%', maxWidth: 340, boxShadow: '0 1px 4px #10182818', transition: 'background 0.2s'}}>
+              <button type="button" disabled={!orderName || !isValidPhone || !otpVerified || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading} onClick={handlePlaceOrder} style={{background: (!orderName || !isValidPhone || !otpVerified || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff', color: '#101828', border: 'none', borderRadius: '0.75em', padding: '1em 0', fontWeight: 700, fontSize: '1.15em', cursor: (!orderName || !isValidPhone || !otpVerified || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer', width: '100%', maxWidth: 340, boxShadow: '0 1px 4px #10182818', transition: 'background 0.2s'}}>
                 {loading ? (
                   <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24}}>
                     <span className="checkout-spinner" style={{width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite'}}></span>
