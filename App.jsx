@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const allowedPrices = [5.00, 7.00, 10.00, 120.00];
-
 // Define categories and their folder structure
 const categories = {
   posters: { name: 'Posters', folder: 'posters', price: '120.00' },
@@ -73,29 +71,7 @@ for (let i = 1; i <= 8; i++) {
   });
 }
 
-// Custom hook for Intersection Observer
-function useInView(options) {
-  const ref = useRef();
-  const [inView, setInView] = useState(false);
-  useEffect(() => {
-    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
-      setInView(true);
-      return;
-    }
-    const observer = new window.IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect(); // Only animate once
-        }
-      },
-      options
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [options]);
-  return [ref, inView];
-}
+//
 
 export default function App() {
   const [page, setPage] = useState('home');
@@ -120,12 +96,7 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 800);
   const [adminToken, setAdminToken] = useState(null); // Store admin token after login
   const [loading, setLoading] = useState(false); // Global loading state
-  // Carousel state for smooth transition
-  const [featuredIndex, setFeaturedIndex] = useState(0);
-  const [carouselTransition, setCarouselTransition] = useState(true);
-  const [isManual, setIsManual] = useState(false);
-  const autoScrollTimeout = useRef();
-  const carouselRef = useRef();
+  //
   const categoryScrollRef = useRef();
   const [catScrollPaused, setCatScrollPaused] = useState(false);
   // Cart Drawer state
@@ -382,24 +353,7 @@ export default function App() {
     }
   };
 
-  // Auto-scroll effect
-  useEffect(() => {
-    if (page !== 'home') return;
-    if (isManual) return; // Pause auto-scroll briefly after manual scroll
-    setCarouselTransition(true);
-    autoScrollTimeout.current = setTimeout(() => {
-      setCarouselTransition(true);
-      setFeaturedIndex(idx => (idx + 1) % stickers.length);
-    }, 4500);
-    return () => clearTimeout(autoScrollTimeout.current);
-  }, [page, stickers.length, featuredIndex, isManual]);
-
-  // Resume auto-scroll after manual navigation
-  useEffect(() => {
-    if (!isManual) return;
-    const timeout = setTimeout(() => setIsManual(false), 6000);
-    return () => clearTimeout(timeout);
-  }, [isManual]);
+  //
 
   // For infinite loop, calculate total width
   const totalCategories = Object.keys(categories).length;
@@ -430,17 +384,7 @@ export default function App() {
     setTimeout(() => setCatScrollPaused(false), 4000);
   }
 
-  // Manual navigation handlers
-  const handlePrev = () => {
-    setCarouselTransition(true);
-    setFeaturedIndex(idx => (idx - 1 + stickers.length) % stickers.length);
-    setIsManual(true);
-  };
-  const handleNext = () => {
-    setCarouselTransition(true);
-    setFeaturedIndex(idx => (idx + 1) % stickers.length);
-    setIsManual(true);
-  };
+  //
 
   // Prevent background scroll when cart drawer or zoom modal is open
   useEffect(() => {
