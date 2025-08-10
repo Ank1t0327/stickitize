@@ -152,9 +152,9 @@ export default function App() {
       window.location.hash = '#privacy';
     } else if (targetPage === 'terms' ) {
       window.location.hash = '#terms';
-    } else if (targetPage === 'refund') {
+    } else if (targetPage === 'refund' ) {
       window.location.hash = '#refund';
-    } else if (targetPage === 'shipping') {
+    } else if (targetPage === 'shipping' ) {
       window.location.hash = '#shipping';
     } else {
       window.location.hash = '';
@@ -1375,268 +1375,237 @@ export default function App() {
       )}
       {/* Checkout modal rendered globally so it always appears when showCheckout is true */}
       {showCheckout && (
-        <div className="checkout-modal" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          overflow: 'hidden',
-          background: isMobile ? '#181c2a' : 'rgba(10,20,40,0.97)',
-          display: 'flex',
-          alignItems: isMobile ? 'flex-start' : 'center',
-          justifyContent: isMobile ? 'flex-start' : 'center',
-          zIndex: 4000,
-          padding: isMobile ? '0' : '32px',
-          boxSizing: 'border-box',
-          minHeight: '100vh',
-          maxWidth: '100vw',
-          overflowX: 'hidden'
-        }}>
-          <div className="checkout-form-wrapper" style={{
-            background: isMobile ? 'transparent' : '#181c2a',
-            borderRadius: isMobile ? '0' : '1.25rem',
-            boxShadow: isMobile ? 'none' : '0 8px 32px #0008',
-            maxWidth: '100vw',
-            width: '100%',
-            margin: isMobile ? '0 auto' : 'auto',
-            position: 'relative',
-            padding: isMobile ? '0 0 24px 0' : '36px 36px 24px 36px',
-            boxSizing: 'border-box',
+        <div
+          className="checkout-modal"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: isMobile ? '#181c2a' : 'rgba(10,20,40,0.97)',
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            maxHeight: isMobile ? '100vh' : '90vh',
-            height: isMobile ? '100vh' : undefined,
-            overflow: 'hidden',
-            minHeight: isMobile ? '100vh' : undefined,
-            overflowX: 'hidden'
-          }}>
-            <button className="checkout-x" onClick={() => setShowCheckout(false)} style={{
-              position: 'absolute',
-              top: isMobile ? 16 : 14,
-              right: isMobile ? 12 : 18,
-              background: 'rgba(30,40,60,0.8)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '50%',
-              width: isMobile ? 36 : 32,
-              height: isMobile ? 36 : 32,
-              fontSize: isMobile ? '1.4em' : '1.3em',
-              cursor: 'pointer',
-              zIndex: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>×</button>
-            <h2 style={{
-              color: '#6ec1ff',
-              marginBottom: isMobile ? '1rem' : '1.1rem',
-              textAlign: 'center',
-              fontSize: isMobile ? '1.4em' : '2em',
-              letterSpacing: 1,
-              fontWeight: 700,
+            alignItems: isMobile ? 'flex-start' : 'center',
+            justifyContent: isMobile ? 'flex-start' : 'center',
+            zIndex: 4000,
+            boxSizing: 'border-box',
+            minHeight: '100vh',
+            maxWidth: '100vw',
+            overflow: 'hidden'
+          }}
+        >
+          {!isMobile ? (
+            <div className="checkout-form-wrapper" style={{
+              background: '#181c2a',
+              borderRadius: '1.25rem',
+              boxShadow: '0 8px 32px #0008',
+              maxWidth: 500,
               width: '100%',
-              marginTop: isMobile ? 16 : 0,
+              margin: 'auto',
+              position: 'relative',
+              padding: '36px 36px 24px 36px',
               boxSizing: 'border-box',
-              overflowWrap: 'break-word'
-            }}>Checkout</h2>
-            <div className="checkout-content-scroll" style={{
-              flex: 1,
-              width: '100%',
-              overflowY: 'auto',
-              paddingBottom: isMobile ? 160 : 80,
-              maxHeight: isMobile ? 'calc(100vh - 200px)' : undefined,
-              boxSizing: 'border-box'
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              maxHeight: '90vh',
+              overflow: 'hidden',
+              minHeight: '90vh'
             }}>
-              {/* Order Summary and Form Fields */}
-              <div style={{width: '100%', marginBottom: isMobile ? 16 : 18, paddingLeft: isMobile ? 12 : 0, paddingRight: isMobile ? 12 : 0}}>
-                <h3 style={{color: '#b3e0ff', fontSize: isMobile ? '1em' : '1.1em', marginBottom: isMobile ? 8 : 8, fontWeight: 600}}>Order Summary</h3>
-                <div style={{
-                  background: '#101828',
-                  borderRadius: 10,
-                  padding: isMobile ? '8px 10px' : '10px 12px',
-                  marginBottom: isMobile ? 8 : 8,
-                  maxHeight: 160,
-                  overflowY: 'auto',
-                }}>
-                  {cartDetails.map(item => (
-                            <div key={item.id} style={{display: 'flex', alignItems: 'center', gap: isMobile ? 3 : 10, marginBottom: isMobile ? 6 : 8}}>
-            <img
-                src={item.img}
-                alt="Sticker"
-                style={{width: isMobile ? 32 : 38, height: isMobile ? 32 : 38, borderRadius: 7, objectFit: 'cover', border: '1.5px solid #6ec1ff', cursor: 'pointer'}}
-                onClick={() => setZoomImg(item.img)}
-            />
-            <div style={{flex: 1, minWidth: 0, display: 'flex', alignItems: 'center'}}>
-                <span style={{color: '#b3e0ff', fontSize: isMobile ? '0.9em' : '1em', marginLeft: isMobile ? 3 : 8}}>x{item.qty}</span>
-            </div>
-            <span style={{color: '#6ec1ff', fontWeight: 600, fontSize: isMobile ? '0.9em' : '1em'}}>₹{(parseFloat(item.price) * item.qty).toFixed(2)}</span>
-        </div>
-                  ))}
-                </div>
-                <div style={{display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: isMobile ? '0.85em' : '1em', maxWidth: '100%', boxSizing: 'border-box', marginBottom: isMobile ? 4 : 0, gap: isMobile ? 6 : 0}}>
-                  <span>Subtotal</span>
-                  <span>₹{cartSubtotal.toFixed(2)}</span>
-                </div>
-                {pickupType === 'DELIVERY' && (
-                  <div style={{display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: isMobile ? '0.85em' : '1em', maxWidth: '100%', boxSizing: 'border-box', marginBottom: isMobile ? 4 : 0, gap: isMobile ? 6 : 0}}>
-                    <span>Delivery</span>
-                    <span>{deliveryCharge > 0 ? `₹${deliveryCharge}` : 'Free'}</span>
-                  </div>
-                )}
-                <div style={{display: 'flex', justifyContent: 'space-between', color: '#60a5fa', fontWeight: 700, fontSize: isMobile ? '0.95em' : '1.1em', marginTop: isMobile ? 6 : 4, maxWidth: '100%', boxSizing: 'border-box', gap: isMobile ? 6 : 0}}>
-                  <span>Total</span>
-                  <span>₹{checkoutTotal.toFixed(2)}</span>
-                </div>
-                {/* Free Delivery Suggestion for Delivery option */}
-                {pickupType === 'DELIVERY' && cartSubtotal < 49 && (
-                  <div style={{
-                    background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
-                    color: '#101828',
-                    borderRadius: 10,
-                    margin: isMobile ? '16px 0 0 0' : '14px 0 0 0',
-                    padding: isMobile ? '12px 16px' : '8px 10px',
-                    fontWeight: 'bold',
-                    fontSize: isMobile ? '0.95em' : '1em',
-                    textAlign: 'center',
-                    boxShadow: '0 2px 8px #10182822',
-                    maxWidth: isMobile ? '100%' : 320,
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                  }}>
-                    Add stickers worth <span style={{color: '#0a2342', fontWeight: 'bold'}}>₹{(49 - cartSubtotal).toFixed(2)}</span> for <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>Free Delivery</span>!<br />
-                    <button
-                      type="button"
-                      onClick={() => { setShowCheckout(false); setPage('store'); }}
-                      style={{
-                        marginTop: isMobile ? 12 : 10,
-                        background: '#6ec1ff',
-                        color: '#101828',
-                        border: 'none',
-                        borderRadius: 7,
-                        padding: isMobile ? '10px 24px' : '8px 22px',
-                        fontWeight: 700,
-                        fontSize: isMobile ? '0.95em' : '1em',
-                        cursor: 'pointer',
-                        boxShadow: '0 1px 4px #10182810',
-                        transition: 'background 0.2s',
-                      }}
-                    >
-                      Add Stickers
-                    </button>
-                  </div>
-                )}
-                {pickupType === 'DELIVERY' && cartSubtotal >= 49 && (
-                  <div style={{
-                    background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
-                    color: '#101828',
-                    borderRadius: 10,
-                    margin: isMobile ? '16px 0 0 0' : '14px 0 0 0',
-                    padding: isMobile ? '12px 16px' : '8px 10px',
-                    fontWeight: 'bold',
-                    fontSize: isMobile ? '0.95em' : '1em',
-                    textAlign: 'center',
-                    boxShadow: '0 2px 8px #10182822',
-                    maxWidth: isMobile ? '100%' : 320,
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                  }}>
-                    🎉 You unlocked <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>Free Delivery!</span>
-                  </div>
-                )}
+              {/* Close Button */}
+              <button
+                className="checkout-x"
+                onClick={() => setShowCheckout(false)}
+                style={{
+                  position: 'absolute',
+                  top: 16,
+                  right: 16,
+                  background: 'rgba(30,40,60,0.8)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 36,
+                  height: 36,
+                  fontSize: '1.4em',
+                  cursor: 'pointer',
+                  zIndex: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                ×
+              </button>
+              {/* Header */}
+              <div
+                style={{
+                  width: '100%',
+                  padding: '32px 16px 12px 16px',
+                  boxSizing: 'border-box',
+                  textAlign: 'center'
+                }}
+              >
+                <h2
+                  style={{
+                    color: '#6ec1ff',
+                    fontWeight: 700,
+                    fontSize: '1.4em',
+                    margin: 0,
+                    letterSpacing: 1
+                  }}
+                >
+                  Checkout
+                </h2>
               </div>
-              <form style={{
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: isMobile ? '0.6rem' : '1.1rem',
-                alignItems: 'center',
-                marginTop: 0,
-                paddingBottom: isMobile ? '20px' : 0,
-                boxSizing: 'border-box'
-              }}>
-                <div style={{
+              {/* Scrollable Content */}
+              <div
+                className="checkout-content-scroll"
+                style={{
+                  flex: 1,
                   width: '100%',
-                  marginBottom: isMobile ? 8 : undefined,
-                  paddingLeft: isMobile ? 0 : 0,
-                  paddingRight: isMobile ? 0 : 0,
+                  overflowY: 'auto',
+                  padding: '0 16px 160px 16px',
                   boxSizing: 'border-box'
-                }}>
-                  <label style={{
-                    color: '#6ec1ff',
-                    fontWeight: 600,
-                    fontSize: '1em',
-                    marginBottom: 6,
-                    display: 'block'
-                  }}>Name *</label>
-                  <input type="text" placeholder="Your Name" value={orderName} onChange={e => setOrderName(e.target.value)} required style={{
-                    width: '100%',
-                    maxWidth: '100%',
-                    boxSizing: 'border-box',
-                    padding: isMobile ? '0.6em 0.7em' : '0.85em 1em',
-                    borderRadius: '0.75em',
-                    border: '1.5px solid #6ec1ff',
+                }}
+              >
+                {/* Order Summary */}
+                <div
+                  style={{
                     background: '#101828',
-                    color: '#fff',
-                    fontSize: isMobile ? '0.9em' : '1em',
-                    boxShadow: '0 1px 4px #10182818',
-                    outline: 'none',
-                    transition: 'border 0.2s',
-                    margin: 0
-                  }} />
-                </div>
-                <div style={{
-                  width: '100%',
-                  marginBottom: isMobile ? 8 : undefined,
-                  paddingLeft: isMobile ? 0 : 0,
-                  paddingRight: isMobile ? 0 : 0,
-                  boxSizing: 'border-box'
-                }}>
-                  <label style={{
-                    color: '#6ec1ff',
-                    fontWeight: 600,
-                    fontSize: '1em',
-                    marginBottom: 4,
-                    display: 'block'
-                  }}>Phone Number *</label>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: isMobile ? 'row' : 'row',
-                    gap: isMobile ? 8 : 8,
-                    width: '100%',
+                    borderRadius: 10,
+                    padding: '12px 12px',
+                    marginBottom: 14,
+                    marginTop: 0,
                     boxSizing: 'border-box'
-                  }}>
+                  }}
+                >
+                  <h3 style={{ color: '#b3e0ff', fontSize: '1em', marginBottom: 8, fontWeight: 600 }}>Order Summary</h3>
+                  {cartDetails.map(item => (
+                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <img
+                        src={item.img}
+                        alt="Sticker"
+                        style={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: 7,
+                          objectFit: 'cover',
+                          border: '1.5px solid #6ec1ff',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setZoomImg(item.img)}
+                      />
+                      <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
+                        <span style={{ color: '#b3e0ff', fontSize: '1em', marginLeft: 8 }}>x{item.qty}</span>
+                      </div>
+                      <span style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em' }}>
+                        ₹{(parseFloat(item.price) * item.qty).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '0.95em', marginBottom: 4 }}>
+                    <span>Subtotal</span>
+                    <span>₹{cartSubtotal.toFixed(2)}</span>
+                  </div>
+                  {pickupType === 'DELIVERY' && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '0.95em', marginBottom: 4 }}>
+                      <span>Delivery</span>
+                      <span>{deliveryCharge > 0 ? `₹${deliveryCharge}` : 'Free'}</span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#60a5fa', fontWeight: 700, fontSize: '1.05em', marginTop: 6 }}>
+                    <span>Total</span>
+                    <span>₹{checkoutTotal.toFixed(2)}</span>
+                  </div>
+                  {/* Free Delivery Suggestion */}
+                  {pickupType === 'DELIVERY' && cartSubtotal < 49 && (
                     <div style={{
-                      background: '#101828',
-                      color: '#b3e0ff',
-                      border: '1.5px solid #6ec1ff',
-                      borderRadius: '0.75em',
-                      padding: isMobile ? '0.6em 0.6em' : '0.85em 0.9em',
-                      fontWeight: 700,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: isMobile ? '0.9em' : '1em',
-                      minWidth: '60px',
-                      boxSizing: 'border-box'
-                    }}>+91</div>
+                      background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
+                      color: '#101828',
+                      borderRadius: 10,
+                      margin: '16px 0 0 0',
+                      padding: '12px 16px',
+                      fontWeight: 'bold',
+                      fontSize: '0.95em',
+                      textAlign: 'center',
+                      boxShadow: '0 2px 8px #10182822',
+                      maxWidth: '100%',
+                      marginLeft: 'auto',
+                      marginRight: 'auto'
+                    }}>
+                      Add stickers worth <span style={{ color: '#0a2342', fontWeight: 'bold' }}>₹{(49 - cartSubtotal).toFixed(2)}</span> for <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery</span>!
+                      <br />
+                      <button
+                        type="button"
+                        onClick={() => { setShowCheckout(false); setPage('store'); }}
+                        style={{
+                          marginTop: 12,
+                          background: '#6ec1ff',
+                          color: '#101828',
+                          border: 'none',
+                          borderRadius: 7,
+                          padding: '10px 24px',
+                          fontWeight: 700,
+                          fontSize: '0.95em',
+                          cursor: 'pointer',
+                          boxShadow: '0 1px 4px #10182810',
+                          transition: 'background 0.2s'
+                        }}
+                      >
+                        Add Stickers
+                      </button>
+                    </div>
+                  )}
+                  {pickupType === 'DELIVERY' && cartSubtotal >= 49 && (
+                    <div style={{
+                      background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
+                      color: '#101828',
+                      borderRadius: 10,
+                      margin: '16px 0 0 0',
+                      padding: '12px 16px',
+                      fontWeight: 'bold',
+                      fontSize: '0.95em',
+                      textAlign: 'center',
+                      boxShadow: '0 2px 8px #10182822',
+                      maxWidth: '100%',
+                      marginLeft: 'auto',
+                      marginRight: 'auto'
+                    }}>
+                      🎉 You unlocked <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery!</span>
+                    </div>
+                  )}
+                </div>
+                {/* Form */}
+                <form
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                    alignItems: 'stretch',
+                    marginTop: 0,
+                    paddingBottom: '20px',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  {/* Name */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 6, display: 'block' }}>Name *</label>
                     <input
-                      type="tel"
-                      placeholder="10-digit phone number"
-                      value={phone}
-                      onChange={e => { setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0,10)); }}
+                      type="text"
+                      placeholder="Your Name"
+                      value={orderName}
+                      onChange={e => setOrderName(e.target.value)}
                       required
                       style={{
-                        flex: 1,
-                        maxWidth: '100%',
+                        width: '100%',
                         boxSizing: 'border-box',
-                        padding: isMobile ? '0.6em 0.7em' : '0.85em 1em',
+                        padding: '0.7em 1em',
                         borderRadius: '0.75em',
                         border: '1.5px solid #6ec1ff',
                         background: '#101828',
                         color: '#fff',
-                        fontSize: isMobile ? '0.9em' : '1em',
+                        fontSize: '1em',
                         boxShadow: '0 1px 4px #10182818',
                         outline: 'none',
                         transition: 'border 0.2s',
@@ -1644,232 +1613,571 @@ export default function App() {
                       }}
                     />
                   </div>
-                  {!isValidPhone && phone && <span style={{color: '#ff4d4d', fontSize: '0.95em'}}>Enter a valid 10-digit phone number.</span>}
-                </div>
-                {/* Remove OTP input and verification UI */}
-                {/* Delivery/Pickup Options */}
-                <div style={{
-                  width: '100%',
-                  marginBottom: isMobile ? 8 : undefined,
-                  paddingLeft: isMobile ? 0 : 0,
-                  paddingRight: isMobile ? 0 : 0,
-                  boxSizing: 'border-box'
-                }}>
-                  <label style={{
-                    color: '#6ec1ff',
-                    fontWeight: 600,
-                    fontSize: '1em',
-                    marginBottom: 4,
-                    display: 'block'
-                  }}>Order Type *</label>
-                  <div className="radio-group" style={{
-                    display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row',
-                    gap: isMobile ? '0.8em' : '1em',
-                    alignItems: isMobile ? 'flex-start' : 'center',
-                    width: '100%'
-                  }}>
-                    <label style={{
-                      color: '#fff',
-                      fontWeight: 500,
-                      fontSize: '1em',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.7em',
-                      cursor: 'pointer',
-                      padding: isMobile ? '8px 0' : '0'
-                    }}>
-                      <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} style={{margin: 0, accentColor: '#6ec1ff', width: 20, height: 20}} />
-                      <span>Self-pickup</span>
-                    </label>
-                    <label style={{
-                      color: '#fff',
-                      fontWeight: 500,
-                      fontSize: '1em',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.7em',
-                      cursor: 'pointer',
-                      padding: isMobile ? '8px 0' : '0'
-                    }}>
-                      <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} style={{margin: 0, accentColor: '#6ec1ff', width: 20, height: 20}} />
-                      <span>Delivery</span>
-                    </label>
+                  {/* Phone */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Phone Number *</label>
+                    <div style={{ display: 'flex', flexDirection: 'row', gap: 8, width: '100%' }}>
+                      <div style={{
+                        background: '#101828',
+                        color: '#b3e0ff',
+                        border: '1.5px solid #6ec1ff',
+                        borderRadius: '0.75em',
+                        padding: '0.7em 1em',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1em',
+                        minWidth: '60px',
+                        boxSizing: 'border-box'
+                      }}>+91</div>
+                      <input
+                        type="tel"
+                        placeholder="10-digit phone number"
+                        value={phone}
+                        onChange={e => { setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0,10)); }}
+                        required
+                        style={{
+                          flex: 1,
+                          boxSizing: 'border-box',
+                          padding: '0.7em 1em',
+                          borderRadius: '0.75em',
+                          border: '1.5px solid #6ec1ff',
+                          background: '#101828',
+                          color: '#fff',
+                          fontSize: '1em',
+                          boxShadow: '0 1px 4px #10182818',
+                          outline: 'none',
+                          transition: 'border 0.2s',
+                          margin: 0
+                        }}
+                      />
+                    </div>
+                    {!isValidPhone && phone && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Enter a valid 10-digit phone number.</span>}
                   </div>
-                </div>
-                {/* Delivery Address Dropdown */}
-                {pickupType === 'DELIVERY' && (
-                  <div style={{
-                    width: '100%',
-                    marginBottom: isMobile ? 8 : undefined,
-                    paddingLeft: isMobile ? 0 : 0,
-                    paddingRight: isMobile ? 0 : 0,
-                    boxSizing: 'border-box'
-                  }}>
-                    <label style={{
-                      color: '#6ec1ff',
-                      fontWeight: 600,
-                      fontSize: '1em',
-                      marginBottom: 4,
-                      display: 'block'
-                    }}>Delivery Address *</label>
-                    <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{
+                  {/* Order Type */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Order Type *</label>
+                    <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
+                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
+                        <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Self-pickup</span>
+                      </label>
+                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
+                        <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Delivery</span>
+                      </label>
+                    </div>
+                  </div>
+                  {/* Delivery Address */}
+                  {pickupType === 'DELIVERY' && (
+                    <div style={{ width: '100%' }}>
+                      <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Delivery Address *</label>
+                      <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        padding: '0.7em 1em',
+                        borderRadius: '8px',
+                        border: '1.5px solid #6ec1ff',
+                        background: '#101828',
+                        color: '#fff',
+                        fontSize: '1em',
+                        boxShadow: '0 1px 4px #10182818',
+                        outline: 'none',
+                        transition: 'border 0.2s',
+                        margin: 0
+                      }}>
+                        <option value="">Select Delivery Address</option>
+                        <option value="GH2">GH2</option>
+                        <option value="GH5">GH5</option>
+                        <option value="GH7">GH7</option>
+                        <option value="Unimall">Unimall</option>
+                        <option value="CC">CC</option>
+                        <option value="Buzz">Buzz</option>
+                        <option value="BH1">BH1</option>
+                        <option value="BH2">BH2</option>
+                        <option value="BH3">BH3</option>
+                        <option value="BH4">BH4</option>
+                        <option value="BH5">BH5</option>
+                        <option value="BH6">BH6</option>
+                        <option value="BH7">BH7</option>
+                      </select>
+                      {!orderAddress && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Please select a delivery address.</span>}
+                    </div>
+                  )}
+                  {/* Payment Method */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Payment Method *</label>
+                    <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
+                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
+                        <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Pay on delivery/pickup</span>
+                      </label>
+                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
+                        <input type="radio" name="payment" value="Pay Online" disabled style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Pay Online (Coming Soon)</span>
+                      </label>
+                    </div>
+                  </div>
+                  {/* Privacy Note */}
+                  {pickupType === 'SELF-PICKUP' && (
+                    <div style={{
                       width: '100%',
-                      maxWidth: '100%',
-                      boxSizing: 'border-box',
-                      padding: isMobile ? '0.6em 0.7em' : '11px',
-                      borderRadius: '8px',
-                      border: '1.5px solid #6ec1ff',
+                      maxWidth: 320,
+                      margin: '0 auto',
                       background: '#101828',
-                      color: '#fff',
-                      fontSize: isMobile ? '0.9em' : '1em',
-                      boxShadow: '0 1px 4px #10182818',
-                      outline: 'none',
-                      transition: 'border 0.2s',
-                      margin: 0
-                    }}>
-                      <option value="">Select Delivery Address</option>
-                      <option value="GH2">GH2</option>
-                      <option value="GH5">GH5</option>
-                      <option value="GH7">GH7</option>
-                      <option value="Unimall">Unimall</option>
-                      <option value="CC">CC</option>
-                      <option value="Buzz">Buzz</option>
-                      <option value="BH1">BH1</option>
-                      <option value="BH2">BH2</option>
-                      <option value="BH3">BH3</option>
-                      <option value="BH4">BH4</option>
-                      <option value="BH5">BH5</option>
-                      <option value="BH6">BH6</option>
-                      <option value="BH7">BH7</option>
-                    </select>
-                    {!orderAddress && <span style={{color: '#ff4d4d', fontSize: '0.95em'}}>Please select a delivery address.</span>}
-                  </div>
-                )}
-                {/* Payment Method */}
-                <div style={{
-                  width: '100%',
-                  marginBottom: isMobile ? 8 : undefined,
-                  paddingLeft: isMobile ? 0 : 0,
-                  paddingRight: isMobile ? 0 : 0,
-                  boxSizing: 'border-box'
-                }}>
-                  <label style={{
-                    color: '#6ec1ff',
-                    fontWeight: 600,
-                    fontSize: '1em',
-                    marginBottom: 4,
-                    display: 'block'
-                  }}>Payment Method *</label>
-                  <div className="radio-group" style={{
-                    display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row',
-                    gap: isMobile ? '0.8em' : '1em',
-                    alignItems: isMobile ? 'flex-start' : 'center',
-                    width: '100%'
-                  }}>
-                    <label style={{
-                      color: '#fff',
+                      color: '#b3e0ff',
+                      borderRadius: '0.75em',
+                      padding: '0.7em 1em',
+                      textAlign: 'center',
                       fontWeight: 500,
-                      fontSize: '1em',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.7em',
-                      cursor: 'pointer',
-                      padding: isMobile ? '8px 0' : '0'
+                      fontSize: '0.95em',
+                      marginBottom: '-0.5em',
+                      marginTop: 4
                     }}>
-                      <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} style={{margin: 0, accentColor: '#6ec1ff', width: 20, height: 20}} />
-                      <span>Pay on delivery/pickup</span>
-                    </label>
-                    <label style={{
-                      color: '#fff',
-                      fontWeight: 500,
-                      fontSize: '1em',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.7em',
-                      cursor: 'pointer',
-                      padding: isMobile ? '8px 0' : '0'
-                    }}>
-                      <input type="radio" name="payment" value="Pay Online" disabled style={{margin: 0, accentColor: '#6ec1ff', width: 20, height: 20}} />
-                      <span>Pay Online (Coming Soon)</span>
-                    </label>
-                  </div>
-                </div>
-                {/* Privacy Note */}
-                {pickupType === 'SELF-PICKUP' && (
-                  <div style={{
-                    width: '100%',
-                    background: '#101828',
-                    color: '#b3e0ff',
+                      You'll receive a call for when to pick up your order from BH3.
+                    </div>
+                  )}
+                </form>
+              </div>
+              {/* Fixed Place Order Button at the bottom */}
+              <div
+                style={{
+                  position: 'fixed',
+                  left: 0,
+                  bottom: 0,
+                  width: '100vw',
+                  background: '#181c2a',
+                  padding: '20px 16px',
+                  boxSizing: 'border-box',
+                  borderTop: '1.5px solid #233',
+                  zIndex: 10,
+                  display: 'flex',
+                  justifyContent: 'center'
+                }}
+              >
+                <button
+                  type="button"
+                  disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading}
+                  onClick={handlePlaceOrder}
+                  style={{
+                    background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff',
+                    color: '#101828',
+                    border: 'none',
                     borderRadius: '0.75em',
-                    padding: isMobile ? '0.7em 1em' : '0.85em 1em',
-                    textAlign: 'center',
-                    fontWeight: 500,
-                    fontSize: isMobile ? '0.95em' : '0.98em',
-                    marginBottom: '-0.5em',
-                    marginTop: isMobile ? 4 : 4,
-                    paddingLeft: isMobile ? 20 : undefined,
-                    paddingRight: isMobile ? 20 : undefined
-                  }}>
-                    You'll receive a call for when to pick up your order from BH3.
-                  </div>
-                )}
-              </form>
+                    padding: '1em 0',
+                    fontWeight: 700,
+                    fontSize: '1.05em',
+                    cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer',
+                    width: '100%',
+                    maxWidth: '100%',
+                    boxShadow: '0 1px 4px #10182818',
+                    transition: 'background 0.2s'
+                  }}
+                >
+                  {loading ? (
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24 }}>
+                      <span className="checkout-spinner" style={{ width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }}></span>
+                      <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                    </span>
+                  ) : (
+                    'Place Order'
+                  )}
+                </button>
+              </div>
             </div>
-            <style>{`
-              .checkout-content-scroll { scrollbar-width: none; -ms-overflow-style: none; }
-              .checkout-content-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
-              
-              @media (max-width: 800px) {
-                .checkout-form-wrapper {
-                  min-height: 100vh !important;
-                  height: 100vh !important;
-                }
-                .checkout-content-scroll {
-                  padding-bottom: 180px !important;
-                }
-              }
-            `}</style>
-            {/* Fixed Place Order Button at the bottom */}
-            <div style={{
-              position: 'absolute',
-              left: 0,
-              bottom: 0,
-              width: '100%',
-              background: isMobile ? '#181c2a' : '#181c2a',
-              padding: isMobile ? '20px 12px' : '16px 24px',
-              boxSizing: 'border-box',
-              borderTop: isMobile ? '1.5px solid #233' : '1.5px solid #233',
-              zIndex: 10,
-              display: 'flex',
-              justifyContent: 'center',
-            }}>
-              <button type="button" disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading} onClick={handlePlaceOrder} style={{
-                background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff',
-                color: '#101828',
-                border: 'none',
-                borderRadius: '0.75em',
-                padding: isMobile ? '1em 0' : '1em 0',
-                fontWeight: 700,
-                fontSize: isMobile ? '1.05em' : '1.15em',
-                cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer',
-                width: '100%',
-                maxWidth: isMobile ? '100%' : 340,
-                boxShadow: '0 1px 4px #10182818',
-                transition: 'background 0.2s'
-              }}>
-                {loading ? (
-                  <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24}}>
-                    <span className="checkout-spinner" style={{width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite'}}></span>
-                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-                  </span>
-                ) : (
-                  'Place Order'
-                )}
+          ) : (
+            // Mobile checkout code (fixed)
+            <div
+              className="checkout-form-wrapper"
+              style={{
+                width: '100vw',
+                minHeight: '100vh',
+                background: '#181c2a',
+                boxSizing: 'border-box',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: '0',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+            >
+              {/* Close Button */}
+              <button
+                className="checkout-x"
+                onClick={() => setShowCheckout(false)}
+                style={{
+                  position: 'absolute',
+                  top: 16,
+                  right: 16,
+                  background: 'rgba(30,40,60,0.8)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 36,
+                  height: 36,
+                  fontSize: '1.4em',
+                  cursor: 'pointer',
+                  zIndex: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                ×
               </button>
+              {/* Header */}
+              <div
+                style={{
+                  width: '100%',
+                  padding: '32px 16px 12px 16px',
+                  boxSizing: 'border-box',
+                  textAlign: 'center'
+                }}
+              >
+                <h2
+                  style={{
+                    color: '#6ec1ff',
+                    fontWeight: 700,
+                    fontSize: '1.4em',
+                    margin: 0,
+                    letterSpacing: 1
+                  }}
+                >
+                  Checkout
+                </h2>
+              </div>
+              {/* Scrollable Content */}
+              <div
+                className="checkout-content-scroll"
+                style={{
+                  flex: 1,
+                  width: '100%',
+                  overflowY: 'auto',
+                  padding: '0 16px 160px 16px',
+                  boxSizing: 'border-box'
+                }}
+              >
+                {/* Order Summary */}
+                <div
+                  style={{
+                    background: '#101828',
+                    borderRadius: 10,
+                    padding: '12px 12px',
+                    marginBottom: 14,
+                    marginTop: 0,
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <h3 style={{ color: '#b3e0ff', fontSize: '1em', marginBottom: 8, fontWeight: 600 }}>Order Summary</h3>
+                  {cartDetails.map(item => (
+                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <img
+                        src={item.img}
+                        alt="Sticker"
+                        style={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: 7,
+                          objectFit: 'cover',
+                          border: '1.5px solid #6ec1ff',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setZoomImg(item.img)}
+                      />
+                      <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
+                        <span style={{ color: '#b3e0ff', fontSize: '1em', marginLeft: 8 }}>x{item.qty}</span>
+                      </div>
+                      <span style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em' }}>
+                        ₹{(parseFloat(item.price) * item.qty).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '0.95em', marginBottom: 4 }}>
+                    <span>Subtotal</span>
+                    <span>₹{cartSubtotal.toFixed(2)}</span>
+                  </div>
+                  {pickupType === 'DELIVERY' && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '0.95em', marginBottom: 4 }}>
+                      <span>Delivery</span>
+                      <span>{deliveryCharge > 0 ? `₹${deliveryCharge}` : 'Free'}</span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#60a5fa', fontWeight: 700, fontSize: '1.05em', marginTop: 6 }}>
+                    <span>Total</span>
+                    <span>₹{checkoutTotal.toFixed(2)}</span>
+                  </div>
+                  {/* Free Delivery Suggestion */}
+                  {pickupType === 'DELIVERY' && cartSubtotal < 49 && (
+                    <div style={{
+                      background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
+                      color: '#101828',
+                      borderRadius: 10,
+                      margin: '16px 0 0 0',
+                      padding: '12px 16px',
+                      fontWeight: 'bold',
+                      fontSize: '0.95em',
+                      textAlign: 'center',
+                      boxShadow: '0 2px 8px #10182822',
+                      maxWidth: '100%',
+                      marginLeft: 'auto',
+                      marginRight: 'auto'
+                    }}>
+                      Add stickers worth <span style={{ color: '#0a2342', fontWeight: 'bold' }}>₹{(49 - cartSubtotal).toFixed(2)}</span> for <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery</span>!
+                      <br />
+                      <button
+                        type="button"
+                        onClick={() => { setShowCheckout(false); setPage('store'); }}
+                        style={{
+                          marginTop: 12,
+                          background: '#6ec1ff',
+                          color: '#101828',
+                          border: 'none',
+                          borderRadius: 7,
+                          padding: '10px 24px',
+                          fontWeight: 700,
+                          fontSize: '0.95em',
+                          cursor: 'pointer',
+                          boxShadow: '0 1px 4px #10182810',
+                          transition: 'background 0.2s'
+                        }}
+                      >
+                        Add Stickers
+                      </button>
+                    </div>
+                  )}
+                  {pickupType === 'DELIVERY' && cartSubtotal >= 49 && (
+                    <div style={{
+                      background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
+                      color: '#101828',
+                      borderRadius: 10,
+                      margin: '16px 0 0 0',
+                      padding: '12px 16px',
+                      fontWeight: 'bold',
+                      fontSize: '0.95em',
+                      textAlign: 'center',
+                      boxShadow: '0 2px 8px #10182822',
+                      maxWidth: '100%',
+                      marginLeft: 'auto',
+                      marginRight: 'auto'
+                    }}>
+                      🎉 You unlocked <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery!</span>
+                    </div>
+                  )}
+                </div>
+                {/* Form */}
+                <form
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                    alignItems: 'stretch',
+                    marginTop: 0,
+                    paddingBottom: '20px',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  {/* Name */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 6, display: 'block' }}>Name *</label>
+                    <input
+                      type="text"
+                      placeholder="Your Name"
+                      value={orderName}
+                      onChange={e => setOrderName(e.target.value)}
+                      required
+                      style={{
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        padding: '0.7em 1em',
+                        borderRadius: '0.75em',
+                        border: '1.5px solid #6ec1ff',
+                        background: '#101828',
+                        color: '#fff',
+                        fontSize: '1em',
+                        boxShadow: '0 1px 4px #10182818',
+                        outline: 'none',
+                        transition: 'border 0.2s',
+                        margin: 0
+                      }}
+                    />
+                  </div>
+                  {/* Phone */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Phone Number *</label>
+                    <div style={{ display: 'flex', flexDirection: 'row', gap: 8, width: '100%' }}>
+                      <div style={{
+                        background: '#101828',
+                        color: '#b3e0ff',
+                        border: '1.5px solid #6ec1ff',
+                        borderRadius: '0.75em',
+                        padding: '0.7em 1em',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1em',
+                        minWidth: '60px',
+                        boxSizing: 'border-box'
+                      }}>+91</div>
+                      <input
+                        type="tel"
+                        placeholder="10-digit phone number"
+                        value={phone}
+                        onChange={e => { setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0,10)); }}
+                        required
+                        style={{
+                          flex: 1,
+                          boxSizing: 'border-box',
+                          padding: '0.7em 1em',
+                          borderRadius: '0.75em',
+                          border: '1.5px solid #6ec1ff',
+                          background: '#101828',
+                          color: '#fff',
+                          fontSize: '1em',
+                          boxShadow: '0 1px 4px #10182818',
+                          outline: 'none',
+                          transition: 'border 0.2s',
+                          margin: 0
+                        }}
+                      />
+                    </div>
+                    {!isValidPhone && phone && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Enter a valid 10-digit phone number.</span>}
+                  </div>
+                  {/* Order Type */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Order Type *</label>
+                    <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
+                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
+                        <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Self-pickup</span>
+                      </label>
+                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
+                        <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Delivery</span>
+                      </label>
+                    </div>
+                  </div>
+                  {/* Delivery Address */}
+                  {pickupType === 'DELIVERY' && (
+                    <div style={{ width: '100%' }}>
+                      <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Delivery Address *</label>
+                      <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        padding: '0.7em 1em',
+                        borderRadius: '8px',
+                        border: '1.5px solid #6ec1ff',
+                        background: '#101828',
+                        color: '#fff',
+                        fontSize: '1em',
+                        boxShadow: '0 1px 4px #10182818',
+                        outline: 'none',
+                        transition: 'border 0.2s',
+                        margin: 0
+                      }}>
+                        <option value="">Select Delivery Address</option>
+                        <option value="GH2">GH2</option>
+                        <option value="GH5">GH5</option>
+                        <option value="GH7">GH7</option>
+                        <option value="Unimall">Unimall</option>
+                        <option value="CC">CC</option>
+                        <option value="Buzz">Buzz</option>
+                        <option value="BH1">BH1</option>
+                        <option value="BH2">BH2</option>
+                        <option value="BH3">BH3</option>
+                        <option value="BH4">BH4</option>
+                        <option value="BH5">BH5</option>
+                        <option value="BH6">BH6</option>
+                        <option value="BH7">BH7</option>
+                      </select>
+                      {!orderAddress && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Please select a delivery address.</span>}
+                    </div>
+                  )}
+                  {/* Payment Method */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Payment Method *</label>
+                    <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
+                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
+                        <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Pay on delivery/pickup</span>
+                      </label>
+                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
+                        <input type="radio" name="payment" value="Pay Online" disabled style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Pay Online (Coming Soon)</span>
+                      </label>
+                    </div>
+                  </div>
+                  {/* Privacy Note */}
+                  {pickupType === 'SELF-PICKUP' && (
+                    <div style={{
+                      width: '100%',
+                      maxWidth: 320,
+                      margin: '0 auto',
+                      background: '#101828',
+                      color: '#b3e0ff',
+                      borderRadius: '0.75em',
+                      padding: '0.7em 1em',
+                      textAlign: 'center',
+                      fontWeight: 500,
+                      fontSize: '0.95em',
+                      marginBottom: '-0.5em',
+                      marginTop: 4
+                    }}>
+                      You'll receive a call for when to pick up your order from BH3.
+                    </div>
+                  )}
+                </form>
+              </div>
+              {/* Fixed Place Order Button at the bottom */}
+              <div
+                style={{
+                  position: 'fixed',
+                  left: 0,
+                  bottom: 0,
+                  width: '100vw',
+                  background: '#181c2a',
+                  padding: '20px 16px',
+                  boxSizing: 'border-box',
+                  borderTop: '1.5px solid #233',
+                  zIndex: 10,
+                  display: 'flex',
+                  justifyContent: 'center'
+                }}
+              >
+                <button
+                  type="button"
+                  disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading}
+                  onClick={handlePlaceOrder}
+                  style={{
+                    background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff',
+                    color: '#101828',
+                    border: 'none',
+                    borderRadius: '0.75em',
+                    padding: '1em 0',
+                    fontWeight: 700,
+                    fontSize: '1.05em',
+                    cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer',
+                    width: '100%',
+                    maxWidth: '100%',
+                    boxShadow: '0 1px 4px #10182818',
+                    transition: 'background 0.2s'
+                  }}
+                >
+                  {loading ? (
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24 }}>
+                      <span className="checkout-spinner" style={{ width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }}></span>
+                      <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                    </span>
+                  ) : (
+                    'Place Order'
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
       <footer>
