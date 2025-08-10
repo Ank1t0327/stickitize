@@ -1787,7 +1787,7 @@ export default function App() {
               </div>
             </div>
           ) : (
-            // Mobile checkout code (fixed)
+            // Mobile checkout code (scroll fix)
             <div
               className="checkout-form-wrapper"
               style={{
@@ -1856,7 +1856,9 @@ export default function App() {
                   width: '100%',
                   overflowY: 'auto',
                   padding: '0 16px 160px 16px',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  maxHeight: 'calc(100vh - 80px)', // <-- Make mobile checkout scrollable
+                  minHeight: 0
                 }}
               >
                 {/* Order Summary */}
