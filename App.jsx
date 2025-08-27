@@ -1852,18 +1852,16 @@ export default function App() {
                   )}
                 </form>
               </div>
-              {/* Fixed Place Order Button at the bottom */}
+              {/* Sticky Place Order Button inside the card */}
               <div
                 style={{
-                  position: 'fixed',
-                  left: 0,
+                  position: 'sticky',
                   bottom: 0,
-                  width: '100vw',
+                  width: '100%',
                   background: '#181c2a',
                   padding: '20px 16px',
                   boxSizing: 'border-box',
                   borderTop: '1.5px solid #233',
-                  zIndex: 10,
                   display: 'flex',
                   justifyContent: 'center'
                 }}
@@ -2245,18 +2243,16 @@ export default function App() {
                   )}
                 </form>
               </div>
-              {/* Fixed Place Order Button at the bottom */}
+              {/* Sticky Place Order Button inside the card (mobile) */}
               <div
                 style={{
-                  position: 'fixed',
-                  left: 0,
+                  position: 'sticky',
                   bottom: 0,
-                  width: '100vw',
+                  width: '100%',
                   background: '#181c2a',
                   padding: '20px 16px',
                   boxSizing: 'border-box',
                   borderTop: '1.5px solid #233',
-                  zIndex: 10,
                   display: 'flex',
                   justifyContent: 'center'
                 }}
