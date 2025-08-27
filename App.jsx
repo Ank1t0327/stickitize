@@ -275,6 +275,118 @@ export default function App() {
 
   //
 
+  // Contact form submit
+  const handleContactSubmit = async (event) => {
+    event.preventDefault();
+    const form = event.target;
+    const name = form.name.value.trim();
+    const email = form.email.value.trim();
+    const message = form.message.value.trim();
+    if (!name || !email || !message) return;
+    try {
+      setLoading(true);
+      await fetch(`${API_BASE}/contacts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message })
+      });
+      setMessageSent(true);
+      form.reset();
+      // Refresh messages if admin is viewing
+      if (adminLoggedIn) await fetchContacts();
+    } catch (err) {
+      console.error('Contact submit failed:', err);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setLoading(false);
+      setTimeout(() => setMessageSent(false), 2500);
+    }
+  };
+
+  // Admin login and data actions
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/orders`);
+      if (!res.ok) throw new Error('Failed to fetch orders');
+      const data = await res.json();
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Fetch orders failed:', err);
+    }
+  };
+
+  const fetchContacts = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/contacts`);
+      if (!res.ok) throw new Error('Failed to fetch contacts');
+      const data = await res.json();
+      setContactMessages(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Fetch contacts failed:', err);
+    }
+  };
+
+  const handleAdminLogin = async () => {
+    try {
+      setLoading(true);
+      setAdminError('');
+      const res = await fetch(`${API_BASE}/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: adminId, password: adminPw })
+      });
+      const data = await res.json();
+      if (data && data.auth) {
+        setAdminLoggedIn(true);
+        setAdminToken(data.token || null);
+        await Promise.all([fetchOrders(), fetchContacts()]);
+      } else {
+        setAdminError('Invalid credentials');
+      }
+    } catch (err) {
+      console.error('Admin login failed:', err);
+      setAdminError('Login failed. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClearOrder = async (orderId) => {
+    if (!orderId) return;
+    try {
+      setLoading(true);
+      await fetch(`${API_BASE}/orders/${orderId}`, { method: 'DELETE' });
+      await fetchOrders();
+    } catch (err) {
+      console.error('Clear order failed:', err);
+      alert('Failed to clear order.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClearContact = async (contactId) => {
+    if (!contactId) return;
+    try {
+      setLoading(true);
+      await fetch(`${API_BASE}/contacts/${contactId}`, { method: 'DELETE' });
+      await fetchContacts();
+    } catch (err) {
+      console.error('Clear contact failed:', err);
+      alert('Failed to clear message.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load admin data after login
+  useEffect(() => {
+    if (adminLoggedIn) {
+      fetchOrders();
+      fetchContacts();
+    }
+  }, [adminLoggedIn]);
+
   // For infinite loop, calculate total width
   const totalCategories = Object.keys(categories).length;
   const repeatCount = 4; // Render categories 4 times for a robust loop
