@@ -99,6 +99,7 @@ export default function App() {
   const [adminToken, setAdminToken] = useState(null); // Store admin token after login
   const [loading, setLoading] = useState(false); // Global loading state
   //
+  const [showCustom, setShowCustom] = useState(false);
   const categoryScrollRef = useRef();
   const [catScrollPaused, setCatScrollPaused] = useState(false);
   // Cart Drawer state
@@ -826,6 +827,89 @@ export default function App() {
                 </button>
               ))}
             </div>
+            {/* Custom Sticker CTA */}
+            <div style={{display: 'flex', justifyContent: 'center', marginBottom: 24}}>
+              <button
+                onClick={() => setShowCustom(v => !v)}
+                style={{
+                  background: 'rgba(30,40,60,0.9)',
+                  color: '#fff',
+                  border: '1px solid #6ec1ff',
+                  borderRadius: 8,
+                  padding: '10px 20px',
+                  fontWeight: 'bold',
+                  fontSize: isMobile ? '1em' : '1.05em',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                + Customized Stickers
+              </button>
+            </div>
+            {showCustom && (
+              <div style={{
+                background: 'rgba(30,40,60,0.9)',
+                border: '1px solid #233',
+                borderRadius: 12,
+                padding: 16,
+                margin: '0 auto 24px',
+                width: 'min(720px, 92vw)',
+                color: '#fff',
+                boxShadow: '0 2px 12px rgba(16,21,34,0.25)'
+              }}>
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap'}}>
+                  <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                    <div style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 8,
+                      background: '#101828',
+                      border: '1px solid #6ec1ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#6ec1ff',
+                      fontWeight: 900,
+                      fontSize: 22
+                    }}>+</div>
+                    <div>
+                      <div style={{fontWeight: 700, color: '#b3e0ff'}}>Upload your image</div>
+                      <div style={{fontSize: '0.95em', color: '#dbeafe'}}>Send us the photo you want as a sticker.</div>
+                    </div>
+                  </div>
+                  <div style={{display: 'flex', gap: 10}}>
+                    <a
+                      href="mailto:8stickbuy@gmail.com?subject=Custom%20Sticker%20Request&body=Please%20attach%20the%20image%2Fartwork%20and%20mention%20size%20and%20quantity."
+                      style={{
+                        background: '#6ec1ff',
+                        color: '#101828',
+                        textDecoration: 'none',
+                        borderRadius: 8,
+                        padding: '10px 16px',
+                        fontWeight: 800
+                      }}
+                    >
+                      Email Image
+                    </a>
+                    <a
+                      href="https://wa.me/919138442368"
+                      target="_blank"
+                      rel="noopener"
+                      style={{
+                        background: '#25D366',
+                        color: '#101828',
+                        textDecoration: 'none',
+                        borderRadius: 8,
+                        padding: '10px 16px',
+                        fontWeight: 800
+                      }}
+                    >
+                      WhatsApp Image
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="store-grid">
               {(() => {
                 let products = [];
