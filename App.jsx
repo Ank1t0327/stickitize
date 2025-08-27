@@ -932,9 +932,9 @@ export default function App() {
                 )}
               </form>
               <div className="contact-details" style={{marginTop: '32px', color: '#fff', textAlign: 'center'}}>
-                <p>Email: <a href="mailto:info@stickitize.com" style={{color: '#6ec1ff'}}>info@stickitize.com</a></p>
-                <p>Phone: <a href="tel:+919999999999" style={{color: '#6ec1ff'}}>+91 99999 99999</a></p>
-                <p>Instagram: <a href="https://instagram.com/stickitize" target="_blank" rel="noopener" style={{color: '#6ec1ff'}}>@stickitize</a></p>
+                <p>Email: <a href="mailto:8stickbuy@gmail.com" style={{color: '#6ec1ff'}}>8stickbuy@gmail.com</a></p>
+                <p>Phone: <a href="tel:+919138442368" style={{color: '#6ec1ff'}}>+91 9138442368</a></p>
+                {/* <p>Instagram: <a href="https://instagram.com/stickitize" target="_blank" rel="noopener" style={{color: '#6ec1ff'}}>@stickitize</a></p> */}
               </div>
             </div>
             <div className="join-section" style={{margin: '48px auto 0', maxWidth: '500px', background: 'rgba(30,40,60,0.95)', borderRadius: '16px', padding: '28px', boxShadow: '0 0 24px #0006', textAlign: 'center'}}>
