@@ -2243,16 +2243,18 @@ export default function App() {
                   )}
                 </form>
               </div>
-              {/* Sticky Place Order Button inside the card (mobile) */}
+              {/* Fixed Place Order Button at the bottom (mobile) */}
               <div
                 style={{
-                  position: 'sticky',
+                  position: 'fixed',
+                  left: 0,
                   bottom: 0,
-                  width: '100%',
+                  width: '100vw',
                   background: '#181c2a',
                   padding: '20px 16px',
                   boxSizing: 'border-box',
                   borderTop: '1.5px solid #233',
+                  zIndex: 10,
                   display: 'flex',
                   justifyContent: 'center'
                 }}
