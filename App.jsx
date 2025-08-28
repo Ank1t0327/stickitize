@@ -586,7 +586,6 @@ export default function App() {
           <button className={`nav-btn${page === 'home' ? ' active' : ''}`} onClick={() => handleNav('home')}>HOME</button>
           <button className={`nav-btn${page === 'store' ? ' active' : ''}`} onClick={() => handleNav('store')}>STORE</button>
           <button className={`nav-btn${page === 'contact' ? ' active' : ''}`} onClick={() => handleNav('contact')}>CONTACT</button>
-          <button className={`nav-btn${page === 'admin' ? ' active' : ''}`} onClick={() => handleNav('admin')}>ADMIN</button>
         </div>
       </nav>
       {/* Main content wrapper for padding */}
