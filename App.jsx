@@ -873,7 +873,7 @@ export default function App() {
                     }}>+</div>
                     <div>
                       <div style={{fontWeight: 700, color: '#b3e0ff'}}>Upload your image</div>
-                      <div style={{fontSize: '0.95em', color: '#dbeafe'}}>Send us the photo you want as a sticker.</div>
+                      <div style={{fontSize: '0.95em', color: '#dbeafe'}}>Send us the photo you want as a sticker (10rs/sticker).</div>
                     </div>
                   </div>
                   <div style={{display: 'flex', gap: 10}}>
