@@ -12,7 +12,8 @@ const categories = {
   movies: { name: 'Movies', folder: 'movies' },
   girl: { name: 'Girl', folder: 'girl' },
   phone: { name: 'Phone', folder: 'phone' },
-  sports: { name: 'Sports', folder: 'sports' }
+  sports: { name: 'Sports', folder: 'sports' },
+  fun: {name: 'Fun', folder: 'fun'}
 };
 
 // Dynamically import all sticker images from public/stickers/[category] using Vite's import.meta.glob
