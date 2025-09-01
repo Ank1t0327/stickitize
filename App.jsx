@@ -108,6 +108,8 @@ export default function App() {
   const [cartBounce, setCartBounce] = useState(false);
   const cartFabRef = useRef();
   const [hiddenStickers, setHiddenStickers] = useState([]); // Track stickers whose images failed to load
+  const [paymentLoading, setPaymentLoading] = useState(false); // New state for payment loading
+  const [paymentError, setPaymentError] = useState(''); // New state for payment error
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 800);
@@ -274,6 +276,128 @@ export default function App() {
       alert('Failed to place order. Please try again.');
     }
   };
+
+  // Payment functions for Cashfree
+  const handleOnlinePayment = async () => {
+    if (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress)) {
+      alert('Please fill in all required fields before proceeding with payment.');
+      return;
+    }
+
+    setPaymentLoading(true);
+    setPaymentError('');
+
+    try {
+      // Generate unique order ID
+      const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Create payment order with Cashfree
+      const paymentData = {
+        orderId: orderId,
+        orderAmount: checkoutTotal.toFixed(2),
+        customerId: `CUST_${phone}`,
+        customerName: orderName,
+        customerEmail: `${phone}@stickitize.com`, // Using phone as email since email is not collected
+        customerPhone: phone
+      };
+
+      const response = await fetch(`${API_BASE}/api/payments/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create payment order');
+      }
+
+      const paymentOrder = await response.json();
+      
+      // Store order details for after payment
+      const orderData = {
+        name: orderName,
+        phone: phone,
+        stickers: cartDetails.map(item => `${item.name} (x${item.qty})`),
+        orderType: pickupType,
+        address: pickupType === 'DELIVERY' ? orderAddress : 'SELF-PICKUP',
+        payment: 'Paid Online',
+        orderId: orderId,
+        paymentOrderId: paymentOrder.orderId
+      };
+
+      // Store order data in localStorage for after payment completion
+      localStorage.setItem('pendingOrder', JSON.stringify(orderData));
+
+      // Redirect to Cashfree payment page
+      if (paymentOrder.paymentSessionId) {
+        // For Cashfree checkout
+        const cashfreeUrl = `https://sandbox.cashfree.com/pg/view/${paymentOrder.paymentSessionId}`;
+        window.location.href = cashfreeUrl;
+      } else {
+        throw new Error('Payment session not created');
+      }
+
+    } catch (error) {
+      console.error('Payment error:', error);
+      setPaymentError('Failed to initiate payment. Please try again.');
+      setPaymentLoading(false);
+    }
+  };
+
+  // Handle payment success callback
+  const handlePaymentSuccess = async () => {
+    try {
+      const pendingOrder = localStorage.getItem('pendingOrder');
+      if (!pendingOrder) {
+        console.error('No pending order found');
+        return;
+      }
+
+      const orderData = JSON.parse(pendingOrder);
+      
+      // Save order to backend
+      await fetch(`${API_BASE}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+
+      // Clear pending order
+      localStorage.removeItem('pendingOrder');
+      
+      // Show success message
+      setOrderPlaced(true);
+      setShowCheckout(false);
+      setCart([]);
+      setOrderName('');
+      setPhone('');
+      setOrderAddress('');
+      setOrderPayment('Pay on delivery/pickup');
+      setPickupType('SELF-PICKUP');
+      
+    } catch (error) {
+      console.error('Error saving order after payment:', error);
+      alert('Payment successful but order could not be saved. Please contact support.');
+    }
+  };
+
+  // Check for payment success on page load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderStatus = urlParams.get('order_status');
+    const orderId = urlParams.get('order_id');
+    
+    if (orderStatus === 'SUCCESS' && orderId) {
+      handlePaymentSuccess();
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (orderStatus === 'FAILED') {
+      // Handle payment failure
+      setPaymentError('Payment was cancelled or failed. Please try again.');
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   //
 
@@ -499,6 +623,49 @@ export default function App() {
           />
         </div>
       )}
+      {/* Payment Processing Modal */}
+      {paymentLoading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(10,20,40,0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #101828 0%, #2563eb 100%)',
+            color: '#e0f2fe',
+            borderRadius: '1.3em',
+            boxShadow: '0 6px 32px #000b',
+            padding: '32px 24px 24px 24px',
+            minWidth: 280,
+            maxWidth: '90vw',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 18,
+            border: '2px solid #233',
+          }}>
+            <div style={{fontSize: '1.35em', fontWeight: 700, marginBottom: 12, color: '#6ec1ff', letterSpacing: 1}}>Processing Payment...</div>
+            <div style={{fontSize: '1.08em', marginBottom: 18, color: '#e0f2fe'}}>Please wait while we redirect you to the secure payment gateway.</div>
+            <div className="spinner" style={{
+              width: 60,
+              height: 60,
+              border: '6px solid #6ec1ff',
+              borderTop: '6px solid #101828',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          </div>
+        </div>
+      )}
       {/* Order Placed Popup */}
       {orderPlaced && (
         <div style={{
@@ -529,7 +696,12 @@ export default function App() {
             border: '2px solid #233',
           }}>
             <div style={{fontSize: '1.35em', fontWeight: 700, marginBottom: 12, color: '#6ec1ff', letterSpacing: 1}}>Order Placed!</div>
-            <div style={{fontSize: '1.08em', marginBottom: 18, color: '#e0f2fe'}}>Thank you for your order.<br />You will receive a call soon for confirmation and pickup/delivery details.</div>
+            <div style={{fontSize: '1.08em', marginBottom: 18, color: '#e0f2fe'}}>
+              {orderPayment === 'Paid Online' ? 
+                'Thank you for your order and payment!<br />You will receive a call soon for confirmation and pickup/delivery details.' :
+                'Thank you for your order.<br />You will receive a call soon for confirmation and pickup/delivery details.'
+              }
+            </div>
             <button onClick={() => { setOrderPlaced(false); setPage('home'); }} style={{
               background: 'linear-gradient(90deg, #6ec1ff 0%, #2563eb 100%)',
               color: '#101828',
@@ -1910,10 +2082,36 @@ export default function App() {
                         <span>Pay on delivery/pickup</span>
                       </label>
                       <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="payment" value="Pay Online" disabled style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Pay Online (Coming Soon)</span>
+                        <input type="radio" name="payment" value="Pay Online" checked={orderPayment === 'Pay Online'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Pay Online (Secure Payment)</span>
                       </label>
                     </div>
+                    {paymentError && (
+                      <div style={{ color: '#ff4d4d', fontSize: '0.95em', marginTop: 8, padding: '8px 12px', background: 'rgba(255, 77, 77, 0.1)', borderRadius: '6px', border: '1px solid rgba(255, 77, 77, 0.3)' }}>
+                        {paymentError}
+                      </div>
+                    )}
+                    {orderPayment === 'Pay Online' && (
+                      <div style={{
+                        background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
+                        color: '#101828',
+                        borderRadius: 10,
+                        margin: '16px 0 0 0',
+                        padding: '12px 16px',
+                        fontWeight: 'bold',
+                        fontSize: '0.95em',
+                        textAlign: 'center',
+                        boxShadow: '0 2px 8px #10182822',
+                        maxWidth: '100%',
+                        marginLeft: 'auto',
+                        marginRight: 'auto'
+                      }}>
+                        🔒 Secure Payment via Cashfree<br />
+                        <span style={{ fontSize: '0.9em', fontWeight: 'normal' }}>
+                          You'll be redirected to a secure payment gateway
+                        </span>
+                      </div>
+                    )}
                   </div>
                   {/* Privacy Note */}
                   {pickupType === 'SELF-PICKUP' && (
@@ -1952,30 +2150,30 @@ export default function App() {
               >
                 <button
                   type="button"
-                  disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading}
-                  onClick={handlePlaceOrder}
+                  disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading}
+                  onClick={orderPayment === 'Pay Online' ? handleOnlinePayment : handlePlaceOrder}
                   style={{
-                    background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff',
+                    background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading) ? '#233' : '#6ec1ff',
                     color: '#101828',
                     border: 'none',
                     borderRadius: '0.75em',
                     padding: '1em 0',
                     fontWeight: 700,
                     fontSize: '1.05em',
-                    cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer',
+                    cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading) ? 'not-allowed' : 'pointer',
                     width: '100%',
                     maxWidth: '100%',
                     boxShadow: '0 1px 4px #10182818',
                     transition: 'background 0.2s'
                   }}
                 >
-                  {loading ? (
+                  {(loading || paymentLoading) ? (
                     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24 }}>
                       <span className="checkout-spinner" style={{ width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }}></span>
                       <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                     </span>
                   ) : (
-                    'Place Order'
+                    orderPayment === 'Pay Online' ? 'Proceed to Payment' : 'Place Order'
                   )}
                 </button>
               </div>
@@ -2301,10 +2499,36 @@ export default function App() {
                         <span>Pay on delivery/pickup</span>
                       </label>
                       <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="payment" value="Pay Online" disabled style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Pay Online (Coming Soon)</span>
+                        <input type="radio" name="payment" value="Pay Online" checked={orderPayment === 'Pay Online'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Pay Online (Secure Payment)</span>
                       </label>
                     </div>
+                    {paymentError && (
+                      <div style={{ color: '#ff4d4d', fontSize: '0.95em', marginTop: 8, padding: '8px 12px', background: 'rgba(255, 77, 77, 0.1)', borderRadius: '6px', border: '1px solid rgba(255, 77, 77, 0.3)' }}>
+                        {paymentError}
+                      </div>
+                    )}
+                    {orderPayment === 'Pay Online' && (
+                      <div style={{
+                        background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
+                        color: '#101828',
+                        borderRadius: 10,
+                        margin: '16px 0 0 0',
+                        padding: '12px 16px',
+                        fontWeight: 'bold',
+                        fontSize: '0.95em',
+                        textAlign: 'center',
+                        boxShadow: '0 2px 8px #10182822',
+                        maxWidth: '100%',
+                        marginLeft: 'auto',
+                        marginRight: 'auto'
+                      }}>
+                        🔒 Secure Payment via Cashfree<br />
+                        <span style={{ fontSize: '0.9em', fontWeight: 'normal' }}>
+                          You'll be redirected to a secure payment gateway
+                        </span>
+                      </div>
+                    )}
                   </div>
                   {/* Privacy Note */}
                   {pickupType === 'SELF-PICKUP' && (
@@ -2345,30 +2569,30 @@ export default function App() {
               >
                 <button
                   type="button"
-                  disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading}
-                  onClick={handlePlaceOrder}
+                  disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading}
+                  onClick={orderPayment === 'Pay Online' ? handleOnlinePayment : handlePlaceOrder}
                   style={{
-                    background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? '#233' : '#6ec1ff',
+                    background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading) ? '#233' : '#6ec1ff',
                     color: '#101828',
                     border: 'none',
                     borderRadius: '0.75em',
                     padding: '1em 0',
                     fontWeight: 700,
                     fontSize: '1.05em',
-                    cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment) ? 'not-allowed' : 'pointer',
+                    cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading) ? 'not-allowed' : 'pointer',
                     width: '100%',
                     maxWidth: '100%',
                     boxShadow: '0 1px 4px #10182818',
                     transition: 'background 0.2s'
                   }}
                 >
-                  {loading ? (
+                  {(loading || paymentLoading) ? (
                     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24 }}>
                       <span className="checkout-spinner" style={{ width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }}></span>
                       <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                     </span>
                   ) : (
-                    'Place Order'
+                    orderPayment === 'Pay Online' ? 'Proceed to Payment' : 'Place Order'
                   )}
                 </button>
               </div>
