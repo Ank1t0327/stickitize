@@ -330,8 +330,8 @@ export default function App() {
 
       // Redirect to Cashfree payment page
       if (paymentOrder.paymentSessionId) {
-        // For Cashfree checkout
-        const cashfreeUrl = `https://sandbox.cashfree.com/pg/view/${paymentOrder.paymentSessionId}`;
+        // For Cashfree checkout (production)
+        const cashfreeUrl = `https://payments.cashfree.com/pg/view/${paymentOrder.paymentSessionId}`;
         window.location.href = cashfreeUrl;
       } else {
         throw new Error('Payment session not created');
