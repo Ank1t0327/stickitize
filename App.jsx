@@ -1302,6 +1302,7 @@ export default function App() {
                               })}
                             </span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
+                            <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Payment: {order.payment || 'Pay on delivery/pickup'}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
                             <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery && deliveryCharge > 0 ? ' (includes ₹10 delivery)' : showDelivery && deliveryCharge === 0 ? ' (Free delivery!)' : ''}</span>
                           </div>
