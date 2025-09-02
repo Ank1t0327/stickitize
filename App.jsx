@@ -361,7 +361,16 @@ export default function App() {
       }
 
       const orderData = JSON.parse(pendingOrder);
-      
+
+      // Verify with backend/Cashfree before saving
+      const verifyRes = await fetch(`${API_BASE}/api/payments/verify?order_id=${encodeURIComponent(orderData.orderId)}`);
+      const verifyJson = await verifyRes.json();
+      if (!verifyRes.ok || (verifyJson.order_status && verifyJson.order_status !== 'PAID' && verifyJson.order_status !== 'SUCCESS')) {
+        console.error('Payment verify failed or not paid:', verifyJson);
+        setPaymentError('Payment not confirmed yet. If amount was debited, contact support.');
+        return;
+      }
+
       // Save order to backend
       await fetch(`${API_BASE}/orders`, {
         method: 'POST',
@@ -371,7 +380,7 @@ export default function App() {
 
       // Clear pending order
       localStorage.removeItem('pendingOrder');
-      
+
       // Show success message
       setOrderPlaced(true);
       setShowCheckout(false);
@@ -381,7 +390,7 @@ export default function App() {
       setOrderAddress('');
       setOrderPayment('Pay on delivery/pickup');
       setPickupType('SELF-PICKUP');
-      
+
     } catch (error) {
       console.error('Error saving order after payment:', error);
       alert('Payment successful but order could not be saved. Please contact support.');
