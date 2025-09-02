@@ -312,7 +312,7 @@ export default function App() {
       }
 
       const paymentOrder = await response.json();
-      const { paymentsUrl, hostedPaymentsUrl, checkoutUrl, mode, sessionHost, paymentSessionId } = paymentOrder || {};
+      const { checkoutUrl, paymentSessionId } = paymentOrder || {};
       
       // Store order details for after payment
       const orderData = {
@@ -326,16 +326,23 @@ export default function App() {
         paymentOrderId: paymentOrder.orderId
       };
 
-      // Store order data in localStorage for after payment completion
       localStorage.setItem('pendingOrder', JSON.stringify(orderData));
 
-      // Redirect to hosted Cashfree pages only (simplified reliable flow)
-      let redirectUrl = hostedPaymentsUrl || paymentsUrl || checkoutUrl;
-      if (!redirectUrl) {
-        throw new Error('Payment initiation failed: no URL or session id');
+      // Use Cashfree Checkout SDK (production)
+      if (paymentSessionId) {
+        try {
+          const { load } = await import('@cashfreepayments/cashfree-js');
+          const cf = await load({ mode: 'production' });
+          await cf.checkout({ paymentSessionId, redirectTarget: '_self' });
+          return;
+        } catch (e) {
+          console.warn('Checkout SDK failed, falling back to hosted URL:', e);
+        }
       }
-      console.log('Redirecting to Cashfree:', { redirectUrl, mode, sessionHost });
-      window.location.href = redirectUrl;
+
+      // Fallback to hosted checkout URL
+      if (!checkoutUrl) throw new Error('Payment initiation failed: no checkout URL');
+      window.location.href = checkoutUrl;
 
     } catch (error) {
       console.error('Payment error:', error);

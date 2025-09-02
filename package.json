@@ -5,7 +5,8 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "axios": "^1.7.7"
+    "axios": "^1.7.7",
+    "@cashfreepayments/cashfree-js": "^1.0.5"
   },
   "devDependencies": {
     "vite": "^4.0.0"
