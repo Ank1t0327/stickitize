@@ -329,75 +329,12 @@ export default function App() {
       // Store order data in localStorage for after payment completion
       localStorage.setItem('pendingOrder', JSON.stringify(orderData));
 
-      // Prefer Cashfree Checkout JS SDK to avoid hosted-page 404s
-      if (paymentSessionId) {
-        // First, wait briefly for globally-loaded SDK (from index.html)
-        const waitForCashfree = async (timeoutMs = 8000) => {
-          if (typeof window !== 'undefined' && window.Cashfree) return true;
-          const start = Date.now();
-          return new Promise((resolve) => {
-            const timer = setInterval(() => {
-              if (typeof window !== 'undefined' && window.Cashfree) {
-                clearInterval(timer);
-                resolve(true);
-              } else if (Date.now() - start > timeoutMs) {
-                clearInterval(timer);
-                resolve(false);
-              }
-            }, 200);
-          });
-        };
-
-        let hasSdk = await waitForCashfree();
-
-        // Try multiple SDK URLs for resilience
-        const sdkUrls = mode === 'PROD'
-          ? [
-              'https://sdk.cashfree.com/js/ui/2.0.0/cashfree.js',
-              'https://sdk.cashfree.com/js/ui/1.0.26/cashfree.prod.js'
-            ]
-          : [
-              'https://sdk.cashfree.com/js/ui/2.0.0/cashfree.sandbox.js',
-              'https://sdk.cashfree.com/js/ui-test/2.0.0/cashfree.js',
-              'https://sdk.cashfree.com/js/ui/1.0.26/cashfree.sandbox.js'
-            ];
-
-        const loadSdk = async () => {
-          if (window && window.Cashfree) return true;
-          for (const url of sdkUrls) {
-            // eslint-disable-next-line no-await-in-loop
-            const ok = await new Promise((resolve) => {
-              const script = document.createElement('script');
-              script.src = url;
-              script.async = true;
-              script.onload = () => resolve(true);
-              script.onerror = () => resolve(false);
-              document.body.appendChild(script);
-            });
-            if (ok && window && window.Cashfree) return true;
-          }
-          return false;
-        };
-
-        if (!hasSdk) {
-          hasSdk = await loadSdk();
-        }
-
-        if (!hasSdk || !window.Cashfree) {
-          throw new Error('Failed to load Cashfree SDK');
-        }
-
-        const cashfree = new window.Cashfree({ mode: mode === 'PROD' ? 'PROD' : 'TEST' });
-        await cashfree.checkout({ paymentSessionId });
-        return; // checkout will handle navigation/overlay
-      }
-
-      // Fallback: Redirect to hosted payment pages if SDK unavailable
+      // Redirect to hosted Cashfree pages only (simplified reliable flow)
       let redirectUrl = hostedPaymentsUrl || paymentsUrl || checkoutUrl;
       if (!redirectUrl) {
         throw new Error('Payment initiation failed: no URL or session id');
       }
-      console.log('Redirecting to Cashfree (fallback):', { redirectUrl, mode, sessionHost });
+      console.log('Redirecting to Cashfree:', { redirectUrl, mode, sessionHost });
       window.location.href = redirectUrl;
 
     } catch (error) {
