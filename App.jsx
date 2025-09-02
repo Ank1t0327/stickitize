@@ -717,7 +717,7 @@ export default function App() {
             <div style={{fontSize: '1.35em', fontWeight: 700, marginBottom: 12, color: '#6ec1ff', letterSpacing: 1}}>Order Placed!</div>
             <div style={{fontSize: '1.08em', marginBottom: 18, color: '#e0f2fe'}}>
               {orderPayment === 'Paid Online' ? 
-                'Thank you for your order and payment!<br />You will receive a call soon for confirmation and pickup/delivery details.' :
+                'Thank you for your order and payment! You will receive a call soon for confirmation and pickup/delivery details.' :
                 'Thank you for your order.<br />You will receive a call soon for confirmation and pickup/delivery details.'
               }
             </div>
