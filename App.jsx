@@ -235,6 +235,14 @@ export default function App() {
     const product = getProductById(item.id);
     return { ...product, qty: item.qty };
   });
+  // Detect if any poster is in the cart
+  const hasPosterInCart = cartDetails.some(item => item.category === 'posters');
+  // Force online payment if posters are present
+  useEffect(() => {
+    if (hasPosterInCart && orderPayment !== 'Pay Online') {
+      setOrderPayment('Pay Online');
+    }
+  }, [hasPosterInCart]);
   // Calculate checkout total (including delivery if selected)
   const cartSubtotal = cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0);
   // Free delivery if subtotal >= 49 or address is BH3
@@ -2101,11 +2109,16 @@ export default function App() {
                         <input type="radio" name="payment" value="Pay Online" checked={orderPayment === 'Pay Online'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
                         <span>Pay Online</span>
                       </label>
-                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                      <label style={{ color: hasPosterInCart ? '#7aa4c7' : '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: hasPosterInCart ? 'not-allowed' : 'pointer', padding: '8px 0' }}>
+                        <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => !hasPosterInCart && setOrderPayment(e.target.value)} disabled={hasPosterInCart} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
                         <span>Pay on delivery/pickup</span>
                       </label>
                     </div>
+                    {hasPosterInCart && (
+                      <div style={{ color: '#ffdd57', fontSize: '0.95em', marginTop: 8, padding: '8px 12px', background: 'rgba(255, 221, 87, 0.1)', borderRadius: '6px', border: '1px solid rgba(255, 221, 87, 0.3)' }}>
+                        Only Pay Online is available when posters are in the cart.
+                      </div>
+                    )}
                     {paymentError && (
                       <div style={{ color: '#ff4d4d', fontSize: '0.95em', marginTop: 8, padding: '8px 12px', background: 'rgba(255, 77, 77, 0.1)', borderRadius: '6px', border: '1px solid rgba(255, 77, 77, 0.3)' }}>
                         {paymentError}
@@ -2498,11 +2511,16 @@ export default function App() {
                         <input type="radio" name="payment" value="Pay Online" checked={orderPayment === 'Pay Online'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
                         <span>Pay Online</span>
                       </label>
-                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                      <label style={{ color: hasPosterInCart ? '#7aa4c7' : '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: hasPosterInCart ? 'not-allowed' : 'pointer', padding: '8px 0' }}>
+                        <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => !hasPosterInCart && setOrderPayment(e.target.value)} disabled={hasPosterInCart} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
                         <span>Pay on delivery/pickup</span>
                       </label>
                     </div>
+                    {hasPosterInCart && (
+                      <div style={{ color: '#ffdd57', fontSize: '0.95em', marginTop: 8, padding: '8px 12px', background: 'rgba(255, 221, 87, 0.1)', borderRadius: '6px', border: '1px solid rgba(255, 221, 87, 0.3)' }}>
+                        Only Pay Online is available when posters are in the cart.
+                      </div>
+                    )}
                     {paymentError && (
                       <div style={{ color: '#ff4d4d', fontSize: '0.95em', marginTop: 8, padding: '8px 12px', background: 'rgba(255, 77, 77, 0.1)', borderRadius: '6px', border: '1px solid rgba(255, 77, 77, 0.3)' }}>
                         {paymentError}
