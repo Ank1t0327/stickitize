@@ -401,13 +401,13 @@ export default function App() {
   // Check for payment success on page load
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const orderStatus = urlParams.get('order_status');
     const orderId = urlParams.get('order_id');
-    
-    if (orderStatus === 'SUCCESS' && orderId) {
+    const orderStatus = urlParams.get('order_status');
+
+    // If we have order_id, attempt verification regardless of order_status
+    if (orderId) {
       handlePaymentSuccess();
       setTimeout(() => {
-        // Clean to home after a short delay
         window.history.replaceState({}, document.title, window.location.pathname);
       }, 3500);
     } else if (orderStatus === 'FAILED') {
