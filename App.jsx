@@ -84,7 +84,7 @@ export default function App() {
   // Remove OTP/Phone states
   const [phone, setPhone] = useState('');
   const [orderAddress, setOrderAddress] = useState('');
-  const [orderPayment, setOrderPayment] = useState('Pay on delivery/pickup');
+  const [orderPayment, setOrderPayment] = useState('Pay Online');
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [pickupType, setPickupType] = useState('SELF-PICKUP');
   const [adminLoggedIn, setAdminLoggedIn] = useState(false);
@@ -718,7 +718,7 @@ export default function App() {
             <div style={{fontSize: '1.08em', marginBottom: 18, color: '#e0f2fe'}}>
               {orderPayment === 'Paid Online' ? 
                 'Thank you for your order and payment! You will receive a call soon for confirmation and pickup/delivery details.' :
-                'Thank you for your order.<br />You will receive a call soon for confirmation and pickup/delivery details.'
+                'Thank you for your order. You will receive a call soon for confirmation and pickup/delivery details.'
               }
             </div>
             <button onClick={() => { setOrderPlaced(false); setPage('home'); }} style={{
@@ -2098,12 +2098,12 @@ export default function App() {
                     <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Payment Method *</label>
                     <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
                       <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Pay on delivery/pickup</span>
+                        <input type="radio" name="payment" value="Pay Online" checked={orderPayment === 'Pay Online'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Pay Online</span>
                       </label>
                       <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="payment" value="Pay Online" checked={orderPayment === 'Pay Online'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Pay Online (Secure Payment)</span>
+                        <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <span>Pay on delivery/pickup</span>
                       </label>
                     </div>
                     {paymentError && (
@@ -2111,30 +2111,10 @@ export default function App() {
                         {paymentError}
                       </div>
                     )}
-                    {orderPayment === 'Pay Online' && (
-                      <div style={{
-                        background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
-                        color: '#101828',
-                        borderRadius: 10,
-                        margin: '16px 0 0 0',
-                        padding: '12px 16px',
-                        fontWeight: 'bold',
-                        fontSize: '0.95em',
-                        textAlign: 'center',
-                        boxShadow: '0 2px 8px #10182822',
-                        maxWidth: '100%',
-                        marginLeft: 'auto',
-                        marginRight: 'auto'
-                      }}>
-                        🔒 Secure Payment via Cashfree<br />
-                        <span style={{ fontSize: '0.9em', fontWeight: 'normal' }}>
-                          You'll be redirected to a secure payment gateway
-                        </span>
-                      </div>
-                    )}
+                    {/* Remove extra secure payment banner when Pay Online is selected */}
                   </div>
                   {/* Privacy Note */}
-                  {pickupType === 'SELF-PICKUP' && (
+                  {pickupType === 'SELF-PICKUP' && orderPayment !== 'Pay Online' && (
                     <div style={{
                       width: '100%',
                       maxWidth: 320,
