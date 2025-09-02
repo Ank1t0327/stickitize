@@ -322,6 +322,7 @@ export default function App() {
         orderType: pickupType,
         address: pickupType === 'DELIVERY' ? orderAddress : 'SELF-PICKUP',
         payment: 'Paid Online',
+        status: 'PAID',
         orderId: orderId,
         paymentOrderId: paymentOrder.orderId
       };
@@ -405,8 +406,10 @@ export default function App() {
     
     if (orderStatus === 'SUCCESS' && orderId) {
       handlePaymentSuccess();
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+      setTimeout(() => {
+        // Clean to home after a short delay
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }, 3500);
     } else if (orderStatus === 'FAILED') {
       // Handle payment failure
       setPaymentError('Payment was cancelled or failed. Please try again.');
@@ -1302,7 +1305,7 @@ export default function App() {
                               })}
                             </span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
-                            <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Payment: {order.payment || 'Pay on delivery/pickup'}</span>
+                            <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Payment: {order.payment || 'Pay on delivery/pickup'}{order.status ? ` • Status: ${order.status}` : ''}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
                             <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery && deliveryCharge > 0 ? ' (includes ₹10 delivery)' : showDelivery && deliveryCharge === 0 ? ' (Free delivery!)' : ''}</span>
                           </div>
