@@ -1376,7 +1376,7 @@ export default function App() {
               <p style={{marginBottom: '16px'}}><strong>Last updated:</strong> {new Date().toLocaleDateString()}</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>1. Information We Collect</h3>
-              <p style={{marginBottom: '16px'}}>We (operated by Ankit) collect information you provide directly to us, such as when you create an account, make a purchase, or contact us. This may include:</p>
+              <p style={{marginBottom: '16px'}}>We collect information you provide directly to us, such as when you create an account, make a purchase, or contact us. This may include:</p>
               <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
                 <li>Name and contact information</li>
                 <li>Payment information (processed securely through Razorpay)</li>
@@ -1385,7 +1385,7 @@ export default function App() {
               </ul>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>2. How We Use Your Information</h3>
-              <p style={{marginBottom: '16px'}}>We (operated by Ankit) use the information we collect to:</p>
+              <p style={{marginBottom: '16px'}}>We use the information we collect to:</p>
               <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
                 <li>Process and fulfill your orders</li>
                 <li>Communicate with you about your orders</li>
@@ -1395,7 +1395,7 @@ export default function App() {
               </ul>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Information Sharing</h3>
-              <p style={{marginBottom: '16px'}}>We (operated by Ankit) do not sell, trade, or otherwise transfer your personal information to third parties except:</p>
+              <p style={{marginBottom: '16px'}}>We do not sell, trade, or otherwise transfer your personal information to third parties except:</p>
               <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
                 <li>To process payments through Razorpay</li>
                 <li>To fulfill orders through our delivery partners</li>
@@ -1419,6 +1419,7 @@ export default function App() {
               <p style={{marginBottom: '16px'}}>If you have any questions about this Privacy Policy, please contact us at:</p>
               <p style={{marginBottom: '16px'}}>Email: <a href="mailto:ank1t032718@gmail.com" style={{color: '#6ec1ff'}}>ank1t032718@gmail.com</a></p>
               <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919138442368" style={{color: '#6ec1ff'}}>+91 9138442368</a></p>
+              <p style={{marginBottom: '16px'}}>Business Owner: <strong>Ankit</strong></p>
               
               <div style={{marginTop: '32px', padding: '20px', background: 'rgba(110, 193, 255, 0.1)', borderRadius: '8px', border: '1px solid #6ec1ff'}}>
                 <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>ank1t032718@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
@@ -1435,16 +1436,16 @@ export default function App() {
               <p style={{marginBottom: '16px'}}><strong>Last updated:</strong> {new Date().toLocaleDateString()}</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>1. Acceptance of Terms</h3>
-              <p style={{marginBottom: '16px'}}>By accessing and using STICKITIZE's website and services (operated by Ankit), you accept and agree to be bound by these Terms and Conditions.</p>
+              <p style={{marginBottom: '16px'}}>By accessing and using STICKITIZE's website and services, you accept and agree to be bound by these Terms and Conditions.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>2. Products and Services</h3>
-              <p style={{marginBottom: '16px'}}>We (operated by Ankit) offer high-quality stickers and related products. All products are subject to availability and may be discontinued without notice.</p>
+              <p style={{marginBottom: '16px'}}>We offer high-quality stickers and related products. All products are subject to availability and may be discontinued without notice.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Pricing and Payment</h3>
-              <p style={{marginBottom: '16px'}}>All prices are in Indian Rupees (₹) and include applicable taxes. Payment is processed securely through Razorpay. We (operated by Ankit) reserve the right to modify prices at any time.</p>
+              <p style={{marginBottom: '16px'}}>All prices are in Indian Rupees (₹) and include applicable taxes. Payment is processed securely through Razorpay. We reserve the right to modify prices at any time.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>4. Order Processing</h3>
-              <p style={{marginBottom: '16px'}}>Orders are processed upon receipt of payment confirmation. We (operated by Ankit) will notify you of order status via email or phone.</p>
+              <p style={{marginBottom: '16px'}}>Orders are processed upon receipt of payment confirmation. We will notify you of order status via email or phone.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>5. Intellectual Property</h3>
               <p style={{marginBottom: '16px'}}>All content on this website, including designs, logos, and product images, is the property of STICKITIZE and is protected by copyright laws.</p>
@@ -1459,6 +1460,7 @@ export default function App() {
               <p style={{marginBottom: '16px'}}>For questions about these terms, contact us at:</p>
               <p style={{marginBottom: '16px'}}>Email: <a href="mailto:ank1t032718@gmail.com" style={{color: '#6ec1ff'}}>ank1t032718@gmail.com</a></p>
               <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919138442368" style={{color: '#6ec1ff'}}>+91 9138442368</a></p>
+              <p style={{marginBottom: '16px'}}>Business Owner: <strong>Ankit</strong></p>
               
               <div style={{marginTop: '32px', padding: '20px', background: 'rgba(110, 193, 255, 0.1)', borderRadius: '8px', border: '1px solid #6ec1ff'}}>
                 <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>ank1t032718@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
@@ -1475,7 +1477,7 @@ export default function App() {
               <p style={{marginBottom: '16px'}}><strong>Last updated:</strong> {new Date().toLocaleDateString()}</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>1. Order Cancellation</h3>
-              <p style={{marginBottom: '16px'}}>You may cancel your order within 2 hours of placing it, provided the order has not been processed for shipping. To cancel, contact us (operated by Ankit) immediately.</p>
+              <p style={{marginBottom: '16px'}}>You may cancel your order within 2 hours of placing it, provided the order has not been processed for shipping. To cancel, contact us immediately.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>2. Refund Eligibility</h3>
               <p style={{marginBottom: '16px'}}>Refunds are available in the following cases:</p>
@@ -1489,10 +1491,10 @@ export default function App() {
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Refund Process</h3>
               <p style={{marginBottom: '16px'}}>To request a refund:</p>
               <ol style={{marginLeft: '20px', marginBottom: '16px'}}>
-                <li>Contact us (operated by Ankit) within 48 hours of receiving your order</li>
+                <li>Contact us within 48 hours of receiving your order</li>
                 <li>Provide order details and reason for refund</li>
                 <li>Include photos if applicable (for damaged products)</li>
-                <li>We (operated by Ankit) will review and process within 3-5 business days</li>
+                <li>We will review and process within 3-5 business days</li>
               </ol>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>4. Refund Timeline</h3>
@@ -1510,6 +1512,7 @@ export default function App() {
               <p style={{marginBottom: '16px'}}>For refund requests or questions, contact us at:</p>
               <p style={{marginBottom: '16px'}}>Email: <a href="mailto:ank1t032718@gmail.com" style={{color: '#6ec1ff'}}>ank1t032718@gmail.com</a></p>
               <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919138442368" style={{color: '#6ec1ff'}}>+91 9138442368</a></p>
+              <p style={{marginBottom: '16px'}}>Business Owner: <strong>Ankit</strong></p>
               
               <div style={{marginTop: '32px', padding: '20px', background: 'rgba(110, 193, 255, 0.1)', borderRadius: '8px', border: '1px solid #6ec1ff'}}>
                 <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>ank1t032718@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
@@ -1526,10 +1529,10 @@ export default function App() {
               <p style={{marginBottom: '16px'}}><strong>Last updated:</strong> {new Date().toLocaleDateString()}</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>1. Delivery Areas</h3>
-              <p style={{marginBottom: '16px'}}>We (operated by Ankit) currently deliver to all major cities and towns across India. Delivery availability will be confirmed at checkout.</p>
+              <p style={{marginBottom: '16px'}}>We currently deliver to all major cities and towns across India. Delivery availability will be confirmed at checkout.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>2. Delivery Options</h3>
-              <p style={{marginBottom: '16px'}}>We (operated by Ankit) offer two delivery options:</p>
+              <p style={{marginBottom: '16px'}}>We offer two delivery options:</p>
               <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
                 <li><strong>Standard Delivery:</strong> 3-5 business days (₹10 charge for orders under ₹49)</li>
                 <li><strong>Express Delivery:</strong> 1-2 business days (₹25 additional charge)</li>
@@ -1542,20 +1545,21 @@ export default function App() {
               <p style={{marginBottom: '16px'}}>Orders are typically processed within 24 hours of payment confirmation. You will receive tracking information via email/SMS.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>5. Delivery Partners</h3>
-              <p style={{marginBottom: '16px'}}>We (operated by Ankit) partner with reliable courier services including India Post, DTDC, and other regional couriers to ensure safe delivery.</p>
+              <p style={{marginBottom: '16px'}}>We partner with reliable courier services including India Post, DTDC, and other regional couriers to ensure safe delivery.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>6. Delivery Issues</h3>
               <p style={{marginBottom: '16px'}}>If you experience delivery issues:</p>
               <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
-                <li>Contact us (operated by Ankit) immediately</li>
+                <li>Contact us immediately</li>
                 <li>Provide order number and issue details</li>
-                <li>We (operated by Ankit) will coordinate with the courier to resolve</li>
+                <li>We will coordinate with the courier to resolve</li>
               </ul>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>7. Contact Information</h3>
               <p style={{marginBottom: '16px'}}>For delivery-related queries, contact us at:</p>
               <p style={{marginBottom: '16px'}}>Email: <a href="mailto:ank1t032718@gmail.com" style={{color: '#6ec1ff'}}>ank1t032718@gmail.com</a></p>
               <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919138442368" style={{color: '#6ec1ff'}}>+91 9138442368</a></p>
+              <p style={{marginBottom: '16px'}}>Business Owner: <strong>Ankit</strong></p>
               
               <div style={{marginTop: '32px', padding: '20px', background: 'rgba(110, 193, 255, 0.1)', borderRadius: '8px', border: '1px solid #6ec1ff'}}>
                 <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>ank1t032718@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
