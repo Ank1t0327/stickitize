@@ -1215,7 +1215,7 @@ export default function App() {
                 )}
               </form>
               <div className="contact-details" style={{marginTop: '32px', color: '#fff', textAlign: 'center'}}>
-                <p><strong>Email:</strong> <a href="mailto:ank1t032718@gmail.com" style={{color: '#6ec1ff'}}>ank1t032718@gmail.com</a></p>
+                <p><strong>Email:</strong> <a href="mailto:8stickbuy@gmail.com" style={{color: '#6ec1ff'}}>8stickbuy@gmail.com</a></p>
                 <p><strong>Phone:</strong> <a href="tel:+919138442368" style={{color: '#6ec1ff'}}>+91 9138442368</a></p>
                 {/* <p>Instagram: <a href="https://instagram.com/stickitize" target="_blank" rel="noopener" style={{color: '#6ec1ff'}}>@stickitize</a></p> */}
               </div>
@@ -1417,12 +1417,11 @@ export default function App() {
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>6. Contact Us</h3>
               <p style={{marginBottom: '16px'}}>If you have any questions about this Privacy Policy, please contact us at:</p>
-              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:ank1t032718@gmail.com" style={{color: '#6ec1ff'}}>ank1t032718@gmail.com</a></p>
+              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:8stickbuy@gmail.com" style={{color: '#6ec1ff'}}>8stickbuy@gmail.com</a></p>
               <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919138442368" style={{color: '#6ec1ff'}}>+91 9138442368</a></p>
-              <p style={{marginBottom: '16px'}}>Business Owner: <strong>Ankit</strong></p>
               
               <div style={{marginTop: '32px', padding: '20px', background: 'rgba(110, 193, 255, 0.1)', borderRadius: '8px', border: '1px solid #6ec1ff'}}>
-                <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>ank1t032718@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
+                <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>8stickbuy@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
               </div>
             </div>
           </section>
@@ -1458,12 +1457,12 @@ export default function App() {
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>8. Contact Information</h3>
               <p style={{marginBottom: '16px'}}>For questions about these terms, contact us at:</p>
-              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:ank1t032718@gmail.com" style={{color: '#6ec1ff'}}>ank1t032718@gmail.com</a></p>
+              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:8stickbuy@gmail.com" style={{color: '#6ec1ff'}}>8stickbuy@gmail.com</a></p>
               <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919138442368" style={{color: '#6ec1ff'}}>+91 9138442368</a></p>
               <p style={{marginBottom: '16px'}}>Business Owner: <strong>Ankit</strong></p>
               
               <div style={{marginTop: '32px', padding: '20px', background: 'rgba(110, 193, 255, 0.1)', borderRadius: '8px', border: '1px solid #6ec1ff'}}>
-                <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>ank1t032718@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
+                <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>8stickbuy@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
               </div>
             </div>
           </section>
@@ -1510,12 +1509,12 @@ export default function App() {
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>6. Contact Us</h3>
               <p style={{marginBottom: '16px'}}>For refund requests or questions, contact us at:</p>
-              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:ank1t032718@gmail.com" style={{color: '#6ec1ff'}}>ank1t032718@gmail.com</a></p>
+              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:8stickbuy@gmail.com" style={{color: '#6ec1ff'}}>8stickbuy@gmail.com</a></p>
               <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919138442368" style={{color: '#6ec1ff'}}>+91 9138442368</a></p>
               <p style={{marginBottom: '16px'}}>Business Owner: <strong>Ankit</strong></p>
               
               <div style={{marginTop: '32px', padding: '20px', background: 'rgba(110, 193, 255, 0.1)', borderRadius: '8px', border: '1px solid #6ec1ff'}}>
-                <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>ank1t032718@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
+                <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>8stickbuy@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
               </div>
             </div>
           </section>
@@ -1557,12 +1556,12 @@ export default function App() {
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>7. Contact Information</h3>
               <p style={{marginBottom: '16px'}}>For delivery-related queries, contact us at:</p>
-              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:ank1t032718@gmail.com" style={{color: '#6ec1ff'}}>ank1t032718@gmail.com</a></p>
+              <p style={{marginBottom: '16px'}}>Email: <a href="mailto:8stickbuy@gmail.com" style={{color: '#6ec1ff'}}>8stickbuy@gmail.com</a></p>
               <p style={{marginBottom: '16px'}}>Phone: <a href="tel:+919138442368" style={{color: '#6ec1ff'}}>+91 9138442368</a></p>
               <p style={{marginBottom: '16px'}}>Business Owner: <strong>Ankit</strong></p>
               
               <div style={{marginTop: '32px', padding: '20px', background: 'rgba(110, 193, 255, 0.1)', borderRadius: '8px', border: '1px solid #6ec1ff'}}>
-                <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>ank1t032718@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
+                <p style={{marginBottom: '16px', color: '#6ec1ff', fontWeight: 'bold'}}>For any queries, you can reach us at <strong>8stickbuy@gmail.com</strong> or call us at <strong>+91 9138442368</strong>.</p>
               </div>
             </div>
           </section>
