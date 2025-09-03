@@ -1379,7 +1379,7 @@ export default function App() {
               <p style={{marginBottom: '16px'}}>We collect information you provide directly to us, such as when you create an account, make a purchase, or contact us. This may include:</p>
               <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
                 <li>Name and contact information</li>
-                <li>Payment information (processed securely through Razorpay)</li>
+                <li>Payment information (processed securely through Cashfree)</li>
                 <li>Order history and preferences</li>
                 <li>Communication records</li>
               </ul>
@@ -1397,7 +1397,7 @@ export default function App() {
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Information Sharing</h3>
               <p style={{marginBottom: '16px'}}>We do not sell, trade, or otherwise transfer your personal information to third parties except:</p>
               <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
-                <li>To process payments through Razorpay</li>
+                <li>To process payments through Cashfree</li>
                 <li>To fulfill orders through our delivery partners</li>
                 <li>When required by law</li>
                 <li>With your explicit consent</li>
@@ -1442,7 +1442,7 @@ export default function App() {
               <p style={{marginBottom: '16px'}}>We offer high-quality stickers and related products. All products are subject to availability and may be discontinued without notice.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Pricing and Payment</h3>
-              <p style={{marginBottom: '16px'}}>All prices are in Indian Rupees (₹) and include applicable taxes. Payment is processed securely through Razorpay. We reserve the right to modify prices at any time.</p>
+              <p style={{marginBottom: '16px'}}>All prices are in Indian Rupees (₹) and include applicable taxes. Payment is processed securely through Cashfree. We reserve the right to modify prices at any time.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>4. Order Processing</h3>
               <p style={{marginBottom: '16px'}}>Orders are processed upon receipt of payment confirmation. We will notify you of order status via email or phone.</p>
