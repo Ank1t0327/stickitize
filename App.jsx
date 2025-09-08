@@ -110,11 +110,34 @@ export default function App() {
   const [hiddenStickers, setHiddenStickers] = useState([]); // Track stickers whose images failed to load
   const [paymentLoading, setPaymentLoading] = useState(false); // New state for payment loading
   const [paymentError, setPaymentError] = useState(''); // New state for payment error
+  // Maintenance mode config (loaded from /public/site-config.json)
+  const [siteConfig, setSiteConfig] = useState({ maintenance: false, headline: '', message: '', resumeDate: '' });
+  const [configLoaded, setConfigLoaded] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 800);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Load site configuration (for maintenance mode) from a static JSON so it can be toggled easily
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const response = await fetch('/site-config.json', { cache: 'no-store' });
+        if (response.ok) {
+          const data = await response.json();
+          setSiteConfig(data || { maintenance: false });
+        } else {
+          setSiteConfig({ maintenance: false });
+        }
+      } catch (err) {
+        setSiteConfig({ maintenance: false });
+      } finally {
+        setConfigLoaded(true);
+      }
+    }
+    loadConfig();
   }, []);
 
   // Add useEffect to sync page state with URL hash
@@ -171,6 +194,54 @@ export default function App() {
   const handleNavToggle = () => {
     setNavOpen(open => !open);
   };
+
+  // Maintenance gate: if enabled, show a simple, professional maintenance page
+  if (configLoaded && siteConfig.maintenance) {
+    const headline = siteConfig.headline || "We'll be back soon";
+    const message = siteConfig.message || 'We\'re making improvements and will resume services shortly.';
+    const resume = siteConfig.resumeDate || '';
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#0f172a',
+        color: '#e2e8f0',
+        padding: '24px'
+      }}>
+        <div style={{
+          width: '100%',
+          maxWidth: '720px',
+          textAlign: 'center',
+          background: 'rgba(15, 23, 42, 0.6)',
+          border: '1px solid rgba(148, 163, 184, 0.15)',
+          borderRadius: '16px',
+          padding: '40px'
+        }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '64px',
+            height: '64px',
+            borderRadius: '999px',
+            background: 'rgba(59, 130, 246, 0.15)',
+            color: '#60a5fa',
+            marginBottom: '16px',
+            fontSize: '28px',
+            fontWeight: 700
+          }}>S</div>
+          <h1 style={{ fontSize: '28px', lineHeight: 1.2, margin: '0 0 8px 0', color: '#f8fafc' }}>{headline}</h1>
+          <p style={{ fontSize: '16px', margin: '0 0 12px 0', color: '#cbd5e1' }}>{message}</p>
+          {resume ? (
+            <p style={{ fontSize: '15px', margin: 0, color: '#94a3b8' }}>Services will resume on <strong style={{ color: '#f1f5f9' }}>{resume}</strong>.</p>
+          ) : null}
+          <div style={{ marginTop: '24px', fontSize: '13px', color: '#94a3b8' }}>Thank you for your patience.</div>
+        </div>
+      </div>
+    );
+  }
 
   // Add to cart logic
   // Animate cart icon when item is added
