@@ -3158,24 +3158,7 @@ function SummaryDashboard({ adminToken }) {
           <SummaryCard title="Custom Stickers" value={`${data.customStickers?.count} (₹${data.customStickers?.earnings})`} />
           <SummaryCard title="Store Stickers" value={`${data.storeStickers?.count} (₹${data.storeStickers?.earnings})`} />
 
-          {/* Simple bar chart replacement using CSS */}
-          <div style={{gridColumn: '1 / -1', background: '#0f172a', border: '1px solid #233', borderRadius: 8, padding: 16}}>
-            <div style={{color: '#b3e0ff', marginBottom: 8, fontWeight: 700}}>Breakdown</div>
-            <div style={{display: 'flex', gap: 12, alignItems: 'flex-end', height: 140}}>
-              {['stickers','posters','customStickers','storeStickers'].map((k, i) => {
-                const max = Math.max(data.stickers?.earnings||0, data.posters?.earnings||0, data.customStickers?.earnings||0, data.storeStickers?.earnings||0) || 1;
-                const v = (data[k]?.earnings || 0) / max * 120;
-                const label = {stickers:'Stickers', posters:'Posters', customStickers:'Custom', storeStickers:'Store'}[k];
-                const color = ['#6ec1ff','#60a5fa','#4ade80','#ffd166'][i];
-                return (
-                  <div key={k} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6}}>
-                    <div style={{width: 36, height: v, background: color, borderRadius: 6}}></div>
-                    <div style={{color: '#b3e0ff', fontSize: '0.9em'}}>{label}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          {/* Breakdown chart removed for a simpler, focused summary */}
         </div>
       )}
     </div>
