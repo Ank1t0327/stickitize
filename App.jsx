@@ -1534,9 +1534,9 @@ export default function App() {
                         }
                         // Find the product by name in stickers only (remove undefined arrays)
                         const product = stickers.find(s => s.name === name);
-                        // If it's a custom sticker, price is 10
-                        const isCustom = name === 'Custom Sticker';
-                        const price = isCustom ? 10 : product ? parseFloat(product.price) : 7;
+                        // Detect custom stickers via explicit list or keyword fallback
+                        const isCustom = name === 'Custom Sticker' || customStickers.some(cs => cs.name === name) || /custom/i.test(name);
+                        const price = isCustom ? 10 : product ? parseFloat(product.price) : 10;
                         adminOrderSubtotal += price * qty;
                       });
                       // Add delivery charge if applicable (free if subtotal >= 70)
