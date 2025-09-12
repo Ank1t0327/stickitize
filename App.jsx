@@ -1796,7 +1796,7 @@ export default function App() {
                 <p>Please login as admin on the Admin page to access the summary.</p>
               </div>
             ) : (
-              <SummaryDashboard />
+              <SummaryDashboard adminToken={adminToken} />
             )}
           </section>
         )}
@@ -3071,7 +3071,7 @@ export default function App() {
   );
 }
 
-function SummaryDashboard() {
+function SummaryDashboard({ adminToken }) {
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [data, setData] = useState(null);
