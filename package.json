@@ -2,11 +2,13 @@
   "name": "stickitize-frontend",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "@cashfreepayments/cashfree-js": "^1.0.5",
+    "@vitejs/plugin-react": "^5.0.2",
     "axios": "^1.7.7",
-    "@cashfreepayments/cashfree-js": "^1.0.5"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"

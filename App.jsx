@@ -13,7 +13,8 @@ const categories = {
   girl: { name: 'Girl', folder: 'girl' },
   phone: { name: 'Phone', folder: 'phone' },
   sports: { name: 'Sports', folder: 'sports' },
-  fun: {name: 'Fun', folder: 'fun'}
+  fun: {name: 'Fun', folder: 'fun'},
+  custom: { name: 'Custom Stickers', folder: 'custom' }
 };
 
 // Dynamically import all sticker images from public/stickers/[category] using Vite's import.meta.glob
@@ -98,6 +99,11 @@ export default function App() {
   const [navOpen, setNavOpen] = useState(false); // New state for mobile nav
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 800);
   const [adminToken, setAdminToken] = useState(null); // Store admin token after login
+  const [customStickers, setCustomStickers] = useState([]); // Store custom stickers
+  const [uploadedImage, setUploadedImage] = useState(null); // Store uploaded image file
+  const [imagePreview, setImagePreview] = useState(null); // Store image preview URL
+  const [customStickerName, setCustomStickerName] = useState(''); // Store custom sticker name
+  const [uploading, setUploading] = useState(false); // Upload loading state
   const [loading, setLoading] = useState(false); // Global loading state
   //
   const [showCustom, setShowCustom] = useState(false);
@@ -110,34 +116,11 @@ export default function App() {
   const [hiddenStickers, setHiddenStickers] = useState([]); // Track stickers whose images failed to load
   const [paymentLoading, setPaymentLoading] = useState(false); // New state for payment loading
   const [paymentError, setPaymentError] = useState(''); // New state for payment error
-  // Maintenance mode config (loaded from /public/site-config.json)
-  const [siteConfig, setSiteConfig] = useState({ maintenance: false, headline: '', message: '', resumeDate: '' });
-  const [configLoaded, setConfigLoaded] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 800);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Load site configuration (for maintenance mode) from a static JSON so it can be toggled easily
-  useEffect(() => {
-    async function loadConfig() {
-      try {
-        const response = await fetch('/site-config.json', { cache: 'no-store' });
-        if (response.ok) {
-          const data = await response.json();
-          setSiteConfig(data || { maintenance: false });
-        } else {
-          setSiteConfig({ maintenance: false });
-        }
-      } catch (err) {
-        setSiteConfig({ maintenance: false });
-      } finally {
-        setConfigLoaded(true);
-      }
-    }
-    loadConfig();
   }, []);
 
   // Add useEffect to sync page state with URL hash
@@ -195,54 +178,6 @@ export default function App() {
     setNavOpen(open => !open);
   };
 
-  // Maintenance gate: if enabled, show a simple, professional maintenance page
-  if (configLoaded && siteConfig.maintenance) {
-    const headline = siteConfig.headline || "We'll be back soon";
-    const message = siteConfig.message || 'We\'re making improvements and will resume services shortly.';
-    const resume = siteConfig.resumeDate || '';
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#0f172a',
-        color: '#e2e8f0',
-        padding: '24px'
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '720px',
-          textAlign: 'center',
-          background: 'rgba(15, 23, 42, 0.6)',
-          border: '1px solid rgba(148, 163, 184, 0.15)',
-          borderRadius: '16px',
-          padding: '40px'
-        }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '64px',
-            height: '64px',
-            borderRadius: '999px',
-            background: 'rgba(59, 130, 246, 0.15)',
-            color: '#60a5fa',
-            marginBottom: '16px',
-            fontSize: '28px',
-            fontWeight: 700
-          }}>S</div>
-          <h1 style={{ fontSize: '28px', lineHeight: 1.2, margin: '0 0 8px 0', color: '#f8fafc' }}>{headline}</h1>
-          <p style={{ fontSize: '16px', margin: '0 0 12px 0', color: '#cbd5e1' }}>{message}</p>
-          {resume ? (
-            <p style={{ fontSize: '15px', margin: 0, color: '#94a3b8' }}>Services will resume on <strong style={{ color: '#f1f5f9' }}>{resume}</strong>.</p>
-          ) : null}
-          <div style={{ marginTop: '24px', fontSize: '13px', color: '#94a3b8' }}>Thank you for your patience.</div>
-        </div>
-      </div>
-    );
-  }
-
   // Add to cart logic
   // Animate cart icon when item is added
   useEffect(() => {
@@ -294,12 +229,96 @@ export default function App() {
     setCart(prev => prev.filter(item => item.id !== stickerId));
   };
 
+  // Custom sticker upload functions
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type and size
+      if (file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) { // 5MB limit
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImagePreview(e.target.result);
+          setUploadedImage(file);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert('Please upload a valid image file under 5MB');
+      }
+    }
+  };
+
+  const uploadCustomSticker = async () => {
+    if (!uploadedImage) {
+      alert('Please select an image first');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', uploadedImage);
+      formData.append('name', customStickerName || 'Custom Sticker');
+
+      const response = await fetch(`${API_BASE}/api/upload-custom-sticker`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Add to custom stickers list
+        setCustomStickers(prev => [...prev, result.sticker]);
+        // Add to cart
+        handleAddToCart(result.sticker.id);
+        // Reset form
+        setUploadedImage(null);
+        setImagePreview(null);
+        setCustomStickerName('');
+        // Clear file input
+        const fileInput = document.getElementById('custom-sticker-input');
+        if (fileInput) fileInput.value = '';
+        
+        alert('Custom sticker uploaded and added to cart!');
+      } else {
+        alert('Upload failed: ' + (result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Load custom stickers on component mount
+  useEffect(() => {
+    const loadCustomStickers = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/custom-stickers`);
+        const customStickers = await response.json();
+        setCustomStickers(customStickers);
+      } catch (error) {
+        console.error('Failed to load custom stickers:', error);
+      }
+    };
+    loadCustomStickers();
+  }, []);
+
   // Get total items in cart
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
   // Get cart product details (stickers, posters, packs)
   const getProductById = (id) => {
-    return stickers.find(s => s.id === id) || topPicks.find(s => s.id === id);
+    // Check regular stickers first
+    let product = stickers.find(s => s.id === id) || topPicks.find(s => s.id === id);
+    
+    // If not found, check custom stickers
+    if (!product) {
+      product = customStickers.find(s => s.id === id);
+    }
+    
+    return product;
   };
 
   const cartDetails = cart.map(item => {
@@ -316,8 +335,8 @@ export default function App() {
   }, [hasPosterInCart]);
   // Calculate checkout total (including delivery if selected)
   const cartSubtotal = cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0);
-  // Free delivery if subtotal >= 49 or address is BH3
-  const deliveryCharge = (pickupType === 'DELIVERY' && cartSubtotal < 49 && orderAddress !== 'BH3') ? 10 : 0;
+  // Free delivery if subtotal >= 70 or address is BH3
+  const deliveryCharge = (pickupType === 'DELIVERY' && cartSubtotal < 70 && orderAddress !== 'BH3') ? 10 : 0;
   const checkoutTotal = cartSubtotal + deliveryCharge;
 
   // Validate phone number format (must be exactly 10 digits)
@@ -985,7 +1004,7 @@ export default function App() {
                         alignItems: 'center',
                       }}>
                         <img
-                          src={item.img}
+                          src={item.imageUrl || item.img}
                           alt="Product"
                           style={{
                             cursor: 'pointer',
@@ -994,12 +1013,12 @@ export default function App() {
                             objectFit: 'contain',
                             borderRadius: 12,
                             marginBottom: 12,
-                            border: '2px solid #60a5fa',
+                            border: item.category === 'custom' ? '2px solid #4ade80' : '2px solid #60a5fa',
                             background: '#101522',
                             display: 'block',
                             boxSizing: 'border-box',
                           }}
-                          onClick={() => setZoomImg(item.img)}
+                          onClick={() => setZoomImg(item.imageUrl || item.img)}
                           onError={() => handleImageError(item.id)}
                           onContextMenu={e => e.preventDefault()}
                           onTouchStart={e => e.preventDefault()}
@@ -1009,6 +1028,11 @@ export default function App() {
                       </div>
                       <div className="store-info">
                         <span className="store-price">₹{item.price}</span>
+                        {item.category === 'custom' && (
+                          <div style={{ color: '#4ade80', fontWeight: 600, fontSize: '0.9em', marginTop: 4 }}>
+                            ✨ Custom Sticker
+                          </div>
+                        )}
                       </div>
                       <div className="store-actions">
                         {!inCart ? (
@@ -1077,7 +1101,47 @@ export default function App() {
               >
                 All Stickers
               </button>
-              {Object.entries(categories).filter(([key]) => key !== 'stickerpack').map(([key, category]) => (
+              {/* Eye-catching Custom Stickers button */}
+              <button
+                className={`category-btn${selectedCategory === 'custom' ? ' active' : ''}`}
+                onClick={() => setSelectedCategory('custom')}
+                style={{
+                  background: selectedCategory === 'custom' 
+                    ? 'linear-gradient(90deg, #4ade80, #6ec1ff)'
+                    : 'linear-gradient(90deg, rgba(74,222,128,0.15), rgba(110,193,255,0.15))',
+                  color: selectedCategory === 'custom' ? '#101828' : '#b3e0ff',
+                  border: selectedCategory === 'custom' ? '2px solid #4ade80' : '1px solid #6ec1ff',
+                  boxShadow: selectedCategory === 'custom' ? '0 6px 18px rgba(74,222,128,0.35)' : '0 2px 8px rgba(110,193,255,0.15)',
+                  borderRadius: '999px',
+                  padding: '10px 18px',
+                  fontWeight: 800,
+                  letterSpacing: 0.3,
+                  cursor: 'pointer',
+                  position: 'relative',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  transition: 'all 0.25s ease'
+                }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                <span style={{fontSize: '1.1em'}}>🎨</span>
+                <span>Custom Stickers</span>
+                <span style={{
+                  background: '#4ade80',
+                  color: '#0a1a2b',
+                  borderRadius: 999,
+                  padding: '2px 8px',
+                  fontSize: '0.75em',
+                  fontWeight: 900,
+                  marginLeft: 4,
+                  border: '1px solid #0a1a2b'
+                }}>
+                  NEW
+                </span>
+              </button>
+              {Object.entries(categories).filter(([key]) => key !== 'stickerpack' && key !== 'custom').map(([key, category]) => (
                 <button 
                   key={key}
                   className={`category-btn${selectedCategory === key ? ' active' : ''}`}
@@ -1110,13 +1174,13 @@ export default function App() {
                   fontWeight: 'bold',
                   fontSize: isMobile ? '1em' : '1.05em',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-              >
+                  transition: 'all 0.3s ease',
+                  display: 'none'
+                }}>
                 + Customized Stickers
               </button>
             </div>
-            {showCustom && (
+            {false && (
               <div style={{
                 background: 'rgba(30,40,60,0.9)',
                 border: '1px solid #233',
@@ -1180,11 +1244,123 @@ export default function App() {
                 </div>
               </div>
             )}
+            {/* Custom Sticker Upload Section */}
+            {selectedCategory === 'custom' && (
+              <div style={{
+                background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+                borderRadius: '16px',
+                padding: '24px',
+                marginBottom: '32px',
+                border: '2px solid #6ec1ff',
+                boxShadow: '0 8px 32px rgba(110, 193, 255, 0.2)'
+              }}>
+                <h3 style={{ color: '#6ec1ff', marginBottom: '20px', textAlign: 'center', fontSize: '1.5em' }}>
+                  Upload Your Custom Sticker
+                </h3>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+                  {/* File Upload */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '400px' }}>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleFileUpload}
+                      style={{ display: 'none' }}
+                      id="custom-sticker-input"
+                    />
+                    <label 
+                      htmlFor="custom-sticker-input" 
+                      style={{
+                        background: 'linear-gradient(45deg, #6ec1ff, #4ade80)',
+                        color: '#101828',
+                        padding: '12px 24px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                        fontSize: '1.1em',
+                        border: 'none',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 4px 15px rgba(110, 193, 255, 0.3)'
+                      }}
+                      onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                      onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                    >
+                      📁 Choose Image File
+                    </label>
+                    
+                    {/* Image Preview */}
+                    {imagePreview && (
+                      <div style={{ textAlign: 'center' }}>
+                        <img 
+                          src={imagePreview} 
+                          alt="Preview" 
+                          style={{
+                            maxWidth: '200px',
+                            maxHeight: '200px',
+                            borderRadius: '8px',
+                            border: '2px solid #6ec1ff',
+                            objectFit: 'contain'
+                          }}
+                        />
+                        <input 
+                          type="text" 
+                          placeholder="Enter sticker name (optional)"
+                          value={customStickerName}
+                          onChange={(e) => setCustomStickerName(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            marginTop: '12px',
+                            borderRadius: '6px',
+                            border: '1px solid #6ec1ff',
+                            background: 'rgba(30, 40, 60, 0.8)',
+                            color: '#fff',
+                            fontSize: '1em'
+                          }}
+                        />
+                        <button
+                          onClick={uploadCustomSticker}
+                          disabled={uploading}
+                          style={{
+                            background: uploading ? '#666' : 'linear-gradient(45deg, #4ade80, #6ec1ff)',
+                            color: '#101828',
+                            padding: '12px 24px',
+                            borderRadius: '8px',
+                            border: 'none',
+                            cursor: uploading ? 'not-allowed' : 'pointer',
+                            fontWeight: 'bold',
+                            fontSize: '1.1em',
+                            marginTop: '12px',
+                            width: '100%',
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          {uploading ? '⏳ Uploading...' : '🚀 Upload & Add to Cart'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div style={{ 
+                    color: '#b3e0ff', 
+                    fontSize: '0.9em', 
+                    textAlign: 'center',
+                    marginTop: '8px'
+                  }}>
+                    💡 Upload any image (max 5MB) and it will be added to your cart as a custom sticker for ₹10
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="store-grid">
               {(() => {
                 let products = [];
                 if (selectedCategory === 'all') {
                   products = interleavedAllStickers;
+                } else if (selectedCategory === 'custom') {
+                  products = customStickers;
                 } else {
                   products = stickers.filter(sticker => {
                     return sticker.category === selectedCategory;
@@ -1220,7 +1396,7 @@ export default function App() {
                         alignItems: 'center',
                       }}>
                         <img
-                          src={item.img}
+                          src={item.imageUrl || item.img}
                           alt="Product"
                           style={{
                             cursor: 'pointer',
@@ -1229,12 +1405,12 @@ export default function App() {
                             objectFit: 'contain',
                             borderRadius: 12,
                             marginBottom: 12,
-                            border: '2px solid #60a5fa',
+                            border: item.category === 'custom' ? '2px solid #4ade80' : '2px solid #60a5fa',
                             background: '#101522',
                             display: 'block',
                             boxSizing: 'border-box',
                           }}
-                          onClick={() => setZoomImg(item.img)}
+                          onClick={() => setZoomImg(item.imageUrl || item.img)}
                           onError={() => handleImageError(item.id)}
                           onContextMenu={e => e.preventDefault()}
                           onTouchStart={e => e.preventDefault()}
@@ -1246,6 +1422,11 @@ export default function App() {
                         <span className="store-price">₹{item.price}</span>
                         {item.category === 'posters' && (
                           <div style={{ color: '#b3e0ff', fontWeight: 600, fontSize: '0.98em', marginBottom: 2 }}>Size : A3</div>
+                        )}
+                        {item.category === 'custom' && (
+                          <div style={{ color: '#4ade80', fontWeight: 600, fontSize: '0.9em', marginTop: 4 }}>
+                            ✨ Custom Sticker
+                          </div>
                         )}
                       </div>
                       <div className="store-actions">
@@ -1358,9 +1539,9 @@ export default function App() {
                         const price = isCustom ? 10 : product ? parseFloat(product.price) : 7;
                         adminOrderSubtotal += price * qty;
                       });
-                      // Add delivery charge if applicable (free if subtotal >= 49)
+                      // Add delivery charge if applicable (free if subtotal >= 70)
                       const showDelivery = order.orderType === 'DELIVERY';
-                      const deliveryCharge = (showDelivery && adminOrderSubtotal < 49) ? 10 : 0;
+                      const deliveryCharge = (showDelivery && adminOrderSubtotal < 70) ? 10 : 0;
                       let total = adminOrderSubtotal;
                       if (showDelivery) total += deliveryCharge;
                       return (
@@ -1368,7 +1549,7 @@ export default function App() {
                           <div style={{display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0}}>
                             <span style={{color: '#fff', fontWeight: 'bold', fontSize: '1.1em'}}>{order.name}</span>
                             <span style={{color: '#b3e0ff', fontSize: '1em'}}>{order.phone}</span>
-                            <span style={{color: '#6ec1ff', fontSize: '0.98em', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap'}}>
+                            <div style={{color: '#6ec1ff', fontSize: '0.98em', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: '8px'}}>
                               {order.stickers && order.stickers.map((sticker, i) => {
                                 // Extract name
                                 const nameMatch = sticker.match(/^(.*) \(x(\d+)\)$/);
@@ -1377,12 +1558,37 @@ export default function App() {
                                   name = nameMatch[1];
                                 }
                                 const product = stickers.find(s => s.name === name);
-                                const category = product ? categories[product.category]?.name || product.category : 'Unknown';
+                                const customSticker = customStickers.find(s => s.name === name);
+                                const category = product ? categories[product.category]?.name || product.category : 
+                                              customSticker ? 'Custom Sticker' : 'Unknown';
+                                const isCustom = customSticker || name === 'Custom Sticker';
+                                
                                 return (
-                                  <span key={i}>{sticker} <span style={{color: '#60a5fa', fontSize: '0.95em', marginLeft: 4}}>[{category}]</span></span>
+                                  <div key={i} style={{display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px'}}>
+                                    {isCustom && customSticker && (
+                                      <img 
+                                        src={customSticker.imageUrl} 
+                                        alt={customSticker.name}
+                                        style={{
+                                          width: '30px',
+                                          height: '30px',
+                                          borderRadius: '4px',
+                                          border: '1px solid #4ade80',
+                                          objectFit: 'cover'
+                                        }}
+                                        onClick={() => setZoomImg(customSticker.imageUrl)}
+                                      />
+                                    )}
+                                    <span>
+                                      {sticker} 
+                                      <span style={{color: isCustom ? '#4ade80' : '#60a5fa', fontSize: '0.95em', marginLeft: 4}}>
+                                        [{category}]
+                                      </span>
+                                    </span>
+                                  </div>
                                 );
                               })}
-                            </span>
+                            </div>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Payment: {order.payment || 'Pay on delivery/pickup'}{order.status ? ` • Status: ${order.status}` : ''}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
@@ -1428,6 +1634,108 @@ export default function App() {
                                 'CLEAR'
                               )}
                             </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Custom Stickers Management section, visible only to admin */}
+                {adminLoggedIn && (
+                  <div className="admin-custom-stickers" style={{marginTop: '32px'}}>
+                    <h2 style={{color: '#6ec1ff', marginBottom: '18px'}}>Custom Stickers Uploaded by Users</h2>
+                    {customStickers.length === 0 ? (
+                      <p style={{color: '#fff'}}>No custom stickers uploaded yet.</p>
+                    ) : (
+                      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px'}}>
+                        {customStickers.map((sticker, idx) => (
+                          <div key={idx} style={{
+                            background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            border: '2px solid #4ade80',
+                            boxShadow: '0 4px 20px rgba(74, 222, 128, 0.2)'
+                          }}>
+                            <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                              {/* Sticker Image */}
+                              <div style={{textAlign: 'center'}}>
+                                <img 
+                                  src={sticker.imageUrl} 
+                                  alt={sticker.name}
+                                  style={{
+                                    maxWidth: '200px',
+                                    maxHeight: '200px',
+                                    borderRadius: '8px',
+                                    border: '2px solid #4ade80',
+                                    objectFit: 'contain',
+                                    background: '#101522',
+                                    cursor: 'pointer'
+                                  }}
+                                  onClick={() => setZoomImg(sticker.imageUrl)}
+                                />
+                              </div>
+                              
+                              {/* Sticker Details */}
+                              <div style={{textAlign: 'center'}}>
+                                <h3 style={{color: '#4ade80', marginBottom: '8px', fontSize: '1.2em'}}>
+                                  {sticker.name}
+                                </h3>
+                                <p style={{color: '#b3e0ff', marginBottom: '4px'}}>
+                                  Price: <span style={{color: '#4ade80', fontWeight: 'bold'}}>₹{sticker.price}</span>
+                                </p>
+                                <p style={{color: '#b3e0ff', marginBottom: '4px', fontSize: '0.9em'}}>
+                                  ID: {sticker.id}
+                                </p>
+                                <p style={{color: '#b3e0ff', marginBottom: '8px', fontSize: '0.9em'}}>
+                                  Uploaded: {new Date(sticker.createdAt).toLocaleDateString()}
+                                </p>
+                                
+                                {/* Action Buttons */}
+                                <div style={{display: 'flex', gap: '8px', justifyContent: 'center'}}>
+                                  <button 
+                                    onClick={() => setZoomImg(sticker.imageUrl)}
+                                    style={{
+                                      background: 'linear-gradient(45deg, #6ec1ff, #4ade80)',
+                                      color: '#101828',
+                                      border: 'none',
+                                      borderRadius: '6px',
+                                      padding: '8px 16px',
+                                      cursor: 'pointer',
+                                      fontWeight: 'bold',
+                                      fontSize: '0.9em'
+                                    }}
+                                  >
+                                    🔍 View Full Size
+                                  </button>
+                                  <button 
+                                    onClick={async () => {
+                                      if (confirm('Are you sure you want to delete this custom sticker?')) {
+                                        try {
+                                          await fetch(`${API_BASE}/api/custom-stickers/${sticker.id}`, { method: 'DELETE' });
+                                          setCustomStickers(prev => prev.filter(s => s.id !== sticker.id));
+                                          alert('Custom sticker deleted successfully');
+                                        } catch (err) {
+                                          alert('Failed to delete custom sticker');
+                                        }
+                                      }
+                                    }}
+                                    style={{
+                                      background: '#ff4d4d',
+                                      color: '#fff',
+                                      border: 'none',
+                                      borderRadius: '6px',
+                                      padding: '8px 16px',
+                                      cursor: 'pointer',
+                                      fontWeight: 'bold',
+                                      fontSize: '0.9em'
+                                    }}
+                                  >
+                                    🗑️ Delete
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1604,12 +1912,12 @@ export default function App() {
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>2. Delivery Options</h3>
               <p style={{marginBottom: '16px'}}>We offer two delivery options:</p>
               <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
-                <li><strong>Standard Delivery:</strong> 3-5 business days (₹10 charge for orders under ₹49)</li>
+                <li><strong>Standard Delivery:</strong> 3-5 business days (₹10 charge for orders under ₹70)</li>
                 <li><strong>Express Delivery:</strong> 1-2 business days (₹25 additional charge)</li>
               </ul>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Free Delivery</h3>
-              <p style={{marginBottom: '16px'}}>Free standard delivery is available on orders of ₹49 and above.</p>
+              <p style={{marginBottom: '16px'}}>Free standard delivery is available on orders of ₹70 and above.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>4. Order Processing</h3>
               <p style={{marginBottom: '16px'}}>Orders are typically processed within 24 hours of payment confirmation. You will receive tracking information via email/SMS.</p>
@@ -1744,7 +2052,7 @@ export default function App() {
             <button onClick={closeCartDrawer} style={{background: 'none', border: 'none', color: '#fff', fontSize: '2em', cursor: 'pointer', lineHeight: 1}}>&times;</button>
           </div>
           {/* Free Delivery Dynamic Message */}
-          {cartDetails.length > 0 && pickupType === 'DELIVERY' && cartSubtotal < 49 && (
+          {cartDetails.length > 0 && pickupType === 'DELIVERY' && cartSubtotal < 70 && (
             <div style={{
               background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
               color: '#101828',
@@ -1761,11 +2069,11 @@ export default function App() {
               marginLeft: 'auto',
               marginRight: 'auto',
             }}>
-              Add stickers worth <span style={{color: '#0a2342', fontWeight: 'bold'}}>₹{(49 - cartSubtotal).toFixed(2)}</span> for <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
+              Add stickers worth <span style={{color: '#0a2342', fontWeight: 'bold'}}>₹{(70 - cartSubtotal).toFixed(2)}</span> for <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
               <style>{`@keyframes fadeInHighlight { from { opacity: 0; background: #fff; } to { opacity: 1; background: linear-gradient(90deg, #6ec1ff 0%,rgb(74, 222, 178) 100%); } }`}</style>
             </div>
           )}
-          {cartDetails.length > 0 && pickupType === 'DELIVERY' && cartSubtotal >= 49 && (
+          {cartDetails.length > 0 && pickupType === 'DELIVERY' && cartSubtotal >= 70 && (
             <div style={{
               background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
               color: '#101828',
@@ -1803,10 +2111,10 @@ export default function App() {
                   minHeight: 90
                 }}>
                   <img
-                    src={item.img}
+                    src={item.imageUrl || item.img}
                     alt={item.name}
                     style={{width: 80, height: 80, objectFit: 'cover', borderRadius: '10px', flexShrink: 0, cursor: 'pointer'}}
-                    onClick={() => setZoomImg(item.img)}
+                    onClick={() => setZoomImg(item.imageUrl || item.img)}
                     onContextMenu={e => e.preventDefault()}
                     onTouchStart={e => e.preventDefault()}
                     onDragStart={e => e.preventDefault()}
@@ -1969,7 +2277,7 @@ export default function App() {
                   {cartDetails.map(item => (
                     <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       <img
-                        src={item.img}
+                        src={item.imageUrl || item.img}
                         alt="Sticker"
                         style={{
                           width: 38,
@@ -1979,7 +2287,7 @@ export default function App() {
                           border: '1.5px solid #6ec1ff',
                           cursor: 'pointer'
                         }}
-                        onClick={() => setZoomImg(item.img)}
+                        onClick={() => setZoomImg(item.imageUrl || item.img)}
                       />
                       <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
                         <span style={{ color: '#b3e0ff', fontSize: '1em', marginLeft: 8 }}>x{item.qty}</span>
@@ -2004,7 +2312,7 @@ export default function App() {
                     <span>₹{checkoutTotal.toFixed(2)}</span>
                   </div>
                   {/* Free Delivery Suggestion */}
-                  {pickupType === 'DELIVERY' && cartSubtotal < 49 && (
+                  {pickupType === 'DELIVERY' && cartSubtotal < 70 && (
                     <div style={{
                       background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
                       color: '#101828',
@@ -2019,7 +2327,7 @@ export default function App() {
                       marginLeft: 'auto',
                       marginRight: 'auto'
                     }}>
-                      Add stickers worth <span style={{ color: '#0a2342', fontWeight: 'bold' }}>₹{(49 - cartSubtotal).toFixed(2)}</span> for <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery</span>!
+                      Add stickers worth <span style={{ color: '#0a2342', fontWeight: 'bold' }}>₹{(70 - cartSubtotal).toFixed(2)}</span> for <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery</span>!
                       <br />
                       <button
                         type="button"
@@ -2042,7 +2350,7 @@ export default function App() {
                       </button>
                     </div>
                   )}
-                  {pickupType === 'DELIVERY' && cartSubtotal >= 49 && (
+                  {pickupType === 'DELIVERY' && cartSubtotal >= 70 && (
                     <div style={{
                       background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
                       color: '#101828',
@@ -2371,7 +2679,7 @@ export default function App() {
                   {cartDetails.map(item => (
                     <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       <img
-                        src={item.img}
+                        src={item.imageUrl || item.img}
                         alt="Sticker"
                         style={{
                           width: 38,
@@ -2381,7 +2689,7 @@ export default function App() {
                           border: '1.5px solid #6ec1ff',
                           cursor: 'pointer'
                         }}
-                        onClick={() => setZoomImg(item.img)}
+                        onClick={() => setZoomImg(item.imageUrl || item.img)}
                       />
                       <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
                         <span style={{ color: '#b3e0ff', fontSize: '1em', marginLeft: 8 }}>x{item.qty}</span>
@@ -2406,7 +2714,7 @@ export default function App() {
                     <span>₹{checkoutTotal.toFixed(2)}</span>
                   </div>
                   {/* Free Delivery Suggestion */}
-                  {pickupType === 'DELIVERY' && cartSubtotal < 49 && (
+                  {pickupType === 'DELIVERY' && cartSubtotal < 70 && (
                     <div style={{
                       background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
                       color: '#101828',
@@ -2421,7 +2729,7 @@ export default function App() {
                       marginLeft: 'auto',
                       marginRight: 'auto'
                     }}>
-                      Add stickers worth <span style={{ color: '#0a2342', fontWeight: 'bold' }}>₹{(49 - cartSubtotal).toFixed(2)}</span> for <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery</span>!
+                      Add stickers worth <span style={{ color: '#0a2342', fontWeight: 'bold' }}>₹{(70 - cartSubtotal).toFixed(2)}</span> for <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery</span>!
                       <br />
                       <button
                         type="button"
@@ -2444,7 +2752,7 @@ export default function App() {
                       </button>
                     </div>
                   )}
-                  {pickupType === 'DELIVERY' && cartSubtotal >= 49 && (
+                  {pickupType === 'DELIVERY' && cartSubtotal >= 70 && (
                     <div style={{
                       background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
                       color: '#101828',
