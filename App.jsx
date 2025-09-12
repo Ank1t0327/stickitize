@@ -150,6 +150,8 @@ export default function App() {
         setPage('refund');
       } else if (window.location.hash === '#shipping') {
         setPage('shipping');
+      } else if ((window.location.hash || '').toLowerCase() === '#summary') {
+        setPage('summary');
       } else {
         setPage('home');
       }
