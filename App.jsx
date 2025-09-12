@@ -1532,11 +1532,12 @@ export default function App() {
                           name = nameMatch[1];
                           qty = parseInt(nameMatch[2], 10);
                         }
-                        // Find the product by name in stickers only (remove undefined arrays)
-                        const product = stickers.find(s => s.name === name);
+                        // Resolve product from both stickers and top picks
+                        const product = stickers.find(s => s.name === name) || topPicks.find(s => s.name === name);
                         // Detect custom stickers via explicit list or keyword fallback
                         const isCustom = name === 'Custom Sticker' || customStickers.some(cs => cs.name === name) || /custom/i.test(name);
-                        const price = isCustom ? 10 : product ? parseFloat(product.price) : 10;
+                        // Pricing: customs ₹10, known product price, else default ₹7
+                        const price = isCustom ? 10 : product ? parseFloat(product.price) : 7;
                         adminOrderSubtotal += price * qty;
                       });
                       // Add delivery charge if applicable (free if subtotal >= 70)
