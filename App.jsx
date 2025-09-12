@@ -595,6 +595,10 @@ export default function App() {
       if (data && data.auth) {
         setAdminLoggedIn(true);
         setAdminToken(data.token || null);
+        try {
+          if (adminId) localStorage.setItem('adminId', adminId);
+          if (adminPw) localStorage.setItem('adminPass', adminPw);
+        } catch (e) {}
         await Promise.all([fetchOrders(), fetchContacts()]);
       } else {
         setAdminError('Invalid credentials');
@@ -3082,7 +3086,10 @@ function SummaryDashboard() {
       if (start) params.append('start', new Date(start).toISOString());
       if (end) params.append('end', new Date(end).toISOString());
       const res = await fetch(`${API_BASE}/api/summary?${params.toString()}`, {
-        headers: { 'x-admin-key': `${localStorage.getItem('adminId') || ''}:${localStorage.getItem('adminPass') || ''}` }
+        headers: {
+          'x-admin-key': `${localStorage.getItem('adminId') || ''}:${localStorage.getItem('adminPass') || ''}`,
+          'x-admin-token': adminToken || ''
+        }
       });
       if (!res.ok) throw new Error('Unauthorized or failed');
       const json = await res.json();
@@ -3100,7 +3107,10 @@ function SummaryDashboard() {
       setLoading(true);
       const res = await fetch(`${API_BASE}/api/summary/reset`, {
         method: 'POST',
-        headers: { 'x-admin-key': `${localStorage.getItem('adminId') || ''}:${localStorage.getItem('adminPass') || ''}` }
+        headers: {
+          'x-admin-key': `${localStorage.getItem('adminId') || ''}:${localStorage.getItem('adminPass') || ''}`,
+          'x-admin-token': adminToken || ''
+        }
       });
       if (!res.ok) throw new Error('Unauthorized or failed');
       await fetchSummary();
