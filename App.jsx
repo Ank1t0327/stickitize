@@ -3075,8 +3075,7 @@ function SummaryDashboard({ adminToken }) {
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [data, setData] = useState(null);
-  const [costSticker, setCostSticker] = useState('');
-  const [costPoster, setCostPoster] = useState('');
+  const [productionCostInput, setProductionCostInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -3087,8 +3086,7 @@ function SummaryDashboard({ adminToken }) {
       const params = new URLSearchParams();
       if (start) params.append('start', new Date(start).toISOString());
       if (end) params.append('end', new Date(end).toISOString());
-      if (costSticker) params.append('costSticker', String(Number(costSticker) || 0));
-      if (costPoster) params.append('costPoster', String(Number(costPoster) || 0));
+      if (productionCostInput) params.append('productionCost', String(Number(productionCostInput) || 0));
       const res = await fetch(`${API_BASE}/api/summary?${params.toString()}`, {
         headers: {
           'x-admin-key': `${localStorage.getItem('adminId') || ''}:${localStorage.getItem('adminPass') || ''}`,
@@ -3140,12 +3138,8 @@ function SummaryDashboard({ adminToken }) {
           <input type="date" value={end} onChange={e => setEnd(e.target.value)} style={{background: '#101828', color: '#fff', border: '1px solid #233', borderRadius: 6, padding: '8px 10px'}} />
         </div>
         <div>
-          <label style={{color: '#b3e0ff', display: 'block', marginBottom: 6}}>Sticker Cost (₹)</label>
-          <input type="number" min="0" step="0.01" value={costSticker} onChange={e => setCostSticker(e.target.value)} style={{background: '#101828', color: '#fff', border: '1px solid #233', borderRadius: 6, padding: '8px 10px', width: 140}} />
-        </div>
-        <div>
-          <label style={{color: '#b3e0ff', display: 'block', marginBottom: 6}}>Poster Cost (₹)</label>
-          <input type="number" min="0" step="0.01" value={costPoster} onChange={e => setCostPoster(e.target.value)} style={{background: '#101828', color: '#fff', border: '1px solid #233', borderRadius: 6, padding: '8px 10px', width: 140}} />
+          <label style={{color: '#b3e0ff', display: 'block', marginBottom: 6}}>Production Cost (₹)</label>
+          <input type="number" min="0" step="0.01" value={productionCostInput} onChange={e => setProductionCostInput(e.target.value)} style={{background: '#101828', color: '#fff', border: '1px solid #233', borderRadius: 6, padding: '8px 10px', width: 180}} />
         </div>
         <button onClick={fetchSummary} style={{background: '#6ec1ff', color: '#101828', border: 'none', borderRadius: 8, padding: '10px 16px', fontWeight: 700, cursor: 'pointer'}}>Apply</button>
         <button onClick={resetSummary} style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 16px', fontWeight: 700, cursor: 'pointer'}}>Reset Data</button>
