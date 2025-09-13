@@ -78,16 +78,6 @@ for (let i = 1; i <= 8; i++) {
 
 export default function App() {
   const [page, setPage] = useState('home');
-  // Navigate to hidden Summary page via hash
-  useEffect(() => {
-    const applyHash = () => {
-      const hash = (window.location.hash || '').toLowerCase();
-      if (hash === '#summary') setPage('summary');
-    };
-    applyHash();
-    window.addEventListener('hashchange', applyHash);
-    return () => window.removeEventListener('hashchange', applyHash);
-  }, []);
   const [cart, setCart] = useState([]); // [{id, qty}]
   const [zoomImg, setZoomImg] = useState(null); // holds image url for zoom view
   const [showCheckout, setShowCheckout] = useState(false);
@@ -150,8 +140,6 @@ export default function App() {
         setPage('refund');
       } else if (window.location.hash === '#shipping') {
         setPage('shipping');
-      } else if ((window.location.hash || '').toLowerCase() === '#summary') {
-        setPage('summary');
       } else {
         setPage('home');
       }
@@ -1534,27 +1522,6 @@ export default function App() {
               <div className="admin-orders" style={{marginTop: '18px'}}>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px'}}>
                   <h2 style={{color: '#6ec1ff', margin: 0}}>Placed Orders</h2>
-                  <button
-                    onClick={() => {
-                      try {
-                        if (adminId) localStorage.setItem('adminId', adminId);
-                        if (adminPw) localStorage.setItem('adminPass', adminPw);
-                      } catch (e) {}
-                      window.location.hash = '#summary';
-                      setPage('summary');
-                    }}
-                    style={{
-                      background: 'linear-gradient(90deg, #6ec1ff, #4ade80)',
-                      color: '#101828',
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '8px 14px',
-                      fontWeight: 800,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Summary
-                  </button>
                 </div>
                 {orders.length === 0 ? (
                   <p style={{color: '#fff'}}>No orders placed yet.</p>
@@ -1784,19 +1751,6 @@ export default function App() {
                   </div>
                 )}
               </div>
-            )}
-          </section>
-        )}
-        {page === 'summary' && (
-          <section className="summary" id="summary" style={{maxWidth: 900, margin: '32px auto', padding: 24, background: 'rgba(16,21,34,0.95)', borderRadius: 16, boxShadow: '0 0 24px #0006'}}>
-            {/* Auth gate: require adminLoggedIn */}
-            {!adminLoggedIn ? (
-              <div style={{color: '#fff', textAlign: 'center'}}>
-                <h2 style={{color: '#6ec1ff', marginBottom: 12}}>Access Denied</h2>
-                <p>Please login as admin on the Admin page to access the summary.</p>
-              </div>
-            ) : (
-              <SummaryDashboard adminToken={adminToken} />
             )}
           </section>
         )}
@@ -3067,109 +3021,6 @@ export default function App() {
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
-    </div>
-  );
-}
-
-function SummaryDashboard({ adminToken }) {
-  const [start, setStart] = useState('');
-  const [end, setEnd] = useState('');
-  const [data, setData] = useState(null);
-  const [productionCostInput, setProductionCostInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const fetchSummary = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const params = new URLSearchParams();
-      if (start) params.append('start', new Date(start).toISOString());
-      if (end) params.append('end', new Date(end).toISOString());
-      if (productionCostInput) params.append('productionCost', String(Number(productionCostInput) || 0));
-      const res = await fetch(`${API_BASE}/api/summary?${params.toString()}`, {
-        headers: {
-          'x-admin-key': `${localStorage.getItem('adminId') || ''}:${localStorage.getItem('adminPass') || ''}`,
-          'x-admin-token': adminToken || ''
-        }
-      });
-      if (!res.ok) throw new Error('Unauthorized or failed');
-      const json = await res.json();
-      setData(json);
-    } catch (e) {
-      setError('Failed to load summary.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetSummary = async () => {
-    if (!confirm('This will reset the summary baseline. Continue?')) return;
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_BASE}/api/summary/reset`, {
-        method: 'POST',
-        headers: {
-          'x-admin-key': `${localStorage.getItem('adminId') || ''}:${localStorage.getItem('adminPass') || ''}`,
-          'x-admin-token': adminToken || ''
-        }
-      });
-      if (!res.ok) throw new Error('Unauthorized or failed');
-      await fetchSummary();
-    } catch (e) {
-      setError('Failed to reset summary.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchSummary(); }, []);
-
-  return (
-    <div>
-      <h2 style={{color: '#6ec1ff', marginBottom: 16}}>Business Summary</h2>
-      <div style={{display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16}}>
-        <div>
-          <label style={{color: '#b3e0ff', display: 'block', marginBottom: 6}}>Start Date</label>
-          <input type="date" value={start} onChange={e => setStart(e.target.value)} style={{background: '#101828', color: '#fff', border: '1px solid #233', borderRadius: 6, padding: '8px 10px'}} />
-        </div>
-        <div>
-          <label style={{color: '#b3e0ff', display: 'block', marginBottom: 6}}>End Date</label>
-          <input type="date" value={end} onChange={e => setEnd(e.target.value)} style={{background: '#101828', color: '#fff', border: '1px solid #233', borderRadius: 6, padding: '8px 10px'}} />
-        </div>
-        <div>
-          <label style={{color: '#b3e0ff', display: 'block', marginBottom: 6}}>Production Cost (₹)</label>
-          <input type="number" min="0" step="0.01" value={productionCostInput} onChange={e => setProductionCostInput(e.target.value)} style={{background: '#101828', color: '#fff', border: '1px solid #233', borderRadius: 6, padding: '8px 10px', width: 180}} />
-        </div>
-        <button onClick={fetchSummary} style={{background: '#6ec1ff', color: '#101828', border: 'none', borderRadius: 8, padding: '10px 16px', fontWeight: 700, cursor: 'pointer'}}>Apply</button>
-        <button onClick={resetSummary} style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 16px', fontWeight: 700, cursor: 'pointer'}}>Reset Data</button>
-      </div>
-      {loading && <div style={{color: '#b3e0ff'}}>Loading...</div>}
-      {error && <div style={{color: '#ff8080'}}>{error}</div>}
-      {data && (
-        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16}}>
-          <SummaryCard title="Total Earnings" value={`₹${data.totalEarnings?.toFixed?.(2) || data.totalEarnings}`} />
-          <SummaryCard title="Production Cost" value={`₹${data.productionCost?.toFixed?.(2) || data.productionCost}`} />
-          <SummaryCard title="Net Profit" value={`₹${data.netProfit?.toFixed?.(2) || data.netProfit}`} highlight />
-          <SummaryCard title="Total Orders" value={data.totalOrders} />
-
-          <SummaryCard title="Stickers Sold" value={`${data.stickers?.count} (₹${data.stickers?.earnings})`} />
-          <SummaryCard title="Posters Sold" value={`${data.posters?.count} (₹${data.posters?.earnings})`} />
-          <SummaryCard title="Custom Stickers" value={`${data.customStickers?.count} (₹${data.customStickers?.earnings})`} />
-          <SummaryCard title="Store Stickers" value={`${data.storeStickers?.count} (₹${data.storeStickers?.earnings})`} />
-
-          {/* Breakdown chart removed for a simpler, focused summary */}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SummaryCard({ title, value, highlight }) {
-  return (
-    <div style={{background: highlight ? 'linear-gradient(90deg, #4ade80, #6ec1ff)' : '#0f172a', color: highlight ? '#0a1a2b' : '#fff', border: '1px solid #233', borderRadius: 8, padding: 16, fontWeight: 700}}>
-      <div style={{fontSize: '0.95em', opacity: 0.9}}>{title}</div>
-      <div style={{fontSize: '1.35em'}}>{value}</div>
     </div>
   );
 }
