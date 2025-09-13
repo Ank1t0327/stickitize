@@ -1353,7 +1353,8 @@ export default function App() {
                     textAlign: 'center',
                     marginTop: '8px'
                   }}>
-                    💡 Upload any image (max 5MB) and it will be added to your cart as a custom sticker for ₹10
+                    💡 Upload any image (max 5MB) and it will be added to your cart as a custom sticker for ₹10. 
+                    (Only online payment is available when custom stickers are in the cart)
                   </div>
                 </div>
               </div>
