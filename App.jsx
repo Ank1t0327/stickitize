@@ -418,8 +418,8 @@ export default function App() {
   }, [hasPosterInCart, hasCustomInCart]);
   // Calculate checkout total (including delivery if selected)
   const cartSubtotal = cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0);
-  // Free delivery if subtotal >= 70 or address is BH3
-  const deliveryCharge = (pickupType === 'DELIVERY' && cartSubtotal < 70 && orderAddress !== 'BH3') ? 10 : 0;
+  // Always charge delivery fee when Delivery is selected
+  const deliveryCharge = (pickupType === 'DELIVERY') ? 10 : 0;
   const checkoutTotal = cartSubtotal + deliveryCharge;
 
   // Validate phone number format (must be exactly 10 digits)
@@ -1683,7 +1683,7 @@ export default function App() {
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Payment: {order.payment || 'Pay on delivery/pickup'}{order.status ? ` • Status: ${order.status}` : ''}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
-                            <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery && deliveryCharge > 0 ? ' (includes ₹10 delivery)' : showDelivery && deliveryCharge === 0 ? ' (Free delivery!)' : ''}</span>
+                      <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery ? ' (includes ₹10 delivery)' : ''}</span>
                           </div>
                           <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearOrder(order._id)} disabled={loading}>
                             {loading ? (
@@ -2175,7 +2175,7 @@ export default function App() {
             <button onClick={closeCartDrawer} style={{background: 'none', border: 'none', color: '#fff', fontSize: '2em', cursor: 'pointer', lineHeight: 1}}>&times;</button>
           </div>
           {/* Free Delivery Dynamic Message */}
-          {cartDetails.length > 0 && pickupType === 'DELIVERY' && cartSubtotal < 70 && (
+          {cartDetails.length > 0 && pickupType === 'DELIVERY' && (
             <div style={{
               background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
               color: '#101828',
@@ -2192,29 +2192,8 @@ export default function App() {
               marginLeft: 'auto',
               marginRight: 'auto',
             }}>
-              Add stickers worth <span style={{color: '#0a2342', fontWeight: 'bold'}}>₹{(70 - cartSubtotal).toFixed(2)}</span> for <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
+              Delivery charge of <span style={{color: '#0a2342', fontWeight: 'bold'}}>₹10</span> will apply.
               <style>{`@keyframes fadeInHighlight { from { opacity: 0; background: #fff; } to { opacity: 1; background: linear-gradient(90deg, #6ec1ff 0%,rgb(74, 222, 178) 100%); } }`}</style>
-            </div>
-          )}
-          {cartDetails.length > 0 && pickupType === 'DELIVERY' && cartSubtotal >= 70 && (
-            <div style={{
-              background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
-              color: '#101828',
-              borderRadius: 10,
-              margin: '14px 24px 0 24px',
-              padding: '8px 10px',
-              fontWeight: 'bold',
-              fontSize: '1em',
-              textAlign: 'center',
-              boxShadow: '0 2px 8px #10182822',
-              animation: 'fadeInHighlight 0.7s',
-              letterSpacing: 0.1,
-              maxWidth: 320,
-              marginLeft: 'auto',
-              marginRight: 'auto',
-            }}>
-              🎉 You unlocked <span style={{color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8'}}>FREE delivery!</span>
-              <style>{`@keyframes fadeInHighlight { from { opacity: 0; background: #fff; } to { opacity: 1; background: linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%); } }`}</style>
             </div>
           )}
           <div style={{flex: 1, overflowY: 'auto', padding: '24px', marginBottom: isMobile ? 90 : 90}}>
