@@ -121,6 +121,7 @@ export default function App() {
   const [soldStickerCount, setSoldStickerCount] = useState(0);
   const [soldPosterCount, setSoldPosterCount] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [summaryLoading, setSummaryLoading] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 800);
@@ -128,20 +129,25 @@ export default function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Load persisted admin stats on first render
+  // Load admin summary from backend
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('adminStats');
-      if (raw) {
-        const saved = JSON.parse(raw);
-        if (saved && typeof saved === 'object') {
-          setSoldStickerCount(Number(saved.soldStickerCount) || 0);
-          setSoldPosterCount(Number(saved.soldPosterCount) || 0);
-          setTotalRevenue(Number(saved.totalRevenue) || 0);
-          setStatsRunning(Boolean(saved.started));
+    const loadSummary = async () => {
+      try {
+        setSummaryLoading(true);
+        const res = await fetch(`${API_BASE}/admin/summary`);
+        const data = await res.json();
+        if (data) {
+          setStatsRunning(Boolean(data.running));
+          setSoldStickerCount(Number(data.stickersSold) || 0);
+          setSoldPosterCount(Number(data.postersSold) || 0);
+          setTotalRevenue(Number(data.totalRevenue) || 0);
         }
+      } catch (e) {
+      } finally {
+        setSummaryLoading(false);
       }
-    } catch (e) {}
+    };
+    loadSummary();
   }, []);
 
   // Add useEffect to sync page state with URL hash
@@ -199,66 +205,59 @@ export default function App() {
     setNavOpen(open => !open);
   };
 
-  // Compute stats from current orders
-  const calculateStatsFromOrders = () => {
-    let stickersCount = 0;
-    let postersCount = 0;
-    let revenue = 0;
-    try {
-      orders.forEach(order => {
-        let orderSubtotal = 0;
-        if (Array.isArray(order.stickers)) {
-          order.stickers.forEach(stickerStr => {
-            const match = stickerStr && stickerStr.match(/^(.*) \(x(\d+)\)$/);
-            let name = stickerStr || '';
-            let qty = 1;
-            if (match) {
-              name = match[1];
-              qty = parseInt(match[2], 10) || 1;
-            }
-            const product = stickers.find(s => s.name === name) || topPicks.find(s => s.name === name);
-            const isCustom = name === 'Custom Sticker' || (customStickers && customStickers.some(cs => cs.name === name)) || /custom/i.test(name);
-            const unitPrice = isCustom ? 10 : product ? parseFloat(product.price) : 7;
-            orderSubtotal += unitPrice * qty;
-            // Count items: treat known 'posters' category as posters else stickers
-            const categoryKey = product ? product.category : undefined;
-            if (categoryKey === 'posters' || /poster/i.test(name)) {
-              postersCount += qty;
-            } else {
-              stickersCount += qty;
-            }
-          });
+  // Poll backend summary while running
+  useEffect(() => {
+    if (!statsRunning) return;
+    let timer = null;
+    const poll = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/admin/summary`);
+        const data = await res.json();
+        if (data) {
+          setSoldStickerCount(Number(data.stickersSold) || 0);
+          setSoldPosterCount(Number(data.postersSold) || 0);
+          setTotalRevenue(Number(data.totalRevenue) || 0);
         }
-        const showDelivery = order.orderType === 'DELIVERY';
-        const deliveryCharge = (showDelivery && orderSubtotal < 70) ? 10 : 0;
-        revenue += orderSubtotal + (showDelivery ? deliveryCharge : 0);
-      });
-    } catch (e) {}
-    return { stickersCount, postersCount, revenue };
-  };
+      } catch (e) {}
+      timer = setTimeout(poll, 5000);
+    };
+    poll();
+    return () => { if (timer) clearTimeout(timer); };
+  }, [statsRunning]);
 
-  const handleStartStats = () => {
-    setStatsRunning(true);
-    const { stickersCount, postersCount, revenue } = calculateStatsFromOrders();
-    setSoldStickerCount(stickersCount);
-    setSoldPosterCount(postersCount);
-    setTotalRevenue(revenue);
+  const handleStartStats = async () => {
     try {
-      localStorage.setItem('adminStats', JSON.stringify({
-        soldStickerCount: stickersCount,
-        soldPosterCount: postersCount,
-        totalRevenue: revenue,
-        started: true
-      }));
-    } catch (e) {}
+      setSummaryLoading(true);
+      await fetch(`${API_BASE}/admin/summary/start`, { method: 'POST' });
+      setStatsRunning(true);
+      // Immediately refresh summary
+      try {
+        const res = await fetch(`${API_BASE}/admin/summary`);
+        const data = await res.json();
+        if (data) {
+          setSoldStickerCount(Number(data.stickersSold) || 0);
+          setSoldPosterCount(Number(data.postersSold) || 0);
+          setTotalRevenue(Number(data.totalRevenue) || 0);
+        }
+      } catch (e) {}
+    } catch (e) {
+    } finally {
+      setSummaryLoading(false);
+    }
   };
 
-  const handleResetStats = () => {
-    setStatsRunning(false);
-    setSoldStickerCount(0);
-    setSoldPosterCount(0);
-    setTotalRevenue(0);
-    try { localStorage.removeItem('adminStats'); } catch (e) {}
+  const handleResetStats = async () => {
+    try {
+      setSummaryLoading(true);
+      await fetch(`${API_BASE}/admin/summary/reset`, { method: 'POST' });
+      setStatsRunning(false);
+      setSoldStickerCount(0);
+      setSoldPosterCount(0);
+      setTotalRevenue(0);
+    } catch (e) {
+    } finally {
+      setSummaryLoading(false);
+    }
   };
 
   // Add to cart logic
@@ -1840,22 +1839,29 @@ export default function App() {
                   <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12}}>
                     <h3 style={{color: '#6ec1ff', margin: 0}}>Sales Summary</h3>
                     <div style={{display: 'flex', gap: 8}}>
-                      <button onClick={handleStartStats} style={{background: '#4ade80', color: '#0b1220', border: 'none', borderRadius: '6px', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer'}}>Start</button>
-                      <button onClick={handleResetStats} style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer'}}>Reset</button>
+                      {!statsRunning ? (
+                        <button onClick={handleStartStats} disabled={summaryLoading} style={{background: '#4ade80', color: '#0b1220', border: 'none', borderRadius: '6px', padding: '8px 12px', fontWeight: 'bold', cursor: summaryLoading ? 'wait' : 'pointer'}}>
+                          {summaryLoading ? 'Starting…' : 'Start'}
+                        </button>
+                      ) : (
+                        <button onClick={handleResetStats} disabled={summaryLoading} style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 12px', fontWeight: 'bold', cursor: summaryLoading ? 'wait' : 'pointer'}}>
+                          {summaryLoading ? 'Resetting…' : 'Reset'}
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12}}>
                     <div style={{background: '#101828', border: '1px solid #233', borderRadius: '8px', padding: '12px'}}>
                       <div style={{color: '#b3e0ff', fontSize: '0.9em'}}>Stickers Sold</div>
-                      <div style={{color: '#fff', fontWeight: 'bold', fontSize: '1.4em'}}>{statsRunning ? soldStickerCount : 0}</div>
+                      <div style={{color: '#fff', fontWeight: 'bold', fontSize: '1.4em'}}>{soldStickerCount}</div>
                     </div>
                     <div style={{background: '#101828', border: '1px solid #233', borderRadius: '8px', padding: '12px'}}>
                       <div style={{color: '#b3e0ff', fontSize: '0.9em'}}>Posters Sold</div>
-                      <div style={{color: '#fff', fontWeight: 'bold', fontSize: '1.4em'}}>{statsRunning ? soldPosterCount : 0}</div>
+                      <div style={{color: '#fff', fontWeight: 'bold', fontSize: '1.4em'}}>{soldPosterCount}</div>
                     </div>
                     <div style={{background: '#101828', border: '1px solid #233', borderRadius: '8px', padding: '12px'}}>
                       <div style={{color: '#b3e0ff', fontSize: '0.9em'}}>Total Revenue</div>
-                      <div style={{color: '#4ade80', fontWeight: 'bold', fontSize: '1.4em'}}>₹{(statsRunning ? totalRevenue : 0).toFixed(2)}</div>
+                      <div style={{color: '#4ade80', fontWeight: 'bold', fontSize: '1.4em'}}>₹{totalRevenue.toFixed(2)}</div>
                     </div>
                   </div>
                 </div>
