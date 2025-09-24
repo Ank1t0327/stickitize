@@ -1171,71 +1171,15 @@ export default function App() {
           <section className="store" id="store" style={{position: 'relative'}}>
             <h2>Our Stickers & Posters</h2>
             {/* Category filters and sticker grid as before */}
-            <div className="category-filters" style={{marginBottom: '32px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center'}}>
-              <button 
-                className={`category-btn${selectedCategory === 'all' ? ' active' : ''}`}
-                onClick={() => setSelectedCategory('all')}
-                style={{
-                  background: selectedCategory === 'all' ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
-                  color: selectedCategory === 'all' ? '#101828' : '#fff',
-                  border: '1px solid #6ec1ff',
-                  borderRadius: '8px',
-                  padding: '10px 20px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                All Stickers
-              </button>
-              {/* Eye-catching Custom Stickers button */}
-              <button
-                className={`category-btn${selectedCategory === 'custom' ? ' active' : ''}`}
-                onClick={() => setSelectedCategory('custom')}
-                style={{
-                  background: selectedCategory === 'custom' 
-                    ? 'linear-gradient(90deg, #4ade80, #6ec1ff)'
-                    : 'linear-gradient(90deg, rgba(74,222,128,0.15), rgba(110,193,255,0.15))',
-                  color: selectedCategory === 'custom' ? '#101828' : '#b3e0ff',
-                  border: selectedCategory === 'custom' ? '2px solid #4ade80' : '1px solid #6ec1ff',
-                  boxShadow: selectedCategory === 'custom' ? '0 6px 18px rgba(74,222,128,0.35)' : '0 2px 8px rgba(110,193,255,0.15)',
-                  borderRadius: '999px',
-                  padding: '10px 18px',
-                  fontWeight: 800,
-                  letterSpacing: 0.3,
-                  cursor: 'pointer',
-                  position: 'relative',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  transition: 'all 0.25s ease'
-                }}
-                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
-              >
-                <span style={{fontSize: '1.1em'}}>🎨</span>
-                <span>Custom Stickers</span>
-                <span style={{
-                  background: '#4ade80',
-                  color: '#0a1a2b',
-                  borderRadius: 999,
-                  padding: '2px 8px',
-                  fontSize: '0.75em',
-                  fontWeight: 900,
-                  marginLeft: 4,
-                  border: '1px solid #0a1a2b'
-                }}>
-                  NEW
-                </span>
-              </button>
-              {Object.entries(categories).filter(([key]) => key !== 'stickerpack' && key !== 'custom').map(([key, category]) => (
+            <div className="category-filters" style={{marginBottom: '20px'}}>
+              {/* Fixed primary buttons */}
+              <div style={{display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 8}}>
                 <button 
-                  key={key}
-                  className={`category-btn${selectedCategory === key ? ' active' : ''}`}
-                  onClick={() => setSelectedCategory(key)}
+                  className={`category-btn${selectedCategory === 'all' ? ' active' : ''}`}
+                  onClick={() => setSelectedCategory('all')}
                   style={{
-                    background: selectedCategory === key ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
-                    color: selectedCategory === key ? '#101828' : '#fff',
+                    background: selectedCategory === 'all' ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
+                    color: selectedCategory === 'all' ? '#101828' : '#fff',
                     border: '1px solid #6ec1ff',
                     borderRadius: '8px',
                     padding: '10px 20px',
@@ -1244,9 +1188,75 @@ export default function App() {
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  {category.name}
+                  All Stickers
                 </button>
-              ))}
+                {/* Eye-catching Custom Stickers button */}
+                <button
+                  className={`category-btn${selectedCategory === 'custom' ? ' active' : ''}`}
+                  onClick={() => setSelectedCategory('custom')}
+                  style={{
+                    background: selectedCategory === 'custom' 
+                      ? 'linear-gradient(90deg, #4ade80, #6ec1ff)'
+                      : 'linear-gradient(90deg, rgba(74,222,128,0.15), rgba(110,193,255,0.15))',
+                    color: selectedCategory === 'custom' ? '#101828' : '#b3e0ff',
+                    border: selectedCategory === 'custom' ? '2px solid #4ade80' : '1px solid #6ec1ff',
+                    boxShadow: selectedCategory === 'custom' ? '0 6px 18px rgba(74,222,128,0.35)' : '0 2px 8px rgba(110,193,255,0.15)',
+                    borderRadius: '999px',
+                    padding: '10px 18px',
+                    fontWeight: 800,
+                    letterSpacing: 0.3,
+                    cursor: 'pointer',
+                    position: 'relative',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    transition: 'all 0.25s ease'
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                  onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+                >
+                  <span style={{fontSize: '1.1em'}}>🎨</span>
+                  <span>Custom Stickers</span>
+                  <span style={{
+                    background: '#4ade80',
+                    color: '#0a1a2b',
+                    borderRadius: 999,
+                    padding: '2px 8px',
+                    fontSize: '0.75em',
+                    fontWeight: 900,
+                    marginLeft: 4,
+                    border: '1px solid #0a1a2b'
+                  }}>
+                    NEW
+                  </span>
+                </button>
+              </div>
+              {/* Scrollable ribbon for other categories (hidden scrollbar visuals) */}
+              <div className="category-ribbon" style={{
+                display: 'flex', gap: 12, alignItems: 'center',
+                overflowX: 'auto', whiteSpace: 'nowrap', WebkitOverflowScrolling: 'touch',
+                padding: '6px 8px', maxWidth: 1100, margin: '0 auto', justifyContent: isMobile ? 'flex-start' : 'center'
+              }}>
+                {Object.entries(categories).filter(([key]) => key !== 'stickerpack' && key !== 'custom').map(([key, category]) => (
+                  <button 
+                    key={key}
+                    className={`category-btn${selectedCategory === key ? ' active' : ''}`}
+                    onClick={() => setSelectedCategory(key)}
+                    style={{
+                      background: selectedCategory === key ? '#6ec1ff' : 'rgba(30,40,60,0.9)',
+                      color: selectedCategory === key ? '#101828' : '#fff',
+                      border: '1px solid #6ec1ff',
+                      borderRadius: '8px',
+                      padding: '10px 20px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
             </div>
             {/* Custom Sticker CTA */}
             <div style={{display: 'flex', justifyContent: 'center', marginBottom: 24}}>

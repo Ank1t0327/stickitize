@@ -1,3 +1,11 @@
+/* Hide horizontal scrollbar visuals for category ribbon while preserving scroll */
+.category-ribbon {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.category-ribbon::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
 body {
   margin: 0;
   font-family: 'Segoe UI', Arial, sans-serif;
