@@ -110,6 +110,7 @@ export default function App() {
   const categoryScrollRef = useRef();
   const [catScrollPaused, setCatScrollPaused] = useState(false);
   const catAutoDirRef = useRef(1); // 1 -> right, -1 -> left
+  const catResumeTimerRef = useRef(null);
   // Cart Drawer state
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [cartBounce, setCartBounce] = useState(false);
@@ -141,14 +142,15 @@ export default function App() {
     const step = (time) => {
       const maxScroll = el.scrollWidth - el.clientWidth;
       if (maxScroll > 0) {
-        const speedPxPerSec = 3; // slower, smoother
+        const speedPxPerSec = 3; // slow and smooth
         const dt = lastTime ? (time - lastTime) / 1000 : 0;
         lastTime = time;
         el.scrollLeft += catAutoDirRef.current * speedPxPerSec * dt;
-        if (el.scrollLeft <= 0) {
+        const epsilon = 0.5;
+        if (el.scrollLeft <= 0 + epsilon) {
           el.scrollLeft = 0;
           catAutoDirRef.current = 1;
-        } else if (el.scrollLeft >= maxScroll) {
+        } else if (el.scrollLeft >= maxScroll - epsilon) {
           el.scrollLeft = maxScroll;
           catAutoDirRef.current = -1;
         }
@@ -159,6 +161,21 @@ export default function App() {
     rafId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(rafId);
   }, [page, catScrollPaused]);
+
+  // Helper to pause with optional delayed resume
+  const pauseCategoryAutoScroll = (resumeDelayMs) => {
+    setCatScrollPaused(true);
+    if (catResumeTimerRef.current) {
+      clearTimeout(catResumeTimerRef.current);
+      catResumeTimerRef.current = null;
+    }
+    if (resumeDelayMs && resumeDelayMs > 0) {
+      catResumeTimerRef.current = setTimeout(() => {
+        setCatScrollPaused(false);
+        catResumeTimerRef.current = null;
+      }, resumeDelayMs);
+    }
+  };
 
   // Load admin summary from backend
   useEffect(() => {
@@ -1266,10 +1283,12 @@ export default function App() {
               <div
                 ref={categoryScrollRef}
                 className="category-ribbon"
-                onMouseEnter={() => setCatScrollPaused(true)}
-                onMouseLeave={() => setCatScrollPaused(false)}
-                onTouchStart={() => setCatScrollPaused(true)}
-                onTouchEnd={() => setCatScrollPaused(false)}
+                onMouseEnter={() => pauseCategoryAutoScroll()}
+                onMouseLeave={() => pauseCategoryAutoScroll(3000)}
+                onTouchStart={() => pauseCategoryAutoScroll()}
+                onTouchEnd={() => pauseCategoryAutoScroll(3000)}
+                onWheel={() => pauseCategoryAutoScroll(3000)}
+                onScroll={() => pauseCategoryAutoScroll(3000)}
                 style={{
                   display: 'flex', gap: 12, alignItems: 'center',
                   overflowX: 'auto', whiteSpace: 'nowrap', WebkitOverflowScrolling: 'touch',
