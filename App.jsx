@@ -109,6 +109,7 @@ export default function App() {
   const [showCustom, setShowCustom] = useState(false);
   const categoryScrollRef = useRef();
   const [catScrollPaused, setCatScrollPaused] = useState(false);
+  const catAutoDirRef = useRef(1); // 1 -> right, -1 -> left
   // Cart Drawer state
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [cartBounce, setCartBounce] = useState(false);
@@ -128,6 +129,36 @@ export default function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Auto-scroll category ribbon with bounce at ends (mobile + desktop)
+  useEffect(() => {
+    if (page !== 'store' || catScrollPaused) return;
+    const el = categoryScrollRef.current;
+    if (!el) return;
+
+    let rafId = 0;
+    let lastTime = 0;
+    const step = (time) => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll > 0) {
+        const speedPxPerSec = 6; // slow, smooth
+        const dt = lastTime ? (time - lastTime) / 1000 : 0;
+        lastTime = time;
+        el.scrollLeft += catAutoDirRef.current * speedPxPerSec * dt;
+        if (el.scrollLeft <= 0) {
+          el.scrollLeft = 0;
+          catAutoDirRef.current = 1;
+        } else if (el.scrollLeft >= maxScroll) {
+          el.scrollLeft = maxScroll;
+          catAutoDirRef.current = -1;
+        }
+      }
+      rafId = requestAnimationFrame(step);
+    };
+
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [page, catScrollPaused]);
 
   // Load admin summary from backend
   useEffect(() => {
@@ -1232,11 +1263,19 @@ export default function App() {
                 </button>
               </div>
               {/* Scrollable ribbon for other categories (hidden scrollbar visuals) */}
-              <div className="category-ribbon" style={{
-                display: 'flex', gap: 12, alignItems: 'center',
-                overflowX: 'auto', whiteSpace: 'nowrap', WebkitOverflowScrolling: 'touch',
-                padding: '6px 8px', maxWidth: 1100, margin: '0 auto', justifyContent: isMobile ? 'flex-start' : 'center'
-              }}>
+              <div
+                ref={categoryScrollRef}
+                className="category-ribbon"
+                onMouseEnter={() => setCatScrollPaused(true)}
+                onMouseLeave={() => setCatScrollPaused(false)}
+                onTouchStart={() => setCatScrollPaused(true)}
+                onTouchEnd={() => setCatScrollPaused(false)}
+                style={{
+                  display: 'flex', gap: 12, alignItems: 'center',
+                  overflowX: 'auto', whiteSpace: 'nowrap', WebkitOverflowScrolling: 'touch',
+                  padding: '6px 8px', maxWidth: 1100, margin: '0 auto', justifyContent: isMobile ? 'flex-start' : 'center'
+                }}
+              >
                 {Object.entries(categories).filter(([key]) => key !== 'stickerpack' && key !== 'custom').map(([key, category]) => (
                   <button 
                     key={key}
