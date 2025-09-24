@@ -141,7 +141,7 @@ export default function App() {
     const step = (time) => {
       const maxScroll = el.scrollWidth - el.clientWidth;
       if (maxScroll > 0) {
-        const speedPxPerSec = 6; // slow, smooth
+        const speedPxPerSec = 3; // slower, smoother
         const dt = lastTime ? (time - lastTime) / 1000 : 0;
         lastTime = time;
         el.scrollLeft += catAutoDirRef.current * speedPxPerSec * dt;
