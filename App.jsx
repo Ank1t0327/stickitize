@@ -13,7 +13,7 @@ const categories = {
   girl: { name: 'Girl', folder: 'girl' },
   phone: { name: 'Phone', folder: 'phone' },
   sports: { name: 'Sports', folder: 'sports' },
-  fun: {name: 'Fun', folder: 'fun'},
+  fun: {name: 'Double', folder: 'fun'},
   custom: { name: 'Custom Stickers', folder: 'custom' }
 };
 
