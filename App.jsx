@@ -21,14 +21,6 @@ const categories = {
 // This will only work for images in /src or /public, and at build time
 
 function getStickerImages(categoryKey, categoryData) {
-  // Vite's import.meta.glob only works for /src, so we use public URLs
-  // We'll use a trick: fetch all files in public/stickers/[category] at build time
-  // We'll use a static require.context-like approach for Vite
-  // But since we can't read public/ at runtime, we can use a convention: list all files in the folder
-  // We'll use a helper to try all numbers from 1 to 100, and only include those that exist (using an <img> onError fallback)
-  // But the best way is to use import.meta.globEager if stickers are in /src/assets
-  // For now, let's use a static approach for public/ (since Vite can't glob public/ at runtime)
-  // We'll try up to 100, but filter out missing images at render time (already handled by hiddenStickers)
   const stickers = [];
   for (let i = 1; i <= 100; i++) {
     stickers.push({
@@ -738,6 +730,26 @@ export default function App() {
     } catch (err) {
       console.error('Clear order failed:', err);
       alert('Failed to clear order.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateOrderStatus = async (orderId, currentStatus) => {
+    if (!orderId) return;
+    if (currentStatus === 'DONE') return; // non-revertable
+    try {
+      setLoading(true);
+      const newStatus = 'DONE';
+      await fetch(`${API_BASE}/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      await fetchOrders();
+    } catch (err) {
+      console.error('Update order status failed:', err);
+      alert('Failed to update order status.');
     } finally {
       setLoading(false);
     }
@@ -1753,16 +1765,42 @@ export default function App() {
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
                       <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery ? ' (includes ₹10 delivery)' : ''}</span>
                           </div>
-                          <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearOrder(order._id)} disabled={loading}>
-                            {loading ? (
-                              <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24}}>
-                                <span className="checkout-spinner" style={{width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite'}}></span>
-                                <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-                              </span>
-                            ) : (
-                              'CLEAR'
-                            )}
-                          </button>
+                          <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+                            <button 
+                              style={{
+                                background: order.status === 'DONE' ? '#4ade80' : '#6ec1ff',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '6px',
+                                padding: '8px 16px',
+                                fontWeight: 'bold',
+                                cursor: order.status === 'DONE' ? 'default' : 'pointer',
+                                opacity: order.status === 'DONE' ? 0.9 : 1,
+                                transition: 'background-color 0.2s ease'
+                              }} 
+                              onClick={() => handleUpdateOrderStatus(order._id, order.status)} 
+                              disabled={loading || order.status === 'DONE'}
+                            >
+                              {loading ? (
+                                <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24}}>
+                                  <span className="checkout-spinner" style={{width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite'}}></span>
+                                  <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                                </span>
+                              ) : (
+                                order.status === 'DONE' ? 'DONE' : 'PENDING'
+                              )}
+                            </button>
+                            <button style={{background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer'}} onClick={() => handleClearOrder(order._id)} disabled={loading}>
+                              {loading ? (
+                                <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24}}>
+                                  <span className="checkout-spinner" style={{width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite'}}></span>
+                                  <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                                </span>
+                              ) : (
+                                'CLEAR'
+                              )}
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
