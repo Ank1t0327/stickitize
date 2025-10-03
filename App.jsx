@@ -115,7 +115,10 @@ export default function App() {
   const [soldStickerCount, setSoldStickerCount] = useState(0);
   const [soldPosterCount, setSoldPosterCount] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [productionCost, setProductionCost] = useState(0);
+  const [deliveryCost, setDeliveryCost] = useState(0);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [incrementModal, setIncrementModal] = useState({ show: false, type: '', amount: '' });
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 800);
@@ -181,6 +184,8 @@ export default function App() {
           setSoldStickerCount(Number(data.stickersSold) || 0);
           setSoldPosterCount(Number(data.postersSold) || 0);
           setTotalRevenue(Number(data.totalRevenue) || 0);
+          setProductionCost(Number(data.productionCost) || 0);
+          setDeliveryCost(Number(data.deliveryCost) || 0);
         }
       } catch (e) {
       } finally {
@@ -257,6 +262,8 @@ export default function App() {
           setSoldStickerCount(Number(data.stickersSold) || 0);
           setSoldPosterCount(Number(data.postersSold) || 0);
           setTotalRevenue(Number(data.totalRevenue) || 0);
+          setProductionCost(Number(data.productionCost) || 0);
+          setDeliveryCost(Number(data.deliveryCost) || 0);
         }
       } catch (e) {}
       timer = setTimeout(poll, 5000);
@@ -278,6 +285,8 @@ export default function App() {
           setSoldStickerCount(Number(data.stickersSold) || 0);
           setSoldPosterCount(Number(data.postersSold) || 0);
           setTotalRevenue(Number(data.totalRevenue) || 0);
+          setProductionCost(Number(data.productionCost) || 0);
+          setDeliveryCost(Number(data.deliveryCost) || 0);
         }
       } catch (e) {}
     } catch (e) {
@@ -294,10 +303,42 @@ export default function App() {
       setSoldStickerCount(0);
       setSoldPosterCount(0);
       setTotalRevenue(0);
+      setProductionCost(0);
+      setDeliveryCost(0);
     } catch (e) {
     } finally {
       setSummaryLoading(false);
     }
+  };
+
+  // Handle increment buttons
+  const handleIncrementClick = (type) => {
+    setIncrementModal({ show: true, type, amount: '' });
+  };
+
+  const handleIncrementSubmit = async () => {
+    const amount = Number(incrementModal.amount) || 0;
+    if (amount <= 0) return;
+
+    const newProductionCost = incrementModal.type === 'production' ? productionCost + amount : productionCost;
+    const newDeliveryCost = incrementModal.type === 'delivery' ? deliveryCost + amount : deliveryCost;
+
+    setProductionCost(newProductionCost);
+    setDeliveryCost(newDeliveryCost);
+
+    try {
+      await fetch(`${API_BASE}/admin/summary/expenses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productionCost: newProductionCost, deliveryCost: newDeliveryCost })
+      });
+    } catch (err) {}
+
+    setIncrementModal({ show: false, type: '', amount: '' });
+  };
+
+  const handleIncrementCancel = () => {
+    setIncrementModal({ show: false, type: '', amount: '' });
   };
 
   // Add to cart logic
@@ -1475,6 +1516,7 @@ export default function App() {
                           placeholder="Enter sticker name (optional)"
                           value={customStickerName}
                           onChange={(e) => setCustomStickerName(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleUploadCustomSticker()}
                           style={{
                             width: '100%',
                             padding: '8px 12px',
@@ -1667,8 +1709,22 @@ export default function App() {
             {!adminLoggedIn ? (
               <div className="admin-login" style={{display: 'flex', flexDirection: 'column', gap: '18px', alignItems: 'center'}}>
                 <h2 style={{color: '#6ec1ff'}}>Admin Login</h2>
-                <input type="text" placeholder="Admin ID" value={adminId} onChange={e => setAdminId(e.target.value)} style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', width: '220px', fontSize: isMobile ? '1.05em' : undefined}} />
-                <input type="password" placeholder="Password" value={adminPw} onChange={e => setAdminPw(e.target.value)} style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', width: '220px', fontSize: isMobile ? '1.05em' : undefined}} />
+                <input 
+                  type="text" 
+                  placeholder="Admin ID" 
+                  value={adminId} 
+                  onChange={e => setAdminId(e.target.value)}
+                  onKeyPress={e => e.key === 'Enter' && handleAdminLogin()}
+                  style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', width: '220px', fontSize: isMobile ? '1.05em' : undefined}} 
+                />
+                <input 
+                  type="password" 
+                  placeholder="Password" 
+                  value={adminPw} 
+                  onChange={e => setAdminPw(e.target.value)}
+                  onKeyPress={e => e.key === 'Enter' && handleAdminLogin()}
+                  style={{padding: '8px', borderRadius: '6px', border: '1px solid #233', background: '#101828', color: '#fff', width: '220px', fontSize: isMobile ? '1.05em' : undefined}} 
+                />
                 <button style={{background: '#6ec1ff', color: '#101828', border: 'none', borderRadius: '8px', padding: '10px 0', fontWeight: 'bold', fontSize: '1.1em', cursor: 'pointer', width: '220px'}} onClick={handleAdminLogin} disabled={loading}>
                   {loading ? (
                     <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24}}>
@@ -1956,7 +2012,7 @@ export default function App() {
                       )}
                     </div>
                   </div>
-                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12}}>
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: '16px'}}>
                     <div style={{background: '#101828', border: '1px solid #233', borderRadius: '8px', padding: '12px'}}>
                       <div style={{color: '#b3e0ff', fontSize: '0.9em'}}>Stickers Sold</div>
                       <div style={{color: '#fff', fontWeight: 'bold', fontSize: '1.4em'}}>{soldStickerCount}</div>
@@ -1965,12 +2021,147 @@ export default function App() {
                       <div style={{color: '#b3e0ff', fontSize: '0.9em'}}>Posters Sold</div>
                       <div style={{color: '#fff', fontWeight: 'bold', fontSize: '1.4em'}}>{soldPosterCount}</div>
                     </div>
+                  </div>
+                  
+                  {/* Expense Display with Add Buttons */}
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: '16px'}}>
                     <div style={{background: '#101828', border: '1px solid #233', borderRadius: '8px', padding: '12px'}}>
-                      <div style={{color: '#b3e0ff', fontSize: '0.9em'}}>Total Revenue</div>
-                      <div style={{color: '#4ade80', fontWeight: 'bold', fontSize: '1.4em'}}>₹{totalRevenue.toFixed(2)}</div>
+                      <div style={{color: '#b3e0ff', fontSize: '0.9em', marginBottom: '8px'}}>Production Cost</div>
+                      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                        <div style={{color: '#fff', fontWeight: 'bold', fontSize: '1.2em'}}>₹{productionCost.toFixed(2)}</div>
+                        <button
+                          onClick={() => handleIncrementClick('production')}
+                          style={{
+                            background: '#4ade80',
+                            color: '#0b1220',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            fontSize: '0.9em',
+                            minWidth: '40px'
+                          }}
+                          title="Add amount to production cost"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <div style={{background: '#101828', border: '1px solid #233', borderRadius: '8px', padding: '12px'}}>
+                      <div style={{color: '#b3e0ff', fontSize: '0.9em', marginBottom: '8px'}}>Delivery Cost</div>
+                      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                        <div style={{color: '#fff', fontWeight: 'bold', fontSize: '1.2em'}}>₹{deliveryCost.toFixed(2)}</div>
+                        <button
+                          onClick={() => handleIncrementClick('delivery')}
+                          style={{
+                            background: '#4ade80',
+                            color: '#0b1220',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            fontSize: '0.9em',
+                            minWidth: '40px'
+                          }}
+                          title="Add amount to delivery cost"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
+                  
+                  {/* Net Revenue Display */}
+                  <div style={{background: '#101828', border: '1px solid #233', borderRadius: '8px', padding: '12px'}}>
+                    <div style={{color: '#b3e0ff', fontSize: '0.9em'}}>Net Revenue (After Expenses)</div>
+                    <div style={{color: '#4ade80', fontWeight: 'bold', fontSize: '1.4em'}}>₹{(totalRevenue - productionCost - deliveryCost).toFixed(2)}</div>
+                  </div>
                 </div>
+
+                {/* Increment Modal */}
+                {incrementModal.show && (
+                  <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0, 0, 0, 0.8)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000
+                  }}>
+                    <div style={{
+                      background: '#101828',
+                      border: '1px solid #233',
+                      borderRadius: '12px',
+                      padding: '24px',
+                      minWidth: '300px',
+                      maxWidth: '400px'
+                    }}>
+                      <h3 style={{color: '#6ec1ff', margin: '0 0 16px 0', fontSize: '1.2em'}}>
+                        Add to {incrementModal.type === 'production' ? 'Production Cost' : 'Delivery Cost'}
+                      </h3>
+                      <div style={{marginBottom: '16px'}}>
+                        <label style={{color: '#b3e0ff', fontSize: '0.9em', display: 'block', marginBottom: '8px'}}>
+                          Amount to add:
+                        </label>
+                        <input
+                          type="number"
+                          value={incrementModal.amount}
+                          onChange={(e) => setIncrementModal({...incrementModal, amount: e.target.value})}
+                          onKeyPress={(e) => e.key === 'Enter' && handleIncrementSubmit()}
+                          placeholder="Enter amount"
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: '#0b1220',
+                            border: '1px solid #233',
+                            borderRadius: '6px',
+                            color: '#fff',
+                            fontSize: '1em'
+                          }}
+                          autoFocus
+                        />
+                      </div>
+                      <div style={{display: 'flex', gap: '12px', justifyContent: 'flex-end'}}>
+                        <button
+                          onClick={handleIncrementCancel}
+                          style={{
+                            background: '#6b7280',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '10px 20px',
+                            cursor: 'pointer',
+                            fontSize: '0.9em'
+                          }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleIncrementSubmit}
+                          disabled={!incrementModal.amount || Number(incrementModal.amount) <= 0}
+                          style={{
+                            background: Number(incrementModal.amount) > 0 ? '#4ade80' : '#6b7280',
+                            color: '#0b1220',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '10px 20px',
+                            cursor: Number(incrementModal.amount) > 0 ? 'pointer' : 'not-allowed',
+                            fontSize: '0.9em',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          Add Amount
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </section>
@@ -2598,6 +2789,7 @@ export default function App() {
                       placeholder="Your Name"
                       value={orderName}
                       onChange={e => setOrderName(e.target.value)}
+                      onKeyPress={e => e.key === 'Enter' && (orderPayment === 'Pay Online' ? handleOnlinePayment() : handlePlaceOrder())}
                       required
                       style={{
                         width: '100%',
@@ -2638,6 +2830,7 @@ export default function App() {
                         placeholder="10-digit phone number"
                         value={phone}
                         onChange={e => { setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0,10)); }}
+                        onKeyPress={e => e.key === 'Enter' && (orderPayment === 'Pay Online' ? handleOnlinePayment() : handlePlaceOrder())}
                         required
                         style={{
                           flex: 1,
@@ -3000,6 +3193,7 @@ export default function App() {
                       placeholder="Your Name"
                       value={orderName}
                       onChange={e => setOrderName(e.target.value)}
+                      onKeyPress={e => e.key === 'Enter' && (orderPayment === 'Pay Online' ? handleOnlinePayment() : handlePlaceOrder())}
                       required
                       style={{
                         width: '100%',
@@ -3040,6 +3234,7 @@ export default function App() {
                         placeholder="10-digit phone number"
                         value={phone}
                         onChange={e => { setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0,10)); }}
+                        onKeyPress={e => e.key === 'Enter' && (orderPayment === 'Pay Online' ? handleOnlinePayment() : handlePlaceOrder())}
                         required
                         style={{
                           flex: 1,
