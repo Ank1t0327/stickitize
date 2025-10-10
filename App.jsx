@@ -515,7 +515,7 @@ export default function App() {
       phone: phone,
       stickers: stickerList,
       orderType: pickupType,
-      address: pickupType === 'DELIVERY' ? orderAddress : 'SELF-PICKUP',
+      address: orderAddress || 'SELF-PICKUP',
       payment: orderPayment
     };
     try {
@@ -582,7 +582,7 @@ export default function App() {
         phone: phone,
         stickers: cartDetails.map(item => `${item.name} (x${item.qty})`),
         orderType: pickupType,
-        address: pickupType === 'DELIVERY' ? orderAddress : 'SELF-PICKUP',
+        address: orderAddress || 'SELF-PICKUP',
         payment: 'Paid Online',
         status: 'PAID',
         orderId: orderId,
@@ -2855,51 +2855,49 @@ export default function App() {
                     <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Order Type *</label>
                     <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
                       <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
                         <span>Self-pickup</span>
                       </label>
                       <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
                         <span>Delivery</span>
                       </label>
                     </div>
                   </div>
-                  {/* Delivery Address */}
-                  {pickupType === 'DELIVERY' && (
-                    <div style={{ width: '100%' }}>
-                      <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Delivery Address *</label>
-                      <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{
-                        width: '100%',
-                        boxSizing: 'border-box',
-                        padding: '0.7em 1em',
-                        borderRadius: '8px',
-                        border: '1.5px solid #6ec1ff',
-                        background: '#101828',
-                        color: '#fff',
-                        fontSize: '1em',
-                        boxShadow: '0 1px 4px #10182818',
-                        outline: 'none',
-                        transition: 'border 0.2s',
-                        margin: 0
-                      }}>
-                        <option value="">Select Delivery Address</option>
-                        <option value="GH2">GH2</option>
-                        <option value="GH5">GH5</option>
-                        <option value="GH7">GH7</option>
-                        <option value="Unimall">Unimall</option>
-                        <option value="CC">CC</option>
-                        <option value="Buzz">Buzz</option>
-                        <option value="BH1">BH1</option>
-                        <option value="BH2">BH2</option>
-                        <option value="BH3">BH3</option>
-                        <option value="BH4">BH4</option>
-                        <option value="BH5">BH5</option>
-                        <option value="BH6">BH6</option>
-                        <option value="BH7">BH7</option>
-                      </select>
-                      {!orderAddress && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Please select a delivery address.</span>}
-                    </div>
-                  )}
+                  {/* Address - visible for both pickup and delivery; required only for delivery */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Address{pickupType === 'DELIVERY' ? ' *' : ''}</label>
+                    <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required={pickupType === 'DELIVERY'} style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      padding: '0.7em 1em',
+                      borderRadius: '8px',
+                      border: '1.5px solid #6ec1ff',
+                      background: '#101828',
+                      color: '#fff',
+                      fontSize: '1em',
+                      boxShadow: '0 1px 4px #10182818',
+                      outline: 'none',
+                      transition: 'border 0.2s',
+                      margin: 0
+                    }}>
+                      <option value="">Select Address</option>
+                      <option value="GH2">GH2</option>
+                      <option value="GH5">GH5</option>
+                      <option value="GH7">GH7</option>
+                      <option value="Unimall">Unimall</option>
+                      <option value="CC">CC</option>
+                      <option value="Buzz">Buzz</option>
+                      <option value="BH1">BH1</option>
+                      <option value="BH2">BH2</option>
+                      <option value="BH3">BH3</option>
+                      <option value="BH4">BH4</option>
+                      <option value="BH5">BH5</option>
+                      <option value="BH6">BH6</option>
+                      <option value="BH7">BH7</option>
+                    </select>
+                    {pickupType === 'DELIVERY' && !orderAddress && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Please select an address for delivery.</span>}
+                  </div>
                   {/* Payment Method */}
                   <div style={{ width: '100%' }}>
                     <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Payment Method *</label>
@@ -3259,51 +3257,49 @@ export default function App() {
                     <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Order Type *</label>
                     <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
                       <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); setOrderAddress('SELF-PICKUP'); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
                         <span>Self-pickup</span>
                       </label>
                       <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); setOrderAddress(''); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                        <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
                         <span>Delivery</span>
                       </label>
                     </div>
                   </div>
-                  {/* Delivery Address */}
-                  {pickupType === 'DELIVERY' && (
-                    <div style={{ width: '100%' }}>
-                      <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Delivery Address *</label>
-                      <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required style={{
-                        width: '100%',
-                        boxSizing: 'border-box',
-                        padding: '0.7em 1em',
-                        borderRadius: '8px',
-                        border: '1.5px solid #6ec1ff',
-                        background: '#101828',
-                        color: '#fff',
-                        fontSize: '1em',
-                        boxShadow: '0 1px 4px #10182818',
-                        outline: 'none',
-                        transition: 'border 0.2s',
-                        margin: 0
-                      }}>
-                        <option value="">Select Delivery Address</option>
-                        <option value="GH2">GH2</option>
-                        <option value="GH5">GH5</option>
-                        <option value="GH7">GH7</option>
-                        <option value="Unimall">Unimall</option>
-                        <option value="CC">CC</option>
-                        <option value="Buzz">Buzz</option>
-                        <option value="BH1">BH1</option>
-                        <option value="BH2">BH2</option>
-                        <option value="BH3">BH3</option>
-                        <option value="BH4">BH4</option>
-                        <option value="BH5">BH5</option>
-                        <option value="BH6">BH6</option>
-                        <option value="BH7">BH7</option>
-                      </select>
-                      {!orderAddress && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Please select a delivery address.</span>}
-                    </div>
-                  )}
+                  {/* Address - visible for both pickup and delivery; required only for delivery */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Address{pickupType === 'DELIVERY' ? ' *' : ''}</label>
+                    <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required={pickupType === 'DELIVERY'} style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      padding: '0.7em 1em',
+                      borderRadius: '8px',
+                      border: '1.5px solid #6ec1ff',
+                      background: '#101828',
+                      color: '#fff',
+                      fontSize: '1em',
+                      boxShadow: '0 1px 4px #10182818',
+                      outline: 'none',
+                      transition: 'border 0.2s',
+                      margin: 0
+                    }}>
+                      <option value="">Select Address</option>
+                      <option value="GH2">GH2</option>
+                      <option value="GH5">GH5</option>
+                      <option value="GH7">GH7</option>
+                      <option value="Unimall">Unimall</option>
+                      <option value="CC">CC</option>
+                      <option value="Buzz">Buzz</option>
+                      <option value="BH1">BH1</option>
+                      <option value="BH2">BH2</option>
+                      <option value="BH3">BH3</option>
+                      <option value="BH4">BH4</option>
+                      <option value="BH5">BH5</option>
+                      <option value="BH6">BH6</option>
+                      <option value="BH7">BH7</option>
+                    </select>
+                    {pickupType === 'DELIVERY' && !orderAddress && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Please select an address for delivery.</span>}
+                  </div>
                   {/* Payment Method */}
                   <div style={{ width: '100%' }}>
                     <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Payment Method *</label>
@@ -3345,7 +3341,7 @@ export default function App() {
                       marginBottom: '-0.5em',
                       marginTop: 4
                     }}>
-                      You'll receive a call for when to pick up your order from BH3.
+                      You'll receive a call for when to pick up your order from Boys Studio - 10.
                     </div>
                   )}
                 </form>
