@@ -13,8 +13,7 @@ const categories = {
   girl: { name: 'Girl', folder: 'girl' },
   phone: { name: 'Phone', folder: 'phone' },
   sports: { name: 'Sports', folder: 'sports' },
-  fun: {name: 'Double', folder: 'fun'},
-  custom: { name: 'Custom Stickers', folder: 'custom' }
+  fun: {name: 'Double', folder: 'fun'}
 };
 
 // Dynamically import all sticker images from public/stickers/[category] using Vite's import.meta.glob
@@ -77,9 +76,8 @@ export default function App() {
   // Remove OTP/Phone states
   const [phone, setPhone] = useState('');
   const [orderAddress, setOrderAddress] = useState('');
-  const [orderPayment, setOrderPayment] = useState('Pay Online');
+  const [orderPayment, setOrderPayment] = useState('Pay on delivery');
   const [orderPlaced, setOrderPlaced] = useState(false);
-  const [pickupType, setPickupType] = useState('SELF-PICKUP');
   const [adminLoggedIn, setAdminLoggedIn] = useState(false);
   const [adminId, setAdminId] = useState('');
   const [adminPw, setAdminPw] = useState('');
@@ -91,14 +89,7 @@ export default function App() {
   const [navOpen, setNavOpen] = useState(false); // New state for mobile nav
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 800);
   const [adminToken, setAdminToken] = useState(null); // Store admin token after login
-  const [customStickers, setCustomStickers] = useState([]); // Store custom stickers
-  const [uploadedImage, setUploadedImage] = useState(null); // Store uploaded image file
-  const [imagePreview, setImagePreview] = useState(null); // Store image preview URL
-  const [customStickerName, setCustomStickerName] = useState(''); // Store custom sticker name
-  const [uploading, setUploading] = useState(false); // Upload loading state
   const [loading, setLoading] = useState(false); // Global loading state
-  //
-  const [showCustom, setShowCustom] = useState(false);
   const categoryScrollRef = useRef();
   const [catScrollPaused, setCatScrollPaused] = useState(false);
   const catAutoDirRef = useRef(1); // 1 -> right, -1 -> left
@@ -392,156 +383,74 @@ export default function App() {
     setCart(prev => prev.filter(item => item.id !== stickerId));
   };
 
-  // Custom sticker upload functions
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      // Validate file type and size
-      if (file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) { // 5MB limit
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setImagePreview(e.target.result);
-          setUploadedImage(file);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert('Please upload a valid image file under 5MB');
-      }
-    }
-  };
-
-  const uploadCustomSticker = async () => {
-    if (!uploadedImage) {
-      alert('Please select an image first');
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('image', uploadedImage);
-      formData.append('name', customStickerName || 'Custom Sticker');
-
-      const response = await fetch(`${API_BASE}/api/upload-custom-sticker`, {
-        method: 'POST',
-        body: formData
-      });
-
-      const result = await response.json();
-      
-      if (result.success) {
-        // Add to custom stickers list
-        setCustomStickers(prev => [...prev, result.sticker]);
-        // Add to cart
-        handleAddToCart(result.sticker.id);
-        // Reset form
-        setUploadedImage(null);
-        setImagePreview(null);
-        setCustomStickerName('');
-        // Clear file input
-        const fileInput = document.getElementById('custom-sticker-input');
-        if (fileInput) fileInput.value = '';
-        
-        alert('Custom sticker uploaded and added to cart!');
-      } else {
-        alert('Upload failed: ' + (result.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert('Upload failed. Please try again.');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // Load custom stickers on component mount
-  useEffect(() => {
-    const loadCustomStickers = async () => {
-      try {
-        const response = await fetch(`${API_BASE}/api/custom-stickers`);
-        const customStickers = await response.json();
-        setCustomStickers(customStickers);
-      } catch (error) {
-        console.error('Failed to load custom stickers:', error);
-      }
-    };
-    loadCustomStickers();
-  }, []);
-
   // Get total items in cart
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
   // Get cart product details (stickers, posters, packs)
   const getProductById = (id) => {
-    // Check regular stickers first
-    let product = stickers.find(s => s.id === id) || topPicks.find(s => s.id === id);
-    
-    // If not found, check custom stickers
-    if (!product) {
-      product = customStickers.find(s => s.id === id);
-    }
-    
-    return product;
+    return stickers.find(s => s.id === id) || topPicks.find(s => s.id === id);
   };
 
   const cartDetails = cart.map(item => {
     const product = getProductById(item.id);
     return { ...product, qty: item.qty };
-  });
-  // Detect if any poster or custom sticker is in the cart
-  const hasPosterInCart = cartDetails.some(item => item.category === 'posters');
-  const hasCustomInCart = cartDetails.some(item => item.category === 'custom' || (typeof item.id === 'string' && item.id.startsWith('custom_')));
-  // Force online payment if posters or custom stickers are present
-  useEffect(() => {
-    if ((hasPosterInCart || hasCustomInCart) && orderPayment !== 'Pay Online') {
-      setOrderPayment('Pay Online');
-    }
-  }, [hasPosterInCart, hasCustomInCart]);
-  // Calculate checkout total (including delivery if selected)
-  const cartSubtotal = cartDetails.reduce((sum, item) => sum + parseFloat(item.price) * item.qty, 0);
-  // Always charge delivery fee when Delivery is selected
-  const deliveryCharge = (pickupType === 'DELIVERY') ? 10 : 0;
-  const checkoutTotal = cartSubtotal + deliveryCharge;
+  }).filter(item => item.id); // filter out undefined
+
+  // Calculate checkout total (no delivery charge)
+  const cartSubtotal = cartDetails.reduce((sum, item) => sum + (parseFloat(item.price) || 7) * item.qty, 0);
+  const checkoutTotal = cartSubtotal;
 
   // Validate phone number format (must be exactly 10 digits)
   const isValidPhone = /^\d{10}$/.test(phone);
 
   // Place order logic (add to orders)
   const handlePlaceOrder = async () => {
+    if (cartCount < 5) {
+      alert('Minimum 5 stickers required to place an order.');
+      return;
+    }
+    if (!orderName || !isValidPhone || !orderAddress) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
     setLoading(true);
     const stickerList = cartDetails.map(item => `${item.name} (x${item.qty})`);
     const orderData = {
       name: orderName,
       phone: phone,
       stickers: stickerList,
-      orderType: pickupType,
-      address: orderAddress || 'SELF-PICKUP',
-      payment: orderPayment
+      orderType: 'DELIVERY',
+      address: orderAddress,
+      payment: 'Pay on delivery'
     };
     try {
-      await fetch(`${API_BASE}/orders`, {
+      const res = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
       });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to place order');
+      }
       setOrderPlaced(true);
       setShowCheckout(false);
       setCart([]);
       setOrderName('');
       setPhone('');
       setOrderAddress('');
-      setOrderPayment('Pay on delivery/pickup');
-      setPickupType('SELF-PICKUP');
+      setOrderPayment('Pay on delivery');
       setLoading(false);
     } catch (err) {
       setLoading(false);
-      alert('Failed to place order. Please try again.');
+      alert(err.message || 'Failed to place order. Please try again.');
     }
   };
 
   // Payment functions for Cashfree
   const handleOnlinePayment = async () => {
-    if (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress)) {
+    if (!orderName || !isValidPhone || !orderAddress) {
       alert('Please fill in all required fields before proceeding with payment.');
       return;
     }
@@ -581,8 +490,8 @@ export default function App() {
         name: orderName,
         phone: phone,
         stickers: cartDetails.map(item => `${item.name} (x${item.qty})`),
-        orderType: pickupType,
-        address: orderAddress || 'SELF-PICKUP',
+        orderType: 'DELIVERY',
+        address: orderAddress,
         payment: 'Paid Online',
         status: 'PAID',
         orderId: orderId,
@@ -1201,7 +1110,7 @@ export default function App() {
                             objectFit: 'contain',
                             borderRadius: 12,
                             marginBottom: 12,
-                            border: item.category === 'custom' ? '2px solid #4ade80' : '2px solid #60a5fa',
+                            border: '2px solid #60a5fa',
                             background: '#101522',
                             display: 'block',
                             boxSizing: 'border-box',
@@ -1216,11 +1125,6 @@ export default function App() {
                       </div>
                       <div className="store-info">
                         <span className="store-price">₹{item.price}</span>
-                        {item.category === 'custom' && (
-                          <div style={{ color: '#4ade80', fontWeight: 600, fontSize: '0.9em', marginTop: 4 }}>
-                            ✨ Custom Sticker
-                          </div>
-                        )}
                       </div>
                       <div className="store-actions">
                         {!inCart ? (
@@ -1291,46 +1195,7 @@ export default function App() {
                 >
                   All Stickers
                 </button>
-                {/* Eye-catching Custom Stickers button */}
-                <button
-                  className={`category-btn${selectedCategory === 'custom' ? ' active' : ''}`}
-                  onClick={() => setSelectedCategory('custom')}
-                  style={{
-                    background: selectedCategory === 'custom' 
-                      ? 'linear-gradient(90deg, #4ade80, #6ec1ff)'
-                      : 'linear-gradient(90deg, rgba(74,222,128,0.15), rgba(110,193,255,0.15))',
-                    color: selectedCategory === 'custom' ? '#101828' : '#b3e0ff',
-                    border: selectedCategory === 'custom' ? '2px solid #4ade80' : '1px solid #6ec1ff',
-                    boxShadow: selectedCategory === 'custom' ? '0 6px 18px rgba(74,222,128,0.35)' : '0 2px 8px rgba(110,193,255,0.15)',
-                    borderRadius: '999px',
-                    padding: '10px 18px',
-                    fontWeight: 800,
-                    letterSpacing: 0.3,
-                    cursor: 'pointer',
-                    position: 'relative',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    transition: 'all 0.25s ease'
-                  }}
-                  onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                  onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
-                >
-                  <span style={{fontSize: '1.1em'}}>🎨</span>
-                  <span>Custom Stickers</span>
-                  <span style={{
-                    background: '#4ade80',
-                    color: '#0a1a2b',
-                    borderRadius: 999,
-                    padding: '2px 8px',
-                    fontSize: '0.75em',
-                    fontWeight: 900,
-                    marginLeft: 4,
-                    border: '1px solid #0a1a2b'
-                  }}>
-                    NEW
-                  </span>
-                </button>
+
               </div>
               {/* Scrollable ribbon for other categories (hidden scrollbar visuals) */}
               <div
@@ -1348,7 +1213,7 @@ export default function App() {
                   padding: '6px 8px', maxWidth: 1100, margin: '0 auto', justifyContent: isMobile ? 'flex-start' : 'center'
                 }}
               >
-                {Object.entries(categories).filter(([key]) => key !== 'stickerpack' && key !== 'custom').map(([key, category]) => (
+                {Object.entries(categories).filter(([key]) => key !== 'stickerpack').map(([key, category]) => (
                   <button 
                     key={key}
                     className={`category-btn${selectedCategory === key ? ' active' : ''}`}
@@ -1369,208 +1234,12 @@ export default function App() {
                 ))}
               </div>
             </div>
-            {/* Custom Sticker CTA */}
-            <div style={{display: 'flex', justifyContent: 'center', marginBottom: 24}}>
-              <button
-                onClick={() => setShowCustom(v => !v)}
-                style={{
-                  background: 'rgba(30,40,60,0.9)',
-                  color: '#fff',
-                  border: '1px solid #6ec1ff',
-                  borderRadius: 8,
-                  padding: '10px 20px',
-                  fontWeight: 'bold',
-                  fontSize: isMobile ? '1em' : '1.05em',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  display: 'none'
-                }}>
-                + Customized Stickers
-              </button>
-            </div>
-            {false && (
-              <div style={{
-                background: 'rgba(30,40,60,0.9)',
-                border: '1px solid #233',
-                borderRadius: 12,
-                padding: 16,
-                margin: '0 auto 24px',
-                width: 'min(720px, 92vw)',
-                color: '#fff',
-                boxShadow: '0 2px 12px rgba(16,21,34,0.25)'
-              }}>
-                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap'}}>
-                  <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
-                    <div style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 8,
-                      background: '#101828',
-                      border: '1px solid #6ec1ff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#6ec1ff',
-                      fontWeight: 900,
-                      fontSize: 22
-                    }}>+</div>
-                    <div>
-                      <div style={{fontWeight: 700, color: '#b3e0ff'}}>Upload your image</div>
-                      <div style={{fontSize: '0.95em', color: '#dbeafe'}}>Send us the photo you want as a sticker (10rs/sticker).</div>
-                    </div>
-                  </div>
-                  <div style={{display: 'flex', gap: 10}}>
-                    <a
-                      href="mailto:8stickbuy@gmail.com?subject=Custom%20Sticker%20Request&body=Please%20attach%20the%20image%2Fartwork%20and%20mention%20size%20and%20quantity."
-                      style={{
-                        background: '#6ec1ff',
-                        color: '#101828',
-                        textDecoration: 'none',
-                        borderRadius: 8,
-                        padding: '10px 16px',
-                        fontWeight: 800
-                      }}
-                    >
-                      Email Image
-                    </a>
-                    <a
-                      href="https://wa.me/919138442368"
-                      target="_blank"
-                      rel="noopener"
-                      style={{
-                        background: '#25D366',
-                        color: '#101828',
-                        textDecoration: 'none',
-                        borderRadius: 8,
-                        padding: '10px 16px',
-                        fontWeight: 800
-                      }}
-                    >
-                      WhatsApp Image
-                    </a>
-                  </div>
-                </div>
-              </div>
-            )}
-            {/* Custom Sticker Upload Section */}
-            {selectedCategory === 'custom' && (
-              <div style={{
-                background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-                borderRadius: '16px',
-                padding: '24px',
-                marginBottom: '32px',
-                border: '2px solid #6ec1ff',
-                boxShadow: '0 8px 32px rgba(110, 193, 255, 0.2)'
-              }}>
-                <h3 style={{ color: '#6ec1ff', marginBottom: '20px', textAlign: 'center', fontSize: '1.5em' }}>
-                  Upload Your Custom Sticker
-                </h3>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-                  {/* File Upload */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '400px' }}>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleFileUpload}
-                      style={{ display: 'none' }}
-                      id="custom-sticker-input"
-                    />
-                    <label 
-                      htmlFor="custom-sticker-input" 
-                      style={{
-                        background: 'linear-gradient(45deg, #6ec1ff, #4ade80)',
-                        color: '#101828',
-                        padding: '12px 24px',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                        fontWeight: 'bold',
-                        fontSize: '1.1em',
-                        border: 'none',
-                        transition: 'all 0.3s ease',
-                        boxShadow: '0 4px 15px rgba(110, 193, 255, 0.3)'
-                      }}
-                      onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-                      onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-                    >
-                      📁 Choose Image File
-                    </label>
-                    
-                    {/* Image Preview */}
-                    {imagePreview && (
-                      <div style={{ textAlign: 'center' }}>
-                        <img 
-                          src={imagePreview} 
-                          alt="Preview" 
-                          style={{
-                            maxWidth: '200px',
-                            maxHeight: '200px',
-                            borderRadius: '8px',
-                            border: '2px solid #6ec1ff',
-                            objectFit: 'contain'
-                          }}
-                        />
-                        <input 
-                          type="text" 
-                          placeholder="Enter sticker name (optional)"
-                          value={customStickerName}
-                          onChange={(e) => setCustomStickerName(e.target.value)}
-                          onKeyPress={(e) => e.key === 'Enter' && handleUploadCustomSticker()}
-                          style={{
-                            width: '100%',
-                            padding: '8px 12px',
-                            marginTop: '12px',
-                            borderRadius: '6px',
-                            border: '1px solid #6ec1ff',
-                            background: 'rgba(30, 40, 60, 0.8)',
-                            color: '#fff',
-                            fontSize: '1em'
-                          }}
-                        />
-                        <button
-                          onClick={uploadCustomSticker}
-                          disabled={uploading}
-                          style={{
-                            background: uploading ? '#666' : 'linear-gradient(45deg, #4ade80, #6ec1ff)',
-                            color: '#101828',
-                            padding: '12px 24px',
-                            borderRadius: '8px',
-                            border: 'none',
-                            cursor: uploading ? 'not-allowed' : 'pointer',
-                            fontWeight: 'bold',
-                            fontSize: '1.1em',
-                            marginTop: '12px',
-                            width: '100%',
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          {uploading ? '⏳ Uploading...' : '🚀 Upload & Add to Cart'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div style={{ 
-                    color: '#b3e0ff', 
-                    fontSize: '0.9em', 
-                    textAlign: 'center',
-                    marginTop: '8px'
-                  }}>
-                    💡 Upload any image (max 5MB) and it will be added to your cart as a custom sticker for ₹10. <br />
-                    (Only online payment is available when custom stickers are in the cart)
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="store-grid">
               {(() => {
                 let products = [];
                 if (selectedCategory === 'all') {
                   products = interleavedAllStickers;
-                } else if (selectedCategory === 'custom') {
-                  products = customStickers;
                 } else {
                   products = stickers.filter(sticker => {
                     return sticker.category === selectedCategory;
@@ -1615,7 +1284,7 @@ export default function App() {
                             objectFit: 'contain',
                             borderRadius: 12,
                             marginBottom: 12,
-                            border: item.category === 'custom' ? '2px solid #4ade80' : '2px solid #60a5fa',
+                            border: '2px solid #60a5fa',
                             background: '#101522',
                             display: 'block',
                             boxSizing: 'border-box',
@@ -1632,11 +1301,6 @@ export default function App() {
                         <span className="store-price">₹{item.price}</span>
                         {item.category === 'posters' && (
                           <div style={{ color: '#b3e0ff', fontWeight: 600, fontSize: '0.98em', marginBottom: 2 }}>Size : A3</div>
-                        )}
-                        {item.category === 'custom' && (
-                          <div style={{ color: '#4ade80', fontWeight: 600, fontSize: '0.9em', marginTop: 4 }}>
-                            ✨ Custom Sticker
-                          </div>
                         )}
                       </div>
                       <div className="store-actions">
@@ -1750,7 +1414,6 @@ export default function App() {
                       // Calculate total price for this order
                       let adminOrderSubtotal = 0;
                       order.stickers.forEach(stickerStr => {
-                        // Extract name and quantity
                         const nameMatch = stickerStr.match(/^(.*) \(x(\d+)\)$/);
                         let name = stickerStr;
                         let qty = 1;
@@ -1758,19 +1421,11 @@ export default function App() {
                           name = nameMatch[1];
                           qty = parseInt(nameMatch[2], 10);
                         }
-                        // Resolve product from both stickers and top picks
                         const product = stickers.find(s => s.name === name) || topPicks.find(s => s.name === name);
-                        // Detect custom stickers via explicit list or keyword fallback
-                        const isCustom = name === 'Custom Sticker' || customStickers.some(cs => cs.name === name) || /custom/i.test(name);
-                        // Pricing: customs ₹10, known product price, else default ₹7
-                        const price = isCustom ? 10 : product ? parseFloat(product.price) : 7;
+                        const price = product ? parseFloat(product.price) : 7;
                         adminOrderSubtotal += price * qty;
                       });
-                      // Add delivery charge if applicable (free if subtotal >= 70)
-                      const showDelivery = order.orderType === 'DELIVERY';
-                      const deliveryCharge = (showDelivery && adminOrderSubtotal < 70) ? 10 : 0;
                       let total = adminOrderSubtotal;
-                      if (showDelivery) total += deliveryCharge;
                       return (
                         <div key={idx} style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#101828', borderRadius: '8px', padding: '12px 18px', marginBottom: 12}}>
                           <div style={{display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0}}>
@@ -1778,37 +1433,19 @@ export default function App() {
                             <span style={{color: '#b3e0ff', fontSize: '1em'}}>{order.phone}</span>
                             <div style={{color: '#6ec1ff', fontSize: '0.98em', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: '8px'}}>
                               {order.stickers && order.stickers.map((sticker, i) => {
-                                // Extract name
                                 const nameMatch = sticker.match(/^(.*) \(x(\d+)\)$/);
                                 let name = sticker;
                                 if (nameMatch) {
                                   name = nameMatch[1];
                                 }
                                 const product = stickers.find(s => s.name === name);
-                                const customSticker = customStickers.find(s => s.name === name);
-                                const category = product ? categories[product.category]?.name || product.category : 
-                                              customSticker ? 'Custom Sticker' : 'Unknown';
-                                const isCustom = customSticker || name === 'Custom Sticker';
+                                const category = product ? categories[product.category]?.name || product.category : 'General';
                                 
                                 return (
                                   <div key={i} style={{display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px'}}>
-                                    {isCustom && customSticker && (
-                                      <img 
-                                        src={customSticker.imageUrl} 
-                                        alt={customSticker.name}
-                                        style={{
-                                          width: '30px',
-                                          height: '30px',
-                                          borderRadius: '4px',
-                                          border: '1px solid #4ade80',
-                                          objectFit: 'cover'
-                                        }}
-                                        onClick={() => setZoomImg(customSticker.imageUrl)}
-                                      />
-                                    )}
                                     <span>
                                       {sticker} 
-                                      <span style={{color: isCustom ? '#4ade80' : '#60a5fa', fontSize: '0.95em', marginLeft: 4}}>
+                                      <span style={{color: '#60a5fa', fontSize: '0.95em', marginLeft: 4}}>
                                         [{category}]
                                       </span>
                                     </span>
@@ -1816,10 +1453,9 @@ export default function App() {
                                 );
                               })}
                             </div>
-                            <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Mode: {order.orderType}</span>
-                            <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Payment: {order.payment || 'Pay on delivery/pickup'}{order.status ? ` • Status: ${order.status}` : ''}</span>
+                            <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Payment: {order.payment || 'Pay on delivery'}{order.status ? ` • Status: ${order.status}` : ''}</span>
                             <span style={{color: '#b3e0ff', fontSize: '0.98em'}}>Address: {order.address}</span>
-                      <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}{showDelivery ? ' (includes ₹10 delivery)' : ''}</span>
+                      <span style={{color: '#2ecc40', fontWeight: 'bold', fontSize: '1.05em'}}>Total: ₹{total.toFixed(2)}</span>
                           </div>
                           <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
                             <button 
@@ -1894,107 +1530,7 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Custom Stickers Management section, visible only to admin */}
-                {adminLoggedIn && (
-                  <div className="admin-custom-stickers" style={{marginTop: '32px'}}>
-                    <h2 style={{color: '#6ec1ff', marginBottom: '18px'}}>Custom Stickers Uploaded by Users</h2>
-                    {customStickers.length === 0 ? (
-                      <p style={{color: '#fff'}}>No custom stickers uploaded yet.</p>
-                    ) : (
-                      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px'}}>
-                        {customStickers.map((sticker, idx) => (
-                          <div key={idx} style={{
-                            background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-                            borderRadius: '12px',
-                            padding: '16px',
-                            border: '2px solid #4ade80',
-                            boxShadow: '0 4px 20px rgba(74, 222, 128, 0.2)'
-                          }}>
-                            <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-                              {/* Sticker Image */}
-                              <div style={{textAlign: 'center'}}>
-                                <img 
-                                  src={sticker.imageUrl} 
-                                  alt={sticker.name}
-                                  style={{
-                                    maxWidth: '200px',
-                                    maxHeight: '200px',
-                                    borderRadius: '8px',
-                                    border: '2px solid #4ade80',
-                                    objectFit: 'contain',
-                                    background: '#101522',
-                                    cursor: 'pointer'
-                                  }}
-                                  onClick={() => setZoomImg(sticker.imageUrl)}
-                                />
-                              </div>
-                              
-                              {/* Sticker Details */}
-                              <div style={{textAlign: 'center'}}>
-                                <h3 style={{color: '#4ade80', marginBottom: '8px', fontSize: '1.2em'}}>
-                                  {sticker.name}
-                                </h3>
-                                <p style={{color: '#b3e0ff', marginBottom: '4px'}}>
-                                  Price: <span style={{color: '#4ade80', fontWeight: 'bold'}}>₹{sticker.price}</span>
-                                </p>
-                                <p style={{color: '#b3e0ff', marginBottom: '4px', fontSize: '0.9em'}}>
-                                  ID: {sticker.id}
-                                </p>
-                                <p style={{color: '#b3e0ff', marginBottom: '8px', fontSize: '0.9em'}}>
-                                  Uploaded: {new Date(sticker.createdAt).toLocaleDateString()}
-                                </p>
-                                
-                                {/* Action Buttons */}
-                                <div style={{display: 'flex', gap: '8px', justifyContent: 'center'}}>
-                                  <button 
-                                    onClick={() => setZoomImg(sticker.imageUrl)}
-                                    style={{
-                                      background: 'linear-gradient(45deg, #6ec1ff, #4ade80)',
-                                      color: '#101828',
-                                      border: 'none',
-                                      borderRadius: '6px',
-                                      padding: '8px 16px',
-                                      cursor: 'pointer',
-                                      fontWeight: 'bold',
-                                      fontSize: '0.9em'
-                                    }}
-                                  >
-                                    🔍 View Full Size
-                                  </button>
-                                  <button 
-                                    onClick={async () => {
-                                      if (confirm('Are you sure you want to delete this custom sticker?')) {
-                                        try {
-                                          await fetch(`${API_BASE}/api/custom-stickers/${sticker.id}`, { method: 'DELETE' });
-                                          setCustomStickers(prev => prev.filter(s => s.id !== sticker.id));
-                                          alert('Custom sticker deleted successfully');
-                                        } catch (err) {
-                                          alert('Failed to delete custom sticker');
-                                        }
-                                      }
-                                    }}
-                                    style={{
-                                      background: '#ff4d4d',
-                                      color: '#fff',
-                                      border: 'none',
-                                      borderRadius: '6px',
-                                      padding: '8px 16px',
-                                      cursor: 'pointer',
-                                      fontWeight: 'bold',
-                                      fontSize: '0.9em'
-                                    }}
-                                  >
-                                    🗑️ Delete
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
+
 
                 {/* Sales Stats Section (moved to bottom, always visible) */}
                 <div className="admin-stats" style={{background: '#0b1220', border: '1px solid #233', borderRadius: '12px', padding: '16px', marginTop: '24px'}}>
@@ -2024,7 +1560,7 @@ export default function App() {
                   </div>
                   
                   {/* Expense Display with Add Buttons */}
-                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: '16px'}}>
+                  <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: 12, marginBottom: '16px'}}>
                     <div style={{background: '#101828', border: '1px solid #233', borderRadius: '8px', padding: '12px'}}>
                       <div style={{color: '#b3e0ff', fontSize: '0.9em', marginBottom: '8px'}}>Production Cost</div>
                       <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
@@ -2048,35 +1584,12 @@ export default function App() {
                         </button>
                       </div>
                     </div>
-                    <div style={{background: '#101828', border: '1px solid #233', borderRadius: '8px', padding: '12px'}}>
-                      <div style={{color: '#b3e0ff', fontSize: '0.9em', marginBottom: '8px'}}>Delivery Cost</div>
-                      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                        <div style={{color: '#fff', fontWeight: 'bold', fontSize: '1.2em'}}>₹{deliveryCost.toFixed(2)}</div>
-                        <button
-                          onClick={() => handleIncrementClick('delivery')}
-                          style={{
-                            background: '#4ade80',
-                            color: '#0b1220',
-                            border: 'none',
-                            borderRadius: '6px',
-                            padding: '8px 12px',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            fontSize: '0.9em',
-                            minWidth: '40px'
-                          }}
-                          title="Add amount to delivery cost"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
                   </div>
                   
                   {/* Net Revenue Display */}
                   <div style={{background: '#101828', border: '1px solid #233', borderRadius: '8px', padding: '12px'}}>
                     <div style={{color: '#b3e0ff', fontSize: '0.9em'}}>Net Revenue (After Expenses)</div>
-                    <div style={{color: '#4ade80', fontWeight: 'bold', fontSize: '1.4em'}}>₹{(totalRevenue - productionCost - deliveryCost).toFixed(2)}</div>
+                    <div style={{color: '#4ade80', fontWeight: 'bold', fontSize: '1.4em'}}>₹{(totalRevenue - productionCost).toFixed(2)}</div>
                   </div>
                 </div>
 
@@ -2330,14 +1843,10 @@ export default function App() {
               <p style={{marginBottom: '16px'}}>We currently deliver to all major cities and towns across India. Delivery availability will be confirmed at checkout.</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>2. Delivery Options</h3>
-              <p style={{marginBottom: '16px'}}>We offer two delivery options:</p>
-              <ul style={{marginLeft: '20px', marginBottom: '16px'}}>
-                <li><strong>Standard Delivery:</strong> 3-5 business days (₹10 charge for orders under ₹70)</li>
-                <li><strong>Express Delivery:</strong> 1-2 business days (₹25 additional charge)</li>
-              </ul>
+              <p style={{marginBottom: '16px'}}>Standard delivery to your hostel location.</p>
               
-              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Free Delivery</h3>
-              <p style={{marginBottom: '16px'}}>Free standard delivery is available on orders of ₹70 and above.</p>
+              <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>3. Delivery Charges</h3>
+              <p style={{marginBottom: '16px'}}>Free delivery on all orders (minimum 5 stickers required per order).</p>
               
               <h3 style={{color: '#6ec1ff', marginTop: '24px', marginBottom: '12px'}}>4. Order Processing</h3>
               <p style={{marginBottom: '16px'}}>Orders are typically processed within 24 hours of payment confirmation. You will receive tracking information via email/SMS.</p>
@@ -2471,28 +1980,7 @@ export default function App() {
             <span style={{fontWeight: 'bold', fontSize: '1.2em', color: '#6ec1ff'}}>Your Cart</span>
             <button onClick={closeCartDrawer} style={{background: 'none', border: 'none', color: '#fff', fontSize: '2em', cursor: 'pointer', lineHeight: 1}}>&times;</button>
           </div>
-          {/* Free Delivery Dynamic Message */}
-          {cartDetails.length > 0 && pickupType === 'DELIVERY' && (
-            <div style={{
-              background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
-              color: '#101828',
-              borderRadius: 10,
-              margin: '14px 24px 0 24px',
-              padding: '8px 10px',
-              fontWeight: 'bold',
-              fontSize: '1em',
-              textAlign: 'center',
-              boxShadow: '0 2px 8px #10182822',
-              animation: 'fadeInHighlight 0.7s',
-              letterSpacing: 0.1,
-              maxWidth: 320,
-              marginLeft: 'auto',
-              marginRight: 'auto',
-            }}>
-              Delivery charge of <span style={{color: '#0a2342', fontWeight: 'bold'}}>₹10</span> will apply.
-              <style>{`@keyframes fadeInHighlight { from { opacity: 0; background: #fff; } to { opacity: 1; background: linear-gradient(90deg, #6ec1ff 0%,rgb(74, 222, 178) 100%); } }`}</style>
-            </div>
-          )}
+
           <div style={{flex: 1, overflowY: 'auto', padding: '24px', marginBottom: isMobile ? 90 : 90}}>
             {cartDetails.length === 0 ? (
               <div style={{color: '#fff', textAlign: 'center', marginTop: 40, fontSize: '1.1em'}}>Your cart is empty.</div>
@@ -2587,212 +2075,201 @@ export default function App() {
             overflow: 'hidden'
           }}
         >
-          {!isMobile ? (
-            <div className="checkout-form-wrapper" style={{
-              background: '#181c2a',
-              borderRadius: '1.25rem',
-              boxShadow: '0 8px 32px #0008',
-              maxWidth: 500,
-              width: '100%',
-              margin: 'auto',
-              position: 'relative',
-              padding: '36px 36px 24px 36px',
-              boxSizing: 'border-box',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              maxHeight: '90vh',
-              overflow: 'hidden',
-              minHeight: '90vh'
-            }}>
-              {/* Close Button */}
-              <button
-                className="checkout-x"
-                onClick={() => setShowCheckout(false)}
+          <div className="checkout-form-wrapper" style={{
+            background: '#181c2a',
+            borderRadius: isMobile ? 0 : '1.25rem',
+            boxShadow: '0 8px 32px #0008',
+            maxWidth: 500,
+            width: '100%',
+            margin: 'auto',
+            position: 'relative',
+            padding: isMobile ? '20px 16px' : '36px 36px 24px 36px',
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            maxHeight: '90vh',
+            overflow: 'hidden',
+            minHeight: isMobile ? '100vh' : 'auto'
+          }}>
+            {/* Close Button */}
+            <button
+              className="checkout-x"
+              onClick={() => setShowCheckout(false)}
+              style={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                background: 'rgba(30,40,60,0.8)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                fontSize: '1.4em',
+                cursor: 'pointer',
+                zIndex: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              ×
+            </button>
+            {/* Header */}
+            <div
+              style={{
+                width: '100%',
+                padding: '16px 16px 12px 16px',
+                boxSizing: 'border-box',
+                textAlign: 'center'
+              }}
+            >
+              <h2
                 style={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 16,
-                  background: 'rgba(30,40,60,0.8)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: 36,
-                  height: 36,
+                  color: '#6ec1ff',
+                  fontWeight: 700,
                   fontSize: '1.4em',
-                  cursor: 'pointer',
-                  zIndex: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
+                  margin: 0,
+                  letterSpacing: 1
                 }}
               >
-                ×
-              </button>
-              {/* Header */}
+                Checkout
+              </h2>
+            </div>
+            {/* Scrollable Content */}
+            <div
+              className="checkout-content-scroll"
+              style={{
+                flex: 1,
+                width: '100%',
+                overflowY: 'auto',
+                padding: '0 16px 20px 16px',
+                boxSizing: 'border-box'
+              }}
+            >
+              {/* Order Summary */}
               <div
                 style={{
-                  width: '100%',
-                  padding: '32px 16px 12px 16px',
-                  boxSizing: 'border-box',
-                  textAlign: 'center'
-                }}
-              >
-                <h2
-                  style={{
-                    color: '#6ec1ff',
-                    fontWeight: 700,
-                    fontSize: '1.4em',
-                    margin: 0,
-                    letterSpacing: 1
-                  }}
-                >
-                  Checkout
-                </h2>
-              </div>
-              {/* Scrollable Content */}
-              <div
-                className="checkout-content-scroll"
-                style={{
-                  flex: 1,
-                  width: '100%',
-                  overflowY: 'auto',
-                  padding: '0 16px 160px 16px',
+                  background: '#101828',
+                  borderRadius: 10,
+                  padding: '12px 12px',
+                  marginBottom: 14,
+                  marginTop: 0,
                   boxSizing: 'border-box'
                 }}
               >
-                {/* Order Summary */}
-                <div
-                  style={{
-                    background: '#101828',
-                    borderRadius: 10,
-                    padding: '12px 12px',
-                    marginBottom: 14,
-                    marginTop: 0,
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  <h3 style={{ color: '#b3e0ff', fontSize: '1em', marginBottom: 8, fontWeight: 600 }}>Order Summary</h3>
-                  {cartDetails.map(item => (
-                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                      <img
-                        src={item.imageUrl || item.img}
-                        alt="Sticker"
-                        style={{
-                          width: 38,
-                          height: 38,
-                          borderRadius: 7,
-                          objectFit: 'cover',
-                          border: '1.5px solid #6ec1ff',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => setZoomImg(item.imageUrl || item.img)}
-                      />
-                      <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
-                        <span style={{ color: '#b3e0ff', fontSize: '1em', marginLeft: 8 }}>x{item.qty}</span>
-                      </div>
-                      <span style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em' }}>
-                        ₹{(parseFloat(item.price) * item.qty).toFixed(2)}
-                      </span>
+                <h3 style={{ color: '#b3e0ff', fontSize: '1em', marginBottom: 8, fontWeight: 600 }}>Order Summary</h3>
+                {cartDetails.map(item => (
+                  <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <img
+                      src={item.imageUrl || item.img}
+                      alt="Sticker"
+                      style={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: 7,
+                        objectFit: 'cover',
+                        border: '1.5px solid #6ec1ff',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => setZoomImg(item.imageUrl || item.img)}
+                    />
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
+                      <span style={{ color: '#b3e0ff', fontSize: '1em', marginLeft: 8 }}>x{item.qty}</span>
                     </div>
-                  ))}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '0.95em', marginBottom: 4 }}>
-                    <span>Subtotal</span>
-                    <span>₹{cartSubtotal.toFixed(2)}</span>
+                    <span style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em' }}>
+                      ₹{(parseFloat(item.price) * item.qty).toFixed(2)}
+                    </span>
                   </div>
-                  {pickupType === 'DELIVERY' && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '0.95em', marginBottom: 4 }}>
-                      <span>Delivery</span>
-                      <span>{deliveryCharge > 0 ? `₹${deliveryCharge}` : 'Free'}</span>
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#60a5fa', fontWeight: 700, fontSize: '1.05em', marginTop: 6 }}>
-                    <span>Total</span>
-                    <span>₹{checkoutTotal.toFixed(2)}</span>
-                  </div>
-                  {/* Free Delivery Suggestion */}
-                  {pickupType === 'DELIVERY' && cartSubtotal < 70 && (
-                    <div style={{
-                      background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
-                      color: '#101828',
-                      borderRadius: 10,
-                      margin: '16px 0 0 0',
-                      padding: '12px 16px',
-                      fontWeight: 'bold',
-                      fontSize: '0.95em',
-                      textAlign: 'center',
-                      boxShadow: '0 2px 8px #10182822',
-                      maxWidth: '100%',
-                      marginLeft: 'auto',
-                      marginRight: 'auto'
-                    }}>
-                      Add stickers worth <span style={{ color: '#0a2342', fontWeight: 'bold' }}>₹{(70 - cartSubtotal).toFixed(2)}</span> for <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery</span>!
-                      <br />
-                      <button
-                        type="button"
-                        onClick={() => { setShowCheckout(false); setPage('store'); }}
-                        style={{
-                          marginTop: 12,
-                          background: '#6ec1ff',
-                          color: '#101828',
-                          border: 'none',
-                          borderRadius: 7,
-                          padding: '10px 24px',
-                          fontWeight: 700,
-                          fontSize: '0.95em',
-                          cursor: 'pointer',
-                          boxShadow: '0 1px 4px #10182810',
-                          transition: 'background 0.2s'
-                        }}
-                      >
-                        Add Stickers
-                      </button>
-                    </div>
-                  )}
-                  {pickupType === 'DELIVERY' && cartSubtotal >= 70 && (
-                    <div style={{
-                      background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
-                      color: '#101828',
-                      borderRadius: 10,
-                      margin: '16px 0 0 0',
-                      padding: '12px 16px',
-                      fontWeight: 'bold',
-                      fontSize: '0.95em',
-                      textAlign: 'center',
-                      boxShadow: '0 2px 8px #10182822',
-                      maxWidth: '100%',
-                      marginLeft: 'auto',
-                      marginRight: 'auto'
-                    }}>
-                      🎉 You unlocked <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery!</span>
-                    </div>
-                  )}
+                ))}
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#60a5fa', fontWeight: 700, fontSize: '1.05em', marginTop: 6 }}>
+                  <span>Total</span>
+                  <span>₹{checkoutTotal.toFixed(2)}</span>
                 </div>
-                {/* Form */}
-                <form
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem',
-                    alignItems: 'stretch',
-                    marginTop: 0,
-                    paddingBottom: '20px',
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  {/* Name */}
-                  <div style={{ width: '100%' }}>
-                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 6, display: 'block' }}>Name *</label>
+                {cartCount < 5 && (
+                  <div style={{
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid #ef4444',
+                    color: '#fca5a5',
+                    padding: '12px 14px',
+                    borderRadius: '10px',
+                    fontWeight: 'bold',
+                    fontSize: '0.92em',
+                    textAlign: 'center',
+                    margin: '12px 0 0 0'
+                  }}>
+                    ⚠️ Minimum 5 stickers required to place an order.<br/>
+                    <span style={{ fontSize: '0.85em', fontWeight: 'normal' }}>Current items in cart: {cartCount}. Please add {5 - cartCount} more.</span>
+                  </div>
+                )}
+              </div>
+              {/* Form */}
+              <form
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  alignItems: 'stretch',
+                  marginTop: 0,
+                  paddingBottom: '20px',
+                  boxSizing: 'border-box'
+                }}
+              >
+                {/* Name */}
+                <div style={{ width: '100%' }}>
+                  <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 6, display: 'block' }}>Name *</label>
+                  <input
+                    type="text"
+                    placeholder="Your Name"
+                    value={orderName}
+                    onChange={e => setOrderName(e.target.value)}
+                    onKeyPress={e => e.key === 'Enter' && handlePlaceOrder()}
+                    required
+                    style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      padding: '0.7em 1em',
+                      borderRadius: '0.75em',
+                      border: '1.5px solid #6ec1ff',
+                      background: '#101828',
+                      color: '#fff',
+                      fontSize: '1em',
+                      boxShadow: '0 1px 4px #10182818',
+                      outline: 'none',
+                      transition: 'border 0.2s',
+                      margin: 0
+                    }}
+                  />
+                </div>
+                {/* Phone */}
+                <div style={{ width: '100%' }}>
+                  <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Phone Number *</label>
+                  <div style={{ display: 'flex', flexDirection: 'row', gap: 8, width: '100%' }}>
+                    <div style={{
+                      background: '#101828',
+                      color: '#b3e0ff',
+                      border: '1.5px solid #6ec1ff',
+                      borderRadius: '0.75em',
+                      padding: '0.7em 1em',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1em',
+                      minWidth: '60px',
+                      boxSizing: 'border-box'
+                    }}>+91</div>
                     <input
-                      type="text"
-                      placeholder="Your Name"
-                      value={orderName}
-                      onChange={e => setOrderName(e.target.value)}
-                      onKeyPress={e => e.key === 'Enter' && (orderPayment === 'Pay Online' ? handleOnlinePayment() : handlePlaceOrder())}
+                      type="tel"
+                      placeholder="10-digit phone number"
+                      value={phone}
+                      onChange={e => { setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0,10)); }}
+                      onKeyPress={e => e.key === 'Enter' && handlePlaceOrder()}
                       required
                       style={{
-                        width: '100%',
+                        flex: 1,
                         boxSizing: 'border-box',
                         padding: '0.7em 1em',
                         borderRadius: '0.75em',
@@ -2807,71 +2284,24 @@ export default function App() {
                       }}
                     />
                   </div>
-                  {/* Phone */}
-                  <div style={{ width: '100%' }}>
-                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Phone Number *</label>
-                    <div style={{ display: 'flex', flexDirection: 'row', gap: 8, width: '100%' }}>
-                      <div style={{
-                        background: '#101828',
-                        color: '#b3e0ff',
-                        border: '1.5px solid #6ec1ff',
-                        borderRadius: '0.75em',
-                        padding: '0.7em 1em',
-                        fontWeight: 700,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1em',
-                        minWidth: '60px',
-                        boxSizing: 'border-box'
-                      }}>+91</div>
-                      <input
-                        type="tel"
-                        placeholder="10-digit phone number"
-                        value={phone}
-                        onChange={e => { setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0,10)); }}
-                        onKeyPress={e => e.key === 'Enter' && (orderPayment === 'Pay Online' ? handleOnlinePayment() : handlePlaceOrder())}
-                        required
-                        style={{
-                          flex: 1,
-                          boxSizing: 'border-box',
-                          padding: '0.7em 1em',
-                          borderRadius: '0.75em',
-                          border: '1.5px solid #6ec1ff',
-                          background: '#101828',
-                          color: '#fff',
-                          fontSize: '1em',
-                          boxShadow: '0 1px 4px #10182818',
-                          outline: 'none',
-                          transition: 'border 0.2s',
-                          margin: 0
-                        }}
-                      />
-                    </div>
-                    {!isValidPhone && phone && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Enter a valid 10-digit phone number.</span>}
-                  </div>
-                  {/* Order Type */}
-                  <div style={{ width: '100%' }}>
-                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Order Type *</label>
-                    <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
-                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Self-pickup</span>
-                      </label>
-                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Delivery</span>
-                      </label>
-                    </div>
-                  </div>
-                  {/* Address - visible for both pickup and delivery; required only for delivery */}
-                  <div style={{ width: '100%' }}>
-                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Address{pickupType === 'DELIVERY' ? ' *' : ''}</label>
-                    <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required={pickupType === 'DELIVERY'} style={{
+                  {!isValidPhone && phone && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Enter a valid 10-digit phone number.</span>}
+                </div>
+
+                {/* Hostel Name / Location Input */}
+                <div style={{ width: '100%' }}>
+                  <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Address / Hostel Location *</label>
+                  <input
+                    type="text"
+                    placeholder="Enter your hostel name/location"
+                    value={orderAddress}
+                    onChange={e => setOrderAddress(e.target.value)}
+                    onKeyPress={e => e.key === 'Enter' && handlePlaceOrder()}
+                    required
+                    style={{
                       width: '100%',
                       boxSizing: 'border-box',
                       padding: '0.7em 1em',
-                      borderRadius: '8px',
+                      borderRadius: '0.75em',
                       border: '1.5px solid #6ec1ff',
                       background: '#101828',
                       color: '#fff',
@@ -2880,519 +2310,69 @@ export default function App() {
                       outline: 'none',
                       transition: 'border 0.2s',
                       margin: 0
-                    }}>
-                      <option value="">Select Address</option>
-                      <option value="GH2">GH2</option>
-                      <option value="GH5">GH5</option>
-                      <option value="GH7">GH7</option>
-                      <option value="Unimall">Unimall</option>
-                      <option value="CC">CC</option>
-                      <option value="Buzz">Buzz</option>
-                      <option value="BH1">BH1</option>
-                      <option value="BH2">BH2</option>
-                      <option value="BH3">BH3</option>
-                      <option value="BH4">BH4</option>
-                      <option value="BH5">BH5</option>
-                      <option value="BH6">BH6</option>
-                      <option value="BH7">BH7</option>
-                    </select>
-                    {pickupType === 'DELIVERY' && !orderAddress && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Please select an address for delivery.</span>}
+                    }}
+                  />
+                  {!orderAddress && <span style={{ color: '#ff4d4d', fontSize: '0.9em', marginTop: 4, display: 'block' }}>Please enter your hostel name or location.</span>}
+                </div>
+
+                {/* Payment Method */}
+                <div style={{ width: '100%' }}>
+                  <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Payment Method *</label>
+                  <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
+                    <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '6px 0' }}>
+                      <input type="radio" name="payment" value="Pay on delivery" checked={orderPayment === 'Pay on delivery'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
+                      <span>Pay on delivery / Cash</span>
+                    </label>
+                    <label style={{ color: '#7aa4c7', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'not-allowed', padding: '6px 0', opacity: 0.7 }}>
+                      <input type="radio" name="payment" value="Pay Online" disabled={true} style={{ margin: 0, width: 20, height: 20 }} />
+                      <span>Pay Online <span style={{ background: '#3b82f6', color: '#fff', padding: '2px 8px', borderRadius: 4, fontSize: '0.8em', marginLeft: 6, fontWeight: 'bold' }}>Coming Soon</span></span>
+                    </label>
                   </div>
-                  {/* Payment Method */}
-                  <div style={{ width: '100%' }}>
-                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Payment Method *</label>
-                    <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
-                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="payment" value="Pay Online" checked={orderPayment === 'Pay Online'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Pay Online</span>
-                      </label>
-                      <label style={{ color: hasPosterInCart ? '#7aa4c7' : '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: hasPosterInCart ? 'not-allowed' : 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => !(hasPosterInCart || hasCustomInCart) && setOrderPayment(e.target.value)} disabled={hasPosterInCart || hasCustomInCart} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Pay on delivery/pickup</span>
-                      </label>
-                    </div>
-                    {hasPosterInCart && (
-                      <div style={{ color: '#ffdd57', fontSize: '0.95em', marginTop: 8, padding: '8px 12px', background: 'rgba(255, 221, 87, 0.1)', borderRadius: '6px', border: '1px solid rgba(255, 221, 87, 0.3)' }}>
-                        Only Pay Online is available when posters or custom stickers are in the cart.
-                      </div>
-                    )}
-                    {paymentError && (
-                      <div style={{ color: '#ff4d4d', fontSize: '0.95em', marginTop: 8, padding: '8px 12px', background: 'rgba(255, 77, 77, 0.1)', borderRadius: '6px', border: '1px solid rgba(255, 77, 77, 0.3)' }}>
-                        {paymentError}
-                      </div>
-                    )}
-                    {/* Remove extra secure payment banner when Pay Online is selected */}
-                  </div>
-                  {/* Privacy Note */}
-                  {pickupType === 'SELF-PICKUP' && orderPayment !== 'Pay Online' && (
-                    <div style={{
-                      width: '100%',
-                      maxWidth: 320,
-                      margin: '0 auto',
-                      background: '#101828',
-                      color: '#b3e0ff',
-                      borderRadius: '0.75em',
-                      padding: '0.7em 1em',
-                      textAlign: 'center',
-                      fontWeight: 500,
-                      fontSize: '0.95em',
-                      marginBottom: '-0.5em',
-                      marginTop: 4
-                    }}>
-                      You'll receive a call for when to pick up your order from BH3.
-                    </div>
-                  )}
-                </form>
-              </div>
-              {/* Sticky Place Order Button inside the card */}
-              <div
-                style={{
-                  position: 'sticky',
-                  bottom: 0,
-                  width: '100%',
-                  background: '#181c2a',
-                  padding: '20px 16px',
-                  boxSizing: 'border-box',
-                  borderTop: '1.5px solid #233',
-                  display: 'flex',
-                  justifyContent: 'center'
-                }}
-              >
-                <button
-                  type="button"
-                  disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading}
-                  onClick={orderPayment === 'Pay Online' ? handleOnlinePayment : handlePlaceOrder}
-                  style={{
-                    background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading) ? '#233' : '#6ec1ff',
-                    color: '#101828',
-                    border: 'none',
-                    borderRadius: '0.75em',
-                    padding: '1em 0',
-                    fontWeight: 700,
-                    fontSize: '1.05em',
-                    cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading) ? 'not-allowed' : 'pointer',
-                    width: '100%',
-                    maxWidth: '100%',
-                    boxShadow: '0 1px 4px #10182818',
-                    transition: 'background 0.2s'
-                  }}
-                >
-                  {(loading || paymentLoading) ? (
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24 }}>
-                      <span className="checkout-spinner" style={{ width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }}></span>
-                      <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-                    </span>
-                  ) : (
-                    orderPayment === 'Pay Online' ? 'Proceed to Payment' : 'Place Order'
-                  )}
-                </button>
-              </div>
+                </div>
+              </form>
             </div>
-          ) : (
-            // Mobile checkout code (scroll fix)
+
+            {/* Place Order Button */}
             <div
-              className="checkout-form-wrapper"
               style={{
-                width: '100vw',
-                minHeight: '100vh',
+                width: '100%',
                 background: '#181c2a',
+                padding: '16px',
                 boxSizing: 'border-box',
+                borderTop: '1.5px solid #233',
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: '0',
-                position: 'relative',
-                overflow: 'hidden'
+                justifyContent: 'center'
               }}
             >
-              {/* Close Button */}
               <button
-                className="checkout-x"
-                onClick={() => setShowCheckout(false)}
+                type="button"
+                disabled={!orderName || !isValidPhone || !orderAddress || cartCount < 5 || loading}
+                onClick={handlePlaceOrder}
                 style={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 16,
-                  background: 'rgba(30,40,60,0.8)',
-                  color: '#fff',
+                  background: (!orderName || !isValidPhone || !orderAddress || cartCount < 5 || loading) ? '#233' : '#6ec1ff',
+                  color: (!orderName || !isValidPhone || !orderAddress || cartCount < 5 || loading) ? '#666' : '#101828',
                   border: 'none',
-                  borderRadius: '50%',
-                  width: 36,
-                  height: 36,
-                  fontSize: '1.4em',
-                  cursor: 'pointer',
-                  zIndex: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
+                  borderRadius: '0.75em',
+                  padding: '1em 0',
+                  fontWeight: 700,
+                  fontSize: '1.05em',
+                  cursor: (!orderName || !isValidPhone || !orderAddress || cartCount < 5 || loading) ? 'not-allowed' : 'pointer',
+                  width: '100%',
+                  boxShadow: '0 1px 4px #10182818',
+                  transition: 'all 0.2s'
                 }}
               >
-                ×
+                {loading ? (
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24 }}>
+                    <span className="checkout-spinner" style={{ width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }}></span>
+                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                  </span>
+                ) : (
+                  'Place Order'
+                )}
               </button>
-              {/* Header */}
-              <div
-                style={{
-                  width: '100%',
-                  padding: '32px 16px 12px 16px',
-                  boxSizing: 'border-box',
-                  textAlign: 'center'
-                }}
-              >
-                <h2
-                  style={{
-                    color: '#6ec1ff',
-                    fontWeight: 700,
-                    fontSize: '1.4em',
-                    margin: 0,
-                    letterSpacing: 1
-                  }}
-                >
-                  Checkout
-                </h2>
-              </div>
-              {/* Scrollable Content */}
-              <div
-                className="checkout-content-scroll"
-                style={{
-                  flex: 1,
-                  width: '100%',
-                  overflowY: 'auto',
-                  padding: '0 16px 160px 16px',
-                  boxSizing: 'border-box',
-                  maxHeight: 'calc(100vh - 80px)', // <-- Make mobile checkout scrollable
-                  minHeight: 0
-                }}
-              >
-                {/* Order Summary */}
-                <div
-                  style={{
-                    background: '#101828',
-                    borderRadius: 10,
-                    padding: '12px 12px',
-                    marginBottom: 14,
-                    marginTop: 0,
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  <h3 style={{ color: '#b3e0ff', fontSize: '1em', marginBottom: 8, fontWeight: 600 }}>Order Summary</h3>
-                  {cartDetails.map(item => (
-                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                      <img
-                        src={item.imageUrl || item.img}
-                        alt="Sticker"
-                        style={{
-                          width: 38,
-                          height: 38,
-                          borderRadius: 7,
-                          objectFit: 'cover',
-                          border: '1.5px solid #6ec1ff',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => setZoomImg(item.imageUrl || item.img)}
-                      />
-                      <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
-                        <span style={{ color: '#b3e0ff', fontSize: '1em', marginLeft: 8 }}>x{item.qty}</span>
-                      </div>
-                      <span style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em' }}>
-                        ₹{(parseFloat(item.price) * item.qty).toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '0.95em', marginBottom: 4 }}>
-                    <span>Subtotal</span>
-                    <span>₹{cartSubtotal.toFixed(2)}</span>
-                  </div>
-                  {pickupType === 'DELIVERY' && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#b3e0ff', fontWeight: 600, fontSize: '0.95em', marginBottom: 4 }}>
-                      <span>Delivery</span>
-                      <span>{deliveryCharge > 0 ? `₹${deliveryCharge}` : 'Free'}</span>
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#60a5fa', fontWeight: 700, fontSize: '1.05em', marginTop: 6 }}>
-                    <span>Total</span>
-                    <span>₹{checkoutTotal.toFixed(2)}</span>
-                  </div>
-                  {/* Free Delivery Suggestion */}
-                  {pickupType === 'DELIVERY' && cartSubtotal < 70 && (
-                    <div style={{
-                      background: 'linear-gradient(90deg, #6ec1ff 0%, #4ade80 100%)',
-                      color: '#101828',
-                      borderRadius: 10,
-                      margin: '16px 0 0 0',
-                      padding: '12px 16px',
-                      fontWeight: 'bold',
-                      fontSize: '0.95em',
-                      textAlign: 'center',
-                      boxShadow: '0 2px 8px #10182822',
-                      maxWidth: '100%',
-                      marginLeft: 'auto',
-                      marginRight: 'auto'
-                    }}>
-                      Add stickers worth <span style={{ color: '#0a2342', fontWeight: 'bold' }}>₹{(70 - cartSubtotal).toFixed(2)}</span> for <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery</span>!
-                      <br />
-                      <button
-                        type="button"
-                        onClick={() => { setShowCheckout(false); setPage('store'); }}
-                        style={{
-                          marginTop: 12,
-                          background: '#6ec1ff',
-                          color: '#101828',
-                          border: 'none',
-                          borderRadius: 7,
-                          padding: '10px 24px',
-                          fontWeight: 700,
-                          fontSize: '0.95em',
-                          cursor: 'pointer',
-                          boxShadow: '0 1px 4px #10182810',
-                          transition: 'background 0.2s'
-                        }}
-                      >
-                        Add Stickers
-                      </button>
-                    </div>
-                  )}
-                  {pickupType === 'DELIVERY' && cartSubtotal >= 70 && (
-                    <div style={{
-                      background: 'linear-gradient(90deg, #4ade80 0%, #6ec1ff 100%)',
-                      color: '#101828',
-                      borderRadius: 10,
-                      margin: '16px 0 0 0',
-                      padding: '12px 16px',
-                      fontWeight: 'bold',
-                      fontSize: '0.95em',
-                      textAlign: 'center',
-                      boxShadow: '0 2px 8px #10182822',
-                      maxWidth: '100%',
-                      marginLeft: 'auto',
-                      marginRight: 'auto'
-                    }}>
-                      🎉 You unlocked <span style={{ color: '#059669', fontWeight: 'bold', textShadow: '0 1px 2px #fff8' }}>Free Delivery!</span>
-                    </div>
-                  )}
-                </div>
-                {/* Form */}
-                <form
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem',
-                    alignItems: 'stretch',
-                    marginTop: 0,
-                    paddingBottom: '20px',
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  {/* Name */}
-                  <div style={{ width: '100%' }}>
-                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 6, display: 'block' }}>Name *</label>
-                    <input
-                      type="text"
-                      placeholder="Your Name"
-                      value={orderName}
-                      onChange={e => setOrderName(e.target.value)}
-                      onKeyPress={e => e.key === 'Enter' && (orderPayment === 'Pay Online' ? handleOnlinePayment() : handlePlaceOrder())}
-                      required
-                      style={{
-                        width: '100%',
-                        boxSizing: 'border-box',
-                        padding: '0.7em 1em',
-                        borderRadius: '0.75em',
-                        border: '1.5px solid #6ec1ff',
-                        background: '#101828',
-                        color: '#fff',
-                        fontSize: '1em',
-                        boxShadow: '0 1px 4px #10182818',
-                        outline: 'none',
-                        transition: 'border 0.2s',
-                        margin: 0
-                      }}
-                    />
-                  </div>
-                  {/* Phone */}
-                  <div style={{ width: '100%' }}>
-                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Phone Number *</label>
-                    <div style={{ display: 'flex', flexDirection: 'row', gap: 8, width: '100%' }}>
-                      <div style={{
-                        background: '#101828',
-                        color: '#b3e0ff',
-                        border: '1.5px solid #6ec1ff',
-                        borderRadius: '0.75em',
-                        padding: '0.7em 1em',
-                        fontWeight: 700,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1em',
-                        minWidth: '60px',
-                        boxSizing: 'border-box'
-                      }}>+91</div>
-                      <input
-                        type="tel"
-                        placeholder="10-digit phone number"
-                        value={phone}
-                        onChange={e => { setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0,10)); }}
-                        onKeyPress={e => e.key === 'Enter' && (orderPayment === 'Pay Online' ? handleOnlinePayment() : handlePlaceOrder())}
-                        required
-                        style={{
-                          flex: 1,
-                          boxSizing: 'border-box',
-                          padding: '0.7em 1em',
-                          borderRadius: '0.75em',
-                          border: '1.5px solid #6ec1ff',
-                          background: '#101828',
-                          color: '#fff',
-                          fontSize: '1em',
-                          boxShadow: '0 1px 4px #10182818',
-                          outline: 'none',
-                          transition: 'border 0.2s',
-                          margin: 0
-                        }}
-                      />
-                    </div>
-                    {!isValidPhone && phone && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Enter a valid 10-digit phone number.</span>}
-                  </div>
-                  {/* Order Type */}
-                  <div style={{ width: '100%' }}>
-                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Order Type *</label>
-                    <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
-                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="pickupType" value="SELF-PICKUP" checked={pickupType === 'SELF-PICKUP'} onChange={e => { setPickupType(e.target.value); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Self-pickup</span>
-                      </label>
-                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="pickupType" value="DELIVERY" checked={pickupType === 'DELIVERY'} onChange={e => { setPickupType(e.target.value); }} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Delivery</span>
-                      </label>
-                    </div>
-                  </div>
-                  {/* Address - visible for both pickup and delivery; required only for delivery */}
-                  <div style={{ width: '100%' }}>
-                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Address{pickupType === 'DELIVERY' ? ' *' : ''}</label>
-                    <select value={orderAddress} onChange={e => setOrderAddress(e.target.value)} required={pickupType === 'DELIVERY'} style={{
-                      width: '100%',
-                      boxSizing: 'border-box',
-                      padding: '0.7em 1em',
-                      borderRadius: '8px',
-                      border: '1.5px solid #6ec1ff',
-                      background: '#101828',
-                      color: '#fff',
-                      fontSize: '1em',
-                      boxShadow: '0 1px 4px #10182818',
-                      outline: 'none',
-                      transition: 'border 0.2s',
-                      margin: 0
-                    }}>
-                      <option value="">Select Address</option>
-                      <option value="GH2">GH2</option>
-                      <option value="GH5">GH5</option>
-                      <option value="GH7">GH7</option>
-                      <option value="Unimall">Unimall</option>
-                      <option value="CC">CC</option>
-                      <option value="Buzz">Buzz</option>
-                      <option value="BH1">BH1</option>
-                      <option value="BH2">BH2</option>
-                      <option value="BH3">BH3</option>
-                      <option value="BH4">BH4</option>
-                      <option value="BH5">BH5</option>
-                      <option value="BH6">BH6</option>
-                      <option value="BH7">BH7</option>
-                    </select>
-                    {pickupType === 'DELIVERY' && !orderAddress && <span style={{ color: '#ff4d4d', fontSize: '0.95em' }}>Please select an address for delivery.</span>}
-                  </div>
-                  {/* Payment Method */}
-                  <div style={{ width: '100%' }}>
-                    <label style={{ color: '#6ec1ff', fontWeight: 600, fontSize: '1em', marginBottom: 4, display: 'block' }}>Payment Method *</label>
-                    <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8em', alignItems: 'flex-start', width: '100%' }}>
-                      <label style={{ color: '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="payment" value="Pay Online" checked={orderPayment === 'Pay Online'} onChange={e => setOrderPayment(e.target.value)} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Pay Online</span>
-                      </label>
-                      <label style={{ color: hasPosterInCart ? '#7aa4c7' : '#fff', fontWeight: 500, fontSize: '1em', display: 'flex', alignItems: 'center', gap: '0.7em', cursor: hasPosterInCart ? 'not-allowed' : 'pointer', padding: '8px 0' }}>
-                        <input type="radio" name="payment" value="Pay on delivery/pickup" checked={orderPayment === 'Pay on delivery/pickup'} onChange={e => !(hasPosterInCart || hasCustomInCart) && setOrderPayment(e.target.value)} disabled={hasPosterInCart || hasCustomInCart} style={{ margin: 0, accentColor: '#6ec1ff', width: 20, height: 20 }} />
-                        <span>Pay on delivery/pickup</span>
-                      </label>
-                    </div>
-                    {hasPosterInCart && (
-                      <div style={{ color: '#ffdd57', fontSize: '0.95em', marginTop: 8, padding: '8px 12px', background: 'rgba(255, 221, 87, 0.1)', borderRadius: '6px', border: '1px solid rgba(255, 221, 87, 0.3)' }}>
-                        Only Pay Online is available when posters or custom stickers are in the cart.
-                      </div>
-                    )}
-                    {paymentError && (
-                      <div style={{ color: '#ff4d4d', fontSize: '0.95em', marginTop: 8, padding: '8px 12px', background: 'rgba(255, 77, 77, 0.1)', borderRadius: '6px', border: '1px solid rgba(255, 77, 77, 0.3)' }}>
-                        {paymentError}
-                      </div>
-                    )}
-                    {/* Remove extra secure payment banner when Pay Online is selected (mobile form) */}
-                  </div>
-                  {/* Privacy Note */}
-                  {pickupType === 'SELF-PICKUP' && (
-                    <div style={{
-                      width: '100%',
-                      maxWidth: 320,
-                      margin: '0 auto',
-                      background: '#101828',
-                      color: '#b3e0ff',
-                      borderRadius: '0.75em',
-                      padding: '0.7em 1em',
-                      textAlign: 'center',
-                      fontWeight: 500,
-                      fontSize: '0.95em',
-                      marginBottom: '-0.5em',
-                      marginTop: 4
-                    }}>
-                      You'll receive a call for when to pick up your order from Boys Studio - 10.
-                    </div>
-                  )}
-                </form>
-              </div>
-              {/* Fixed Place Order Button at the bottom (mobile) */}
-              <div
-                style={{
-                  position: 'fixed',
-                  left: 0,
-                  bottom: 0,
-                  width: '100vw',
-                  background: '#181c2a',
-                  padding: '20px 16px',
-                  boxSizing: 'border-box',
-                  borderTop: '1.5px solid #233',
-                  zIndex: 10,
-                  display: 'flex',
-                  justifyContent: 'center'
-                }}
-              >
-                <button
-                  type="button"
-                  disabled={!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading}
-                  onClick={orderPayment === 'Pay Online' ? handleOnlinePayment : handlePlaceOrder}
-                  style={{
-                    background: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading) ? '#233' : '#6ec1ff',
-                    color: '#101828',
-                    border: 'none',
-                    borderRadius: '0.75em',
-                    padding: '1em 0',
-                    fontWeight: 700,
-                    fontSize: '1.05em',
-                    cursor: (!orderName || !isValidPhone || (pickupType === 'DELIVERY' && !orderAddress) || !orderPayment || loading || paymentLoading) ? 'not-allowed' : 'pointer',
-                    width: '100%',
-                    maxWidth: '100%',
-                    boxShadow: '0 1px 4px #10182818',
-                    transition: 'background 0.2s'
-                  }}
-                >
-                  {(loading || paymentLoading) ? (
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24 }}>
-                      <span className="checkout-spinner" style={{ width: 24, height: 24, border: '3px solid #6ec1ff', borderTop: '3px solid #101828', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }}></span>
-                      <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-                    </span>
-                  ) : (
-                    orderPayment === 'Pay Online' ? 'Proceed to Payment' : 'Place Order'
-                  )}
-                </button>
-              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
       <footer>
